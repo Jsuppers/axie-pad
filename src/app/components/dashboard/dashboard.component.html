@@ -1,0 +1,29 @@
+<div style="display: flex; margin-right: 10px">
+  <mat-card class="header-card" style="margin: 10px;" *ngIf="authService.userState as user">
+    <img mat-card-sm-image src="/assets/dashboard.png">
+    <div>
+      <p><strong>{{hideAddress.getValue() ? 'Manager' : user.displayName}}</strong></p>
+    </div>
+    <div >
+      <span>{{ hideAddress.getValue() ? '*'.repeat(10) : user.email}}</span>
+    </div>
+  </mat-card>
+  <mat-card class="header-card" style="margin: 10px;" *ngIf="authService.userState as user">
+    <img mat-card-sm-image src="/assets/total.png">
+    <div >
+      <strong>Total SLP:</strong> {{totalSLP}}
+    </div>
+  </mat-card>
+  <div class="header-card" style="align-self: flex-end; margin-left: auto">
+    <button mat-raised-button (click)="refresh()" class="add-scholar-button">
+      {{ 'Refresh' }}
+    </button>
+    <button mat-raised-button (click)="hideAddresses()" class="add-scholar-button">
+      {{ hideAddress.getValue() ? 'Show Information' : 'Hide Information'}}
+    </button>
+    <button mat-raised-button (click)="addNewScholar()" class="add-scholar-button">
+      Add New Scholar
+    </button>
+  </div>
+</div>
+<app-table [scholars$]="scholars$" [newScholar$]="newScholar" [hideAddress$]="hideAddress"></app-table>

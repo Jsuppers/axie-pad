@@ -1,0 +1,25 @@
+<div class="login-wrapper">
+  <mat-card style="width: 600px; text-align: center;">
+    <mat-icon>favorite</mat-icon>
+    <p> Donating will show me support for this project and
+      allow me to spend more time developing it. </p>
+    <p>
+      <mat-label><strong>Eth Address</strong></mat-label>
+    </p>
+    <p>
+      <mat-label [cdkCopyToClipboard]="ethAddress" (click)="openSnackBar('Eth address')">
+        <mat-icon>file_copy</mat-icon>
+        <span style="margin-left: 10px">{{ethAddress}}</span>
+      </mat-label>
+    </p>
+    <p>
+      <mat-label><strong>Ronin Address</strong></mat-label>
+    </p>
+    <p>
+      <mat-label [cdkCopyToClipboard]="roninAddress" (click)="openSnackBar('ronin address')">
+        <mat-icon>file_copy</mat-icon>
+        <span style="margin-left: 10px">{{roninAddress}}</span>
+      </mat-label>
+    </p>
+  </mat-card>
+</div>

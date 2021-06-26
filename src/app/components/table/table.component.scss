@@ -1,0 +1,19 @@
+table {
+  width: calc(100% - 20px);
+  margin-left: 10px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+th.mat-sort-header-sorted {
+  color: black;
+}
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+td {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+

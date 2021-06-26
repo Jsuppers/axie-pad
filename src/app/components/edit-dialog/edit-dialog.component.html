@@ -1,0 +1,19 @@
+<h1 mat-dialog-title>{{data.name}}</h1>
+<div mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="data.name">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Axie Ronin Address</mat-label>
+    <input matInput [(ngModel)]="data.roninAddress">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Scholar Ronin Address</mat-label>
+    <input matInput [(ngModel)]="data.scholarRoninAddress">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Save</button>
+</div>
