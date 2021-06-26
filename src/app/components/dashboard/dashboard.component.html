@@ -1,6 +1,6 @@
 <div style="display: flex; margin-right: 10px">
   <mat-card class="header-card" style="margin: 10px;" *ngIf="authService.userState as user">
-    <img mat-card-sm-image src="/assets/dashboard.png">
+    <img mat-card-sm-image src="assets/dashboard.png">
     <div>
       <p><strong>{{hideAddress.getValue() ? 'Manager' : user.displayName}}</strong></p>
     </div>
@@ -9,7 +9,7 @@
     </div>
   </mat-card>
   <mat-card class="header-card" style="margin: 10px;" *ngIf="authService.userState as user">
-    <img mat-card-sm-image src="/assets/total.png">
+    <img mat-card-sm-image src="assets/total.png">
     <div >
       <strong>Total SLP:</strong> {{totalSLP}}
     </div>
