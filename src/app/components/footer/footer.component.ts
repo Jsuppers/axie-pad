@@ -27,4 +27,10 @@ export class FooterComponent implements OnInit {
       this.router.navigate(['privacy']);
     });
   }
+
+  githubClick(): void {
+    this.ngZone.run(() => {
+      this.router.navigateByUrl('https://github.com/Jsuppers/axie-pad');
+    });
+  }
 }
