@@ -30,7 +30,7 @@ export class FooterComponent implements OnInit {
 
   githubClick(): void {
     this.ngZone.run(() => {
-      this.router.navigateByUrl('https://github.com/Jsuppers/axie-pad');
+      window.location.href = 'https://github.com/Jsuppers/axie-pad';
     });
   }
 }
