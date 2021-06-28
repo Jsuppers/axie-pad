@@ -3,22 +3,34 @@
   <!-- Position Column -->
   <ng-container matColumnDef="name">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Name</th>
-    <td mat-cell *matCellDef="let element"> {{hideAddresses ? 'Scholar' : element.name}} </td>
+    <td mat-cell *matCellDef="let element" (click)="navigateToScholar(element)"> {{hideAddresses ? 'Scholar' : element.name}} </td>
+  </ng-container>
+
+  <!-- Symbol Column -->
+  <ng-container matColumnDef="notClaimableSLP">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>In Progress</th>
+    <td mat-cell *matCellDef="let element"> {{element.totalSLP - element.claimableSLP}} </td>
+  </ng-container>
+
+  <!-- Symbol Column -->
+  <ng-container matColumnDef="claimableSLP">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Claimable</th>
+    <td mat-cell *matCellDef="let element"> {{element.claimableSLP}} </td>
   </ng-container>
 
   <!-- Symbol Column -->
   <ng-container matColumnDef="totalSLP">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Total SLP</th>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
     <td mat-cell *matCellDef="let element"> {{element.totalSLP}} </td>
   </ng-container>
 
   <!-- Weight Column -->
-  <ng-container matColumnDef="roninAddress">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Axie Ronin Address</th>
+  <ng-container matColumnDef="accountEthAddress">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Account Eth Address</th>
     <td mat-cell *matCellDef="let element">
-      <span [cdkCopyToClipboard]="element.roninAddress"
-            (click)="openSnackBar(element.roninAddress)">
-        {{ hideAddresses ? '*'.repeat(46) : element.roninAddress}}
+      <span [cdkCopyToClipboard]="element.accountEthAddress"
+            (click)="openSnackBar(element.accountEthAddress)">
+        {{ formatAddress(element.accountEthAddress)}}
       </span>
     </td>
   </ng-container>
@@ -29,8 +41,17 @@
     <td mat-cell *matCellDef="let element">
       <span [cdkCopyToClipboard]="element.scholarRoninAddress"
             (click)="openSnackBar(element.scholarRoninAddress)">
-        {{hideAddresses ? '*'.repeat(46) : element.scholarRoninAddress}}
+        {{ formatAddress(element.scholarRoninAddress)}}
       </span>
+    </td>
+  </ng-container>
+
+
+  <!-- Weight Column -->
+  <ng-container matColumnDef="claimableDate">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Claimable In </th>
+    <td mat-cell *matCellDef="let element">
+        {{getClaimableDate(element)}}
     </td>
   </ng-container>
 

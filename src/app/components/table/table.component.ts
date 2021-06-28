@@ -19,7 +19,16 @@ import firebase from 'firebase';
   styleUrls: ['./table.component.scss']
 })
 export class TableComponent implements OnInit {
-  displayedColumns: string[] = ['name', 'roninAddress', 'scholarRoninAddress', 'totalSLP', 'edit'];
+  displayedColumns: string[] = [
+    'name',
+    'accountEthAddress',
+    'scholarRoninAddress',
+    'notClaimableSLP',
+    'claimableSLP',
+    'totalSLP',
+    'claimableDate',
+    'edit',
+  ];
   dataSource: MatTableDataSource<Scholar>;
   @Input()
   scholars$: Observable<Scholar[]>;
@@ -63,7 +72,7 @@ export class TableComponent implements OnInit {
     dialogRef.afterClosed().subscribe(async (result: Scholar) => {
       if (result) {
         result.scholarRoninAddress = result.scholarRoninAddress?.trim() ?? '';
-        result.roninAddress = result.roninAddress?.trim() ?? '';
+        result.accountEthAddress = result.accountEthAddress?.trim() ?? '';
         const userDocument = await this.db.collection('users').doc(this.authService.userState.uid).get().toPromise();
         await userDocument.ref.update({
           ['scholars.' + result.id]: result
@@ -88,5 +97,25 @@ export class TableComponent implements OnInit {
         });
       }
     });
+  }
+
+  getClaimableDate(element: Scholar): string {
+    const dateFuture: any = new Date((element.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
+    const dateNow: any = new Date();
+
+    const seconds = Math.floor((dateFuture - (dateNow)) / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    return days + ' days, ' + (hours - (days * 24)) + ' hours';
+  }
+
+  formatAddress(address: any): string {
+    return this.hideAddresses ? '*'.repeat(10) : address.substring(0, 10) + '...' + address.substring(address.length - 5, address.length);
+  }
+
+  navigateToScholar(element: Scholar): void {
+    window.open('https://marketplace.axieinfinity.com/profile/' + element.accountEthAddress + '/axie', '_blank');
   }
 }

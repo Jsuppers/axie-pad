@@ -3,8 +3,11 @@ import firebase from 'firebase';
 export interface Scholar {
   id: string;
   name: string;
-  roninAddress: string;
+  accountEthAddress: string;
   scholarRoninAddress: string;
+  notClaimableSLP: number;
+  claimableSLP: number; // claimable_total
+  lastClaimed: number;
   totalSLP: number;
   currentSLP: number;
   scholarShareSLP: number;
@@ -16,8 +19,11 @@ export function DefaultScholar(): Scholar {
     name: 'no name',
     id: firebase.firestore().collection('tmp').doc().id,
     currentSLP: 0,
+    notClaimableSLP: 0,
+    claimableSLP: 0,
     managerShareSLP: 0,
-    roninAddress: '',
+    lastClaimed: 0,
+    accountEthAddress: '',
     scholarRoninAddress: '',
     scholarShareSLP: 0,
     totalSLP: 0,
