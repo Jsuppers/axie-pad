@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Scholar } from '../_models/scholar';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { switchMap } from 'rxjs/operators';
+import { fromPromise } from 'rxjs/internal-compatibility';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PollService {
   private scholars$: BehaviorSubject<Scholar[]> = new BehaviorSubject<Scholar[]>([]);
+  private updatedScholars$: BehaviorSubject<Scholar[]> = new BehaviorSubject<Scholar[]>([]);
 
   constructor(
     private http: HttpClient,
@@ -15,13 +18,18 @@ export class PollService {
     this.listenForScholars();
   }
 
-  private listenForScholars(): void {
-    this.scholars$.pipe()
-      .subscribe(async (scholars) => {
-        for (const scholar of scholars) {
-          await this.updateData(scholar);
-        }
-      });
+  listenForScholars(): void {
+    this.scholars$.pipe(switchMap((scholars) => {
+      const output: Observable<Scholar>[] = [];
+      for (const scholar of scholars) {
+        output.push(fromPromise(this.updateData(scholar)));
+      }
+      return combineLatest(output);
+    })).subscribe((scholars) => this.updatedScholars$.next(scholars));
+  }
+
+  updatedScholars(): Observable<Scholar[]> {
+    return this.updatedScholars$.asObservable();
   }
 
   refresh(): void {
@@ -32,7 +40,7 @@ export class PollService {
     this.scholars$.next(scholars);
   }
 
-  private async updateData(scholar: Scholar): Promise<void> {
+  private async updateData(scholar: Scholar): Promise<Scholar> {
     if (!scholar.accountEthAddress) {
       return;
     }
@@ -48,7 +56,7 @@ export class PollService {
     } catch (e) {
       console.log(e);
     }
-    return;
+    return scholar;
   }
 
 }

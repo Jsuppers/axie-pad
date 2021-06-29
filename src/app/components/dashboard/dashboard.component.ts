@@ -17,7 +17,7 @@ export class DashboardComponent implements OnInit {
   authService: AuthService;
   user: Observable<User>;
   userDocument: firebase.firestore.DocumentSnapshot<unknown>;
-  scholars$: BehaviorSubject<Scholar[]> = new BehaviorSubject<Scholar[]>([]);
+  scholars$: Observable<Scholar[]>;
   totalSLP: number;
   newScholar: BehaviorSubject<Scholar> = new BehaviorSubject<Scholar>(null);
   hideAddress: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -27,10 +27,14 @@ export class DashboardComponent implements OnInit {
               private pollService: PollService,
   ) {
     this.authService = service;
+    this.scholars$ = this.pollService.updatedScholars();
   }
 
   async ngOnInit(): Promise<void> {
     this.userDocument = await this.db.collection('users').doc(this.service.userState.uid).get().toPromise();
+    this.scholars$.subscribe((scholars) => {
+      this.setTotal(scholars);
+    });
     if (!this.userDocument || !this.userDocument.exists) {
       await this.userDocument.ref.set({
         scholars: {},
@@ -40,8 +44,6 @@ export class DashboardComponent implements OnInit {
     this.db.collection('users').doc(this.service.userState.uid).valueChanges().subscribe(async (user: any) => {
       const scholars = Object.values(user.scholars ?? {}) as Scholar[];
       this.pollService.pollScholars(scholars);
-      this.scholars$.next(scholars);
-      this.setTotal(scholars);
     });
   }
 
