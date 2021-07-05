@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { DefaultScholar, Scholar } from '../../_models/scholar';
+import { DefaultFirestoreScholar, FirestoreScholar } from '../../_models/scholar';
 import firebase from 'firebase';
-import User = firebase.User;
-import { HttpClient } from '@angular/common/http';
-import { PollService } from '../../services/poll.service';
+import { UserService } from '../../services/user.service';
+import { MatDialog } from '@angular/material/dialog';
+import { CurrencyDialogComponent } from '../currency-dialog/currency-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,47 +15,29 @@ import { PollService } from '../../services/poll.service';
 })
 export class DashboardComponent implements OnInit {
   authService: AuthService;
-  user: Observable<User>;
   userDocument: firebase.firestore.DocumentSnapshot<unknown>;
-  scholars$: Observable<Scholar[]>;
   totalSLP: number;
-  newScholar: BehaviorSubject<Scholar> = new BehaviorSubject<Scholar>(null);
+  totalFiat: number;
+  fiatCurrency: string;
+  newScholar: BehaviorSubject<FirestoreScholar> = new BehaviorSubject<FirestoreScholar>(null);
   hideAddress: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor(private service: AuthService,
               private db: AngularFirestore,
-              private pollService: PollService,
+              public dialog: MatDialog,
+              private userService: UserService,
   ) {
     this.authService = service;
-    this.scholars$ = this.pollService.updatedScholars();
   }
 
   async ngOnInit(): Promise<void> {
-    this.userDocument = await this.db.collection('users').doc(this.service.userState.uid).get().toPromise();
-    this.scholars$.subscribe((scholars) => {
-      this.setTotal(scholars);
-    });
-    if (!this.userDocument || !this.userDocument.exists) {
-      await this.userDocument.ref.set({
-        scholars: {},
-        totalSLP: 0,
-      }, {merge: true});
-    }
-    this.db.collection('users').doc(this.service.userState.uid).valueChanges().subscribe(async (user: any) => {
-      const scholars = Object.values(user.scholars ?? {}) as Scholar[];
-      this.pollService.pollScholars(scholars);
-    });
-  }
-
-  private setTotal(scholars: Scholar[]): void {
-    this.totalSLP = 0;
-    scholars.forEach((scholar) => {
-      this.totalSLP += scholar.totalSLP ?? 0;
-    });
+    this.userService.getTotalSLP().subscribe((totalSLP) => this.totalSLP = totalSLP);
+    this.userService.getTotalFiat().subscribe((fiatTotal) => this.totalFiat = fiatTotal);
+    this.userService.getFiatCurrency().subscribe((currency) => this.fiatCurrency = currency);
   }
 
   addNewScholar(): void {
-    const newScholar = DefaultScholar();
+    const newScholar = DefaultFirestoreScholar();
     this.newScholar.next(newScholar);
   }
 
@@ -64,6 +46,22 @@ export class DashboardComponent implements OnInit {
   }
 
   refresh(): void {
-    this.pollService.refresh();
+    this.userService.refresh();
+  }
+
+  openCurrencyDialog(): void {
+    const dialogRef = this.dialog.open(CurrencyDialogComponent, {
+      width: '400px',
+      data: this.fiatCurrency,
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: string) => {
+      if (result) {
+        const userDocument = await this.db.collection('users').doc(this.authService.userState.uid).get().toPromise();
+        await userDocument.ref.update({
+          ['currency']: result
+        });
+      }
+    });
   }
 }

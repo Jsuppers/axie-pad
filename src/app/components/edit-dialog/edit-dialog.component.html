@@ -5,12 +5,28 @@
     <input matInput [(ngModel)]="data.name">
   </mat-form-field>
   <mat-form-field>
-    <mat-label>Account Eth Address</mat-label>
-    <input matInput [(ngModel)]="data.accountEthAddress">
+    <mat-label>Account Ronin Address</mat-label>
+    <input matInput [(ngModel)]="data.roninAddress">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Manager's Share</mat-label>
+    <input type="number" matInput [(ngModel)]="data.managerShare">
+  </mat-form-field>
+  <h2> Scholar Details </h2>
+  <mat-form-field appearance="fill">
+    <mat-label>Preferred Payment Method</mat-label>
+    <mat-select [(ngModel)]="data.preferredPaymentMethod">
+      <mat-option [value]="paymentMethods.ronin">Ronin Wallet</mat-option>
+      <mat-option [value]="paymentMethods.eth">Ethereum Wallet</mat-option>
+    </mat-select>
   </mat-form-field>
   <mat-form-field>
     <mat-label>Scholar Ronin Address</mat-label>
     <input matInput [(ngModel)]="data.scholarRoninAddress">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Scholar Eth Address</mat-label>
+    <input matInput [(ngModel)]="data.scholarEthAddress">
   </mat-form-field>
 </div>
 <div mat-dialog-actions>

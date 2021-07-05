@@ -1,6 +1,5 @@
 table {
-  width: calc(100% - 20px);
-  margin-left: 10px;
+  width: 100%;
   overflow-wrap: break-word;
   word-break: break-word;
 }
@@ -16,4 +15,24 @@ td {
   overflow-wrap: break-word;
   word-break: break-word;
 }
+
+.mat-column-rank {
+  padding-left: 15px;
+}
+
+.mat-column-actions {
+  padding-left: 15px;
+}
+
+.mat-column-elo {
+}
+
+.mat-column-wins {
+}
+
+.mat-column-draws {
+}
+
+
+
 

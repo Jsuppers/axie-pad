@@ -12,8 +12,8 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { SignInComponent } from './components/sign-in/sign-in.component';
 import { AuthService } from './services/auth.service';
-import { TableComponent } from './components/table/table.component';
-import { HttpClientModule } from '@angular/common/http';
+import { EarningsTableComponent } from './components/earnings-table/earnings-table.component';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { EditDialogComponent } from './components/edit-dialog/edit-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
@@ -34,6 +34,18 @@ import { FooterComponent } from './components/footer/footer.component';
 import { TermsComponent } from './components/terms/terms.component';
 import { PrivacyComponent } from './components/privacy/privacy.component';
 import { NgcCookieConsentConfig, NgcCookieConsentModule } from 'ngx-cookieconsent';
+import { CurrencyDialogComponent } from './components/currency-dialog/currency-dialog.component';
+import { MatSelectModule } from '@angular/material/select';
+import { ShortenRoninAddressPipe } from './pipes/shorten-ronin-address.pipe';
+import { MatMenuModule } from '@angular/material/menu';
+import { ShortenNamePipe } from './pipes/shorten-name.pipe';
+import { GraphQLModule } from './graphql.module';
+import { MatTabsModule } from '@angular/material/tabs';
+import { ArenaTableComponent } from './components/arena-table/arena-table.component';
+import { ProfileTableComponent } from './components/profile-table/profile-table.component';
+import { CacheMapService } from './services/cache-map.service';
+import { CachingInterceptor } from './interceptors/cache-interceptor';
+import { MatBadgeModule } from '@angular/material/badge';
 
 
 const cookieConfig: NgcCookieConsentConfig = {
@@ -75,7 +87,9 @@ const cookieConfig: NgcCookieConsentConfig = {
 @NgModule({
   declarations: [
     AppComponent,
-    TableComponent,
+    EarningsTableComponent,
+    ArenaTableComponent,
+    ProfileTableComponent,
     EditDialogComponent,
     DashboardComponent,
     SignInComponent,
@@ -83,7 +97,10 @@ const cookieConfig: NgcCookieConsentConfig = {
     DonateComponent,
     FooterComponent,
     TermsComponent,
-    PrivacyComponent
+    PrivacyComponent,
+    CurrencyDialogComponent,
+    ShortenRoninAddressPipe,
+    ShortenNamePipe
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -108,8 +125,17 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatSnackBarModule,
     FlexModule,
     MatCardModule,
+    MatSelectModule,
+    MatMenuModule,
+    GraphQLModule,
+    MatTabsModule,
+    MatBadgeModule,
   ],
-  providers: [AuthService],
+  providers: [AuthService,
+    CacheMapService,
+    { provide: Cache, useClass: CacheMapService },
+    { provide: HTTP_INTERCEPTORS, useClass: CachingInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

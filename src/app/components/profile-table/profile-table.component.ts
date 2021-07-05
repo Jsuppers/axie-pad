@@ -3,7 +3,7 @@ import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Observable } from 'rxjs';
-import { DefaultScholar, Scholar } from '../../_models/scholar';
+import { FirestoreScholar, PaymentMethods } from '../../_models/scholar';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { EditDialogComponent } from '../edit-dialog/edit-dialog.component';
@@ -12,31 +12,34 @@ import { cloneDeep } from 'lodash';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import firebase from 'firebase';
+import { UserService } from '../../services/user.service';
+import { filter } from 'rxjs/operators';
+
+interface TableData extends FirestoreScholar {
+  roninName: string;
+  scholarRoninName: string;
+}
 
 @Component({
-  selector: 'app-table',
-  templateUrl: './table.component.html',
-  styleUrls: ['./table.component.scss']
+  selector: 'app-profile-table',
+  templateUrl: './profile-table.component.html',
+  styleUrls: ['./profile-table.component.scss']
 })
-export class TableComponent implements OnInit {
+export class ProfileTableComponent implements OnInit {
   displayedColumns: string[] = [
     'name',
-    'accountEthAddress',
+    'roninAddress',
     'scholarRoninAddress',
-    'notClaimableSLP',
-    'claimableSLP',
-    'totalSLP',
-    'claimableDate',
-    'edit',
+    'scholarEthAddress',
+    'actions',
   ];
-  dataSource: MatTableDataSource<Scholar>;
-  @Input()
-  scholars$: Observable<Scholar[]>;
-  @Input()
-  newScholar$: Observable<Scholar>;
+  readonly paymentMethods = PaymentMethods;
+  dataSource: MatTableDataSource<TableData>;
   @Input()
   hideAddress$: Observable<boolean>;
   hideAddresses: boolean;
+  @Input()
+  newScholar$: Observable<FirestoreScholar>;
 
   @ViewChild(MatSort) sort: MatSort;
 
@@ -44,35 +47,49 @@ export class TableComponent implements OnInit {
     public dialog: MatDialog,
     private db: AngularFirestore,
     private authService: AuthService,
+    private user: UserService,
     private snackBar: MatSnackBar,
   ) {
   }
 
   ngOnInit(): void {
-    this.scholars$.subscribe((scholars) => {
-      this.dataSource = new MatTableDataSource(scholars);
+    this.user.getScholars().subscribe((scholars) => {
+      const tableData: TableData[] = [];
+      scholars.forEach((scholar) => {
+        tableData.push({
+          ...scholar,
+          roninName: scholar?.roninName ?? 'unknown',
+          scholarRoninName: scholar?.scholarRoninName ?? 'unknown',
+        });
+      });
+      this.dataSource = new MatTableDataSource(tableData);
       this.dataSource.sort = this.sort;
-    });
-    this.newScholar$.subscribe((newScholar) => {
-      if (newScholar) {
-        this.openDialog(newScholar);
-      }
     });
     this.hideAddress$.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
     });
+    this.newScholar$.pipe(filter((scholar) => !!scholar)).subscribe((newScholar) => {
+      this.openDialog(newScholar);
+    });
   }
 
-  openDialog(scholar: Scholar): void {
+  editScholar(data: TableData): void {
+    this.openDialog({
+      ...data,
+    });
+  }
+
+  openDialog(scholar: FirestoreScholar): void {
     const dialogRef = this.dialog.open(EditDialogComponent, {
       width: '400px',
       data: cloneDeep(scholar),
     });
 
-    dialogRef.afterClosed().subscribe(async (result: Scholar) => {
+    dialogRef.afterClosed().subscribe(async (result: FirestoreScholar) => {
       if (result) {
-        result.scholarRoninAddress = result.scholarRoninAddress?.trim() ?? '';
-        result.accountEthAddress = result.accountEthAddress?.trim() ?? '';
+        result.managerShare = result?.managerShare ?? 30;
+        result.scholarRoninAddress = result?.scholarRoninAddress?.trim() ?? '';
+        result.roninAddress = result?.roninAddress?.trim() ?? '';
         const userDocument = await this.db.collection('users').doc(this.authService.userState.uid).get().toPromise();
         await userDocument.ref.update({
           ['scholars.' + result.id]: result
@@ -82,10 +99,10 @@ export class TableComponent implements OnInit {
   }
 
   openSnackBar(message: string): void {
-    this.snackBar.open(message + ' copied');
+    this.snackBar.open(message + ' copied', undefined, {duration: 5000});
   }
 
-  deleteScholar(scholar: Scholar): void {
+  deleteScholar(scholar: TableData): void {
     const dialogRef = this.dialog.open(DeleteDialogComponent, {
       width: '200px',
     });
@@ -99,23 +116,7 @@ export class TableComponent implements OnInit {
     });
   }
 
-  getClaimableDate(element: Scholar): string {
-    const dateFuture: any = new Date((element.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
-    const dateNow: any = new Date();
-
-    const seconds = Math.floor((dateFuture - (dateNow)) / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    return days + ' days, ' + (hours - (days * 24)) + ' hours';
-  }
-
-  formatAddress(address: any): string {
-    return this.hideAddresses ? '*'.repeat(10) : address.substring(0, 10) + '...' + address.substring(address.length - 5, address.length);
-  }
-
-  navigateToScholar(element: Scholar): void {
-    window.open('https://marketplace.axieinfinity.com/profile/' + element.accountEthAddress + '/axie', '_blank');
+  navigateToScholar(element: FirestoreScholar): void {
+    window.open('https://marketplace.axieinfinity.com/profile/' + element.roninAddress.replace('ronin:', '0x') + '/axie', '_blank');
   }
 }

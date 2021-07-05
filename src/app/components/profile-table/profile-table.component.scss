@@ -1,0 +1,41 @@
+table {
+  width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.mat-badge-content {
+  font-family: 'Material Icons';
+}
+
+th.mat-sort-header-sorted {
+  color: black;
+}
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+td {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.mat-column-roninAddress {
+  padding-left: 15px;
+}
+
+.mat-column-actions {
+  padding-left: 15px;
+}
+
+.mat-column-scholarRoninAddress {
+  padding-right: 15px;
+}
+
+.mat-column-averageSLPSinceLastClaimed {
+  padding-left: 15px;
+}
+
+
+
+

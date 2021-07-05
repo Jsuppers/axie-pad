@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Scholar } from '../../_models/scholar';
+import { FirestoreScholar } from '../../_models/scholar';
 
 @Component({
   selector: 'app-delete-dialog',
@@ -10,7 +10,7 @@ import { Scholar } from '../../_models/scholar';
 export class DeleteDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<DeleteDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Scholar) {}
+    @Inject(MAT_DIALOG_DATA) public data: FirestoreScholar) {}
 
   onNoClick(): void {
     this.dialogRef.close();

@@ -11,7 +11,11 @@
   <mat-card class="header-card" style="margin: 10px;" *ngIf="authService.userState as user">
     <img mat-card-sm-image src="assets/total.png">
     <div >
-      <strong>Total SLP:</strong> {{totalSLP}}
+      <strong>Total SLP:</strong> {{totalSLP}} <br>
+      <span (click)="openCurrencyDialog()">
+        <strong>Total {{fiatCurrency.toUpperCase()}}:</strong>
+        {{totalFiat  | number : '1.2-2'}}
+      </span>
     </div>
   </mat-card>
   <div class="header-card" style="align-self: flex-end; margin-left: auto">
@@ -26,4 +30,35 @@
     </button>
   </div>
 </div>
-<app-table [scholars$]="scholars$" [newScholar$]="newScholar" [hideAddress$]="hideAddress"></app-table>
+<mat-tab-group style="
+    margin-left: 15px;
+    margin-right: 15px;">
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <img src="assets/slp.webp" style="width: 20px;margin-right: 10px;">
+      <span>Earnings</span>
+    </ng-template>
+    <app-earnings-table [hideAddress$]="hideAddress"></app-earnings-table>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <img src="assets/arena.png" style="height: 20px;margin-right: 10px;">
+      <span>Arena</span>
+    </ng-template>
+    <app-arena-table [hideAddress$]="hideAddress"></app-arena-table>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <img src="assets/axie.png" style="height: 20px;margin-right: 10px;">
+      <span>Axies</span>
+    </ng-template>
+    Coming soon!
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon style="margin-right: 10px; height: 20px; color: dodgerblue">person</mat-icon>
+      <span>Profile</span>
+    </ng-template>
+    <app-profile-table [newScholar$]="newScholar" [hideAddress$]="hideAddress"></app-profile-table>
+  </mat-tab>
+</mat-tab-group>

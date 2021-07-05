@@ -1,31 +1,38 @@
 import firebase from 'firebase';
+import { SLP } from './slp';
+import { LeaderboardDetails } from './leaderboard';
 
-export interface Scholar {
-  id: string;
-  name: string;
-  accountEthAddress: string;
-  scholarRoninAddress: string;
-  notClaimableSLP: number;
-  claimableSLP: number; // claimable_total
-  lastClaimed: number;
-  totalSLP: number;
-  currentSLP: number;
-  scholarShareSLP: number;
-  managerShareSLP: number;
+export enum PaymentMethods {
+  ronin,
+  eth,
 }
 
-export function DefaultScholar(): Scholar {
+export interface Scholar extends FirestoreScholar {
+  id: string;
+  slp: SLP;
+  leaderboardDetails: LeaderboardDetails;
+  roninName: string;
+  scholarRoninName: string;
+}
+
+export interface FirestoreScholar {
+  id: string;
+  name: string;
+  roninAddress: string;
+  scholarRoninAddress: string;
+  preferredPaymentMethod: PaymentMethods;
+  scholarEthAddress: string;
+  managerShare: number;
+}
+
+export function DefaultFirestoreScholar(): FirestoreScholar {
   return {
     name: 'no name',
     id: firebase.firestore().collection('tmp').doc().id,
-    currentSLP: 0,
-    notClaimableSLP: 0,
-    claimableSLP: 0,
-    managerShareSLP: 0,
-    lastClaimed: 0,
-    accountEthAddress: '',
+    roninAddress: '',
     scholarRoninAddress: '',
-    scholarShareSLP: 0,
-    totalSLP: 0,
+    scholarEthAddress: '',
+    preferredPaymentMethod: PaymentMethods.ronin,
+    managerShare: 50,
   };
 }
