@@ -1,0 +1,14 @@
+<h2>Current Currency</h2>
+<mat-form-field appearance="fill">
+  <mat-label>Preferred Payment Method</mat-label>
+  <mat-select [(ngModel)]="currency">
+    <mat-option value="usd">USD</mat-option>
+    <mat-option value="eur">EUR</mat-option>
+    <mat-option value="php">PHP</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="currency" cdkFocusInitial>Save</button>
+</div>

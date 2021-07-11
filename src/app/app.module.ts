@@ -33,7 +33,10 @@ import { DeleteDialogComponent } from './components/delete-dialog/delete-dialog.
 import { FooterComponent } from './components/footer/footer.component';
 import { TermsComponent } from './components/terms/terms.component';
 import { PrivacyComponent } from './components/privacy/privacy.component';
-import { NgcCookieConsentConfig, NgcCookieConsentModule } from 'ngx-cookieconsent';
+import {
+  NgcCookieConsentConfig,
+  NgcCookieConsentModule,
+} from 'ngx-cookieconsent';
 import { CurrencyDialogComponent } from './components/currency-dialog/currency-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
 import { ShortenRoninAddressPipe } from './pipes/shorten-ronin-address.pipe';
@@ -46,27 +49,27 @@ import { ProfileTableComponent } from './components/profile-table/profile-table.
 import { CacheMapService } from './services/cache-map.service';
 import { CachingInterceptor } from './interceptors/cache-interceptor';
 import { MatBadgeModule } from '@angular/material/badge';
-
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
-    domain: environment.host
+    domain: environment.host,
   },
   palette: {
     popup: {
-      background: '#000'
+      background: '#000',
     },
     button: {
-      background: '#f1d600'
-    }
+      background: '#f1d600',
+    },
   },
   theme: 'edgeless',
   type: 'opt-out',
   layout: 'my-custom-layout',
   layouts: {
-    'my-custom-layout': '{{messagelink}}{{compliance}}'
+    'my-custom-layout': '{{messagelink}}{{compliance}}',
   },
-  elements:{
+  elements: {
     messagelink: `
     <span id="cookieconsent:desc" class="cc-message">{{message}}
       <a aria-label="learn more about our privacy policy" tabindex="1" class="cc-link" href="{{privacyPolicyHref}}" >{{privacyPolicyLink}}</a> and our
@@ -75,14 +78,14 @@ const cookieConfig: NgcCookieConsentConfig = {
     `,
   },
   content: {
-    message: 'By using our site, you acknowledge that you have read and understand our ',
+    message:
+      'By using our site, you acknowledge that you have read and understand our ',
     privacyPolicyLink: 'Privacy Policy',
     privacyPolicyHref: '#/privacy',
     tosLink: 'Terms of Conditions',
     tosHref: '#/terms',
-  }
+  },
 };
-
 
 @NgModule({
   declarations: [
@@ -100,7 +103,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     PrivacyComponent,
     CurrencyDialogComponent,
     ShortenRoninAddressPipe,
-    ShortenNamePipe
+    ShortenNamePipe,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -115,27 +118,29 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatDialogModule,
     MatInputModule,
     MatFormFieldModule,
-    FormsModule,
     MatSortModule,
-    ClipboardModule,
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
     MatSidenavModule,
     MatSnackBarModule,
-    FlexModule,
     MatCardModule,
     MatSelectModule,
     MatMenuModule,
-    GraphQLModule,
     MatTabsModule,
     MatBadgeModule,
+    FormsModule,
+    FlexModule,
+    GraphQLModule,
+    ClipboardModule,
   ],
-  providers: [AuthService,
+  providers: [
+    AuthService,
     CacheMapService,
     { provide: Cache, useClass: CacheMapService },
-    { provide: HTTP_INTERCEPTORS, useClass: CachingInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: CachingInterceptor, multi: true },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class AppModule { }
+export class AppModule {}

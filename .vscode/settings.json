@@ -1,0 +1,7 @@
+{
+    "terminal.integrated.automationShell.windows": [
+        "-ExecutionPolicy",
+        "Bypass"
+    ],
+    "angular.enable-strict-mode-prompt": false
+}

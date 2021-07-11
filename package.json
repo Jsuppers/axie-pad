@@ -23,26 +23,27 @@
     "@angular/platform-browser": "~10.0.14",
     "@angular/platform-browser-dynamic": "~10.0.14",
     "@angular/router": "~10.0.14",
+    "@apollo/client": "^3.0.0",
     "@types/lodash": "^4.14.170",
     "apollo-angular": "^2.6.0",
     "cookieconsent": "^3.1.1",
     "firebase": "^8.6.8",
+    "graphql": "^15.0.0",
     "lodash": "^4.17.21",
     "ngx-cookieconsent": "^2.2.3",
     "rxjs": "~6.5.5",
     "tslib": "^2.0.0",
     "uninstall": "0.0.0",
-    "zone.js": "~0.10.3",
-    "@apollo/client": "^3.0.0",
-    "graphql": "^15.0.0"
+    "zone.js": "~0.10.3"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1000.8",
     "@angular/cli": "~10.0.8",
     "@angular/compiler-cli": "~10.0.14",
-    "@types/node": "^12.11.1",
+    "@schematics/angular": "^12.1.1",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
+    "@types/node": "^12.11.1",
     "codelyzer": "^6.0.0",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~5.0.0",
@@ -54,6 +55,6 @@
     "protractor": "~7.0.0",
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
-    "typescript": "~3.9.5"
+    "typescript": "^3.9.10"
   }
 }

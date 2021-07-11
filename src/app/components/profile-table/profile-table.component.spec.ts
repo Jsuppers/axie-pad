@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ProfileTableComponent } from './earnings-table.component';
+import { ProfileTableComponent } from './profile-table.component';
 
 describe('TableComponent', () => {
   let component: ProfileTableComponent;
