@@ -17,6 +17,6 @@ export class DonateComponent implements OnInit {
   }
 
   openSnackBar(message: string): void {
-    this.snackBar.open(message + ' copied');
+    this.snackBar.open(message + ' copied', undefined, { verticalPosition: 'top'});
   }
 }

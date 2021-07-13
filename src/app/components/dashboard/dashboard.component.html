@@ -1,32 +1,37 @@
-<div style="display: flex; margin-right: 10px">
-  <mat-card class="header-card" style="margin: 10px;" *ngIf="authService.userState as user">
-    <img mat-card-sm-image src="assets/dashboard.png">
-    <div>
-      <p><strong>{{hideAddress.getValue() ? 'Manager' : user.displayName}}</strong></p>
-    </div>
-    <div >
-      <span>{{ hideAddress.getValue() ? '*'.repeat(10) : user.email}}</span>
-    </div>
+<div style="display: flex; margin-right: 10px;">
+  <mat-card class="header-card" *ngIf="authService.userState.getValue() as user">
+  <table style="text-align: start;">
+    <tr style="margin-bottom: 10px;">
+      <td class="title-row" >In Progress</td>
+      <td class="title-row">Total Earnings</td>
+    </tr>
+    <tr>
+      <td class="item-row">{{ progressManagerSLP | number : '1.2-2' }} SLP <span class="small-text"> ({{ progressSLP | number : '1.2-2'}} Total)</span></td>
+      <td class="item-row">{{ totalManagerSLP | number : '1.2-2' }} SLP <span class="small-text"> ({{ totalSLP | number : '1.2-2'}} Total)</span></td>
+    </tr>
+    <tr>
+      <td class="item-row">{{ fiatCurrency + (progressManagerFiat | number : '1.2-2')}} <span class="small-text"> ({{ progressFiat | number : '1.2-2'}} Total)</span></td>
+      <td class="item-row">{{ fiatCurrency + (totalManagerFiat | number : '1.2-2' )}} <span class="small-text"> ({{ totalFiat | number : '1.2-2'}} Total)</span></td>
+    </tr>
+  </table>
   </mat-card>
-  <mat-card class="header-card" style="margin: 10px;" *ngIf="authService.userState as user">
-    <img mat-card-sm-image src="assets/total.png">
-    <div >
-      <strong>Total SLP:</strong> {{totalSLP}} <br>
-      <span (click)="openCurrencyDialog()">
-        <strong>Total {{fiatCurrency.toUpperCase()}}:</strong>
-        {{totalFiat  | number : '1.2-2'}}
-      </span>
-    </div>
-  </mat-card>
-  <div class="header-card" style="align-self: flex-end; margin-left: auto">
+  <div class="buttons-card" style="width: 100px;">
+    <button mat-raised-button (click)="navigateSLPChart()" class="crypto-button">
+      <img src="assets/slp.webp" style="width: 20px"><span style="padding-left: 5px;">{{ fiatCurrency }}{{SLPPrice | number : '1.2-2'}}</span>
+    </button>
+    <button mat-raised-button (click)="navigateAXSChart()" class="crypto-button">
+      <img src="assets/axs.webp" style="width: 20px"><span style="padding-left: 5px;">{{ fiatCurrency }}{{AXSPrice | number : '1.2-2'}}</span>
+    </button>
+</div>
+  <div class="buttons-card" style="align-self: flex-end; margin-left: auto; width: 200px;">
     <button mat-raised-button (click)="refresh()" class="add-scholar-button">
-      {{ 'Refresh' }}
+      <mat-icon>refresh</mat-icon><span style="padding-left: 5px;">{{ 'Refresh' }}</span>
     </button>
     <button mat-raised-button (click)="hideAddresses()" class="add-scholar-button">
       {{ hideAddress.getValue() ? 'Show Information' : 'Hide Information'}}
     </button>
     <button mat-raised-button (click)="addNewScholar()" class="add-scholar-button">
-      Add New Scholar
+      <mat-icon>add</mat-icon><span style="padding-left: 5px;"> Add New Scholar</span>
     </button>
   </div>
 </div>
@@ -53,12 +58,5 @@
       <span>Axies</span>
     </ng-template>
     Coming soon!
-  </mat-tab>
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon style="margin-right: 10px; height: 20px; color: dodgerblue">person</mat-icon>
-      <span>Profile</span>
-    </ng-template>
-    <app-profile-table [newScholar$]="newScholar" [hideAddress$]="hideAddress"></app-profile-table>
   </mat-tab>
 </mat-tab-group>

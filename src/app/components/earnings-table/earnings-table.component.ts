@@ -2,26 +2,31 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { FirestoreScholar, Scholar } from '../../_models/scholar';
-import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
-import { EditDialogComponent } from '../edit-dialog/edit-dialog.component';
-import { AuthService } from '../../services/auth.service';
-import { cloneDeep } from 'lodash';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
-import firebase from 'firebase';
 import { UserService } from '../../services/user.service';
+import { map, switchMap } from 'rxjs/operators';
+import { ScholarService } from 'src/app/services/scholar.service';
 
 interface TableData {
+  position: number;
   name: string;
-  notClaimableSLP: number;
-  claimableSLP: number;
+  roninName: string;
+  roninAddress: string;
   averageSLPSinceLastClaimed: number;
+  averageChipColor: string;
+  inProgressSLP: number;
+  managersShareSLP: number;
+  managersSharePercentage: number;
+  claimableSLP: number;
   totalSLP: number;
   claimableDate: string;
+  claimableTime: string;
   lastClaimedDate: string;
+  paidTimes: number;
+  scholar: Scholar;
 }
 
 @Component({
@@ -31,13 +36,19 @@ interface TableData {
 })
 export class EarningsTableComponent implements OnInit {
   displayedColumns: string[] = [
+    'position',
     'name',
+    'roninAddress',
     'averageSLPSinceLastClaimed',
-    'notClaimableSLP',
+    'inProgressSLP',
+    'managersShareSLP',
     'claimableSLP',
     'totalSLP',
+    'paidTimes',
     'lastClaimedDate',
     'claimableDate',
+    'actions',
+    'menu',
   ];
   dataSource: MatTableDataSource<TableData>;
   @Input()
@@ -48,24 +59,43 @@ export class EarningsTableComponent implements OnInit {
 
   constructor(
     public dialog: MatDialog,
-    private db: AngularFirestore,
-    private authService: AuthService,
     private user: UserService,
     private snackBar: MatSnackBar,
+    private sholarService: ScholarService,
   ) {
   }
 
   ngOnInit(): void {
-    this.user.getScholars().subscribe((scholars) => {
-      const tableData: TableData[] = [];
+    this.user.getScholars().pipe(
+      map((scholars) => {
+      return (scholars ?? []).sort((a, b) => b?.slp?.inProgress - a?.slp?.inProgress)
+    })).pipe(switchMap((scholars) => {
+      const output: Observable<Scholar>[] = [];
       scholars.forEach((scholar) => {
-        const inProgressSLP = scholar?.slp?.total ? (scholar.slp.total - (scholar.slp?.claimable ?? 0)) : 0;
+        output.push(this.user.getScholar(scholar.id));
+      });
+      return combineLatest(output);
+
+    })).subscribe((scholars) => {
+      const tableData: TableData[] = [];
+      scholars.forEach((scholar, index) => {
+        const inProgress = scholar?.slp?.inProgress ?? 0;
+        const averageSLP = this.getAverageSLP(scholar);
         tableData.push({
-          claimableDate: this.getClaimableDate(scholar),
-          notClaimableSLP: inProgressSLP,
+          scholar: scholar,
+          position: index + 1,
+          roninName: scholar?.roninName ?? 'unknown',
+          paidTimes: scholar?.paidTimes ?? 0,
+          roninAddress: scholar?.roninAddress,
+          inProgressSLP: scholar?.slp?.inProgress ?? 0,
+          managersShareSLP: inProgress * ((scholar?.managerShare ?? 0) / 100),
+          managersSharePercentage: (scholar?.managerShare ?? 0),
+          claimableDate: this.getClaimableDateString(scholar),
+          claimableTime: this.getClaimableTimeString(scholar),
           lastClaimedDate: this.getLastClaimedDate(scholar),
           claimableSLP: scholar?.slp?.claimable ?? 0,
-          averageSLPSinceLastClaimed: this.getAverageSLP(scholar),
+          averageSLPSinceLastClaimed: averageSLP,
+          averageChipColor: this.getAverageChipColor(averageSLP),
           totalSLP: scholar?.slp?.total ?? 0,
           name: scholar?.name ?? 'unknown',
         });
@@ -79,37 +109,33 @@ export class EarningsTableComponent implements OnInit {
   }
 
   openSnackBar(message: string): void {
-    this.snackBar.open(message + ' copied', undefined, { duration: 5000 });
+    this.snackBar.open(message + ' copied', undefined, { duration: 5000 , verticalPosition: 'top'});
   }
 
-  getClaimableDate(element: Scholar): string {
+  getClaimableDateString(element: Scholar): string {
     if (!element?.slp?.lastClaimed) {
       return 'unknown';
     }
-    const dateFuture: any = new Date((element.slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
-    const dateNow: any = new Date();
+    const claimableDate: any = new Date((element.slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
+    const now: any = new Date();
+    if (claimableDate < now) {
+      return 'now';
+    }
 
-    const seconds = Math.floor((dateFuture - (dateNow)) / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
+    return claimableDate.toLocaleDateString();
+  }
 
-    const currentHours = (hours - (days * 24));
-    let output = '';
-    if (days > 0) {
-      output = days + ' days, ';
+  getClaimableTimeString(element: Scholar): string {
+    if (!element?.slp?.lastClaimed) {
+      return 'unknown';
     }
-    if (currentHours > 0) {
-      output = output + currentHours + ' hours';
+    const claimableDate: any = new Date((element.slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
+    const now: any = new Date();
+    if (claimableDate < now) {
+      return '';
     }
-    if (output.length === 0) {
-      const currentMinutes = (minutes - (hours * 60));
-      if (currentMinutes > 0 ) {
-        return currentMinutes.toFixed(0) + ' minutes';
-      }
-      output = 'now';
-    }
-    return output;
+
+    return claimableDate.toLocaleTimeString();
   }
 
   getLastClaimedDate(element: Scholar): string {
@@ -135,10 +161,10 @@ export class EarningsTableComponent implements OnInit {
   }
 
   getAverageSLP(scholar: Scholar): number {
-    if (isNaN(scholar?.slp?.total) || isNaN(scholar?.slp?.claimable)) {
+    if (isNaN(scholar?.slp?.total) || isNaN(scholar?.slp?.inProgress)) {
       return 0;
     }
-    const inProgressSLP = scholar.slp.total - scholar.slp.claimable;
+    const inProgressSLP = scholar.slp.inProgress;
     const dateFuture: any = new Date();
     const dateNow: any = new Date(scholar.slp.lastClaimed * 1000);
 
@@ -146,7 +172,36 @@ export class EarningsTableComponent implements OnInit {
     return (inProgressSLP / seconds * 86400);
   }
 
-  navigateToScholar(element: FirestoreScholar): void {
-    window.open('https://marketplace.axieinfinity.com/profile/' + element.roninAddress.replace('ronin:', '0x') + '/axie', '_blank');
+  getAverageChipColor(averageSLP: number): string {
+    if (Math.round(averageSLP) < 100) {
+      return '#FF0000'; // red
+    }
+    if (Math.round(averageSLP) < 150) {
+      return '#FF8000'; // orange
+    }
+    if (Math.round(averageSLP) < 200) {
+      return '#00CC00'; // green
+    }
+    return '#FF00FF'; // pink
+  }
+
+  openPaidDialog(data: TableData): void {
+    this.sholarService.openPayDialog({
+      ...data.scholar,
+    });
+  }
+
+  openDialog(data: TableData): void {
+    this.sholarService.openDialog({
+      ...data.scholar,
+    });
+  }
+
+  deleteScholar(data: TableData): void {
+    this.sholarService.deleteScholar(data.scholar.id);
+  }
+
+  navigateToScholar(roninAddress: string) {
+    this.sholarService.navigateToScholar(roninAddress);
   }
 }

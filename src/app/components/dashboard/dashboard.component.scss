@@ -1,12 +1,34 @@
 .header-card {
   margin: 10px;
-  text-align: center;
-  width: 160px;
   overflow-wrap: break-word;
+  background: #87B7FF;
+  color: white;
 }
 
 .add-scholar-button {
   width: 170px;
   text-align: center;
   margin-top: 10px;
+}
+
+.crypto-button {
+  width: 100px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+
+.small-text {
+  font-size: 10px;
+}
+
+.title-row {
+  font-weight: 520;
+  font-size: 24px;
+  padding-bottom: 10px;
+}
+
+.item-row {
+  padding-right: 10px;
+  font-size: 20px;
 }

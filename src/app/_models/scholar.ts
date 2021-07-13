@@ -19,6 +19,7 @@ export interface FirestoreScholar {
   id: string;
   name: string;
   roninAddress: string;
+  paidTimes: number;
   scholarRoninAddress: string;
   preferredPaymentMethod: PaymentMethods;
   scholarEthAddress: string;
@@ -31,6 +32,7 @@ export function DefaultFirestoreScholar(): FirestoreScholar {
     id: firebase.firestore().collection('tmp').doc().id,
     roninAddress: '',
     scholarRoninAddress: '',
+    paidTimes: 0,
     scholarEthAddress: '',
     preferredPaymentMethod: PaymentMethods.ronin,
     managerShare: 50,

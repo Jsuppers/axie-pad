@@ -1,13 +1,13 @@
 <div fxLayout="column" fxFlexFill>
 
-  <mat-toolbar color="primary">
+  <mat-toolbar style="background: #F0F0F0">
     <a mat-button class="companyName" routerLink="/dashboard">
       <span>Axie Pad</span>
     </a>
     <span class="example-spacer"></span>
     <div fxShow="true" fxHide.lt-md="true" *ngIf="signedIn()">
-      <a mat-button routerLink="/donate"><mat-icon>favorite</mat-icon> Donate </a>
-      <a mat-button routerLink="/dashboard"><mat-icon>dashboard</mat-icon> Dashboard </a>
+      <a mat-button routerLink="/donate"><mat-icon style="padding-bottom: 3px;">favorite</mat-icon></a>
+      <a mat-button (click)="openCurrencyDialog()">{{fiatCurrency?.toUpperCase()}}</a>
       <a mat-button (click)="signOut()"><mat-icon>exit_to_app</mat-icon> Sign out</a>
     </div>
   </mat-toolbar>

@@ -73,7 +73,7 @@ export class ArenaTableComponent implements OnInit {
   }
 
   openSnackBar(message: string): void {
-    this.snackBar.open(message + ' copied', undefined, { duration: 5000 });
+    this.snackBar.open(message + ' copied', undefined, { duration: 5000, verticalPosition: 'top' });
   }
 
   navigateToScholar(element: FirestoreScholar): void {

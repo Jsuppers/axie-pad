@@ -45,11 +45,14 @@ import { ShortenNamePipe } from './pipes/shorten-name.pipe';
 import { GraphQLModule } from './graphql.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ArenaTableComponent } from './components/arena-table/arena-table.component';
-import { ProfileTableComponent } from './components/profile-table/profile-table.component';
 import { CacheMapService } from './services/cache-map.service';
 import { CachingInterceptor } from './interceptors/cache-interceptor';
 import { MatBadgeModule } from '@angular/material/badge';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import {MatChipsModule} from '@angular/material/chips';
+import { UserService } from './services/user.service';
+import { ScholarService } from './services/scholar.service';
+import { PayDialogComponent } from './components/pay-dialog/pay-dialog.component';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -92,7 +95,6 @@ const cookieConfig: NgcCookieConsentConfig = {
     AppComponent,
     EarningsTableComponent,
     ArenaTableComponent,
-    ProfileTableComponent,
     EditDialogComponent,
     DashboardComponent,
     SignInComponent,
@@ -104,6 +106,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     CurrencyDialogComponent,
     ShortenRoninAddressPipe,
     ShortenNamePipe,
+    PayDialogComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -122,6 +125,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
+    MatChipsModule,
     MatSidenavModule,
     MatSnackBarModule,
     MatCardModule,
@@ -136,6 +140,8 @@ const cookieConfig: NgcCookieConsentConfig = {
   ],
   providers: [
     AuthService,
+    UserService,
+    ScholarService,
     CacheMapService,
     { provide: Cache, useClass: CacheMapService },
     { provide: HTTP_INTERCEPTORS, useClass: CachingInterceptor, multi: true },

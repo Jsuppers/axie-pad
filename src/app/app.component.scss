@@ -1,5 +1,6 @@
 .companyName{
   font-size: 150%;
+  color: #888888;
 }
 div {
   overflow: inherit;
@@ -28,4 +29,10 @@ html, body {
 .mat-sidenav-content{
   font-size: 200%;
   text-align: center;
+}
+
+
+::ng-deep .mat-sort-header-container {
+  justify-content: center !important;
+  text-align:center;
 }

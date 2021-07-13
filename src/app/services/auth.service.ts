@@ -3,6 +3,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import firebase from 'firebase';
+import { BehaviorSubject } from 'rxjs';
 import auth = firebase.auth;
 import UserCredential = firebase.auth.UserCredential;
 import User = firebase.User;
@@ -12,7 +13,7 @@ import User = firebase.User;
 })
 
 export class AuthService {
-  userState: User;
+  userState: BehaviorSubject<User> = new BehaviorSubject<User>(null);
 
   constructor(
     public afs: AngularFirestore,
@@ -21,7 +22,7 @@ export class AuthService {
     public ngZone: NgZone
   ) {
     this.afAuth.authState.subscribe((user: User) => {
-      this.userState = user;
+      this.userState.next(user);
       if (user) {
         this.ngZone.run(() => {
           this.router.navigate(['dashboard']);

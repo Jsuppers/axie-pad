@@ -4,6 +4,30 @@ table {
   word-break: break-word;
 }
 
+.center-items {
+  justify-content: center !important;
+  text-align:center;
+}
+th.mat-header-cell,
+td.mat-cell {
+  justify-content: center !important;
+}
+
+.mat-chip-list-wrapper {
+  text-align: center !important;
+  justify-content: center !important;
+}
+
+td, th {
+  text-align: center !important;
+  vertical-align: middle !important;
+  justify-content: center !important;
+}
+
+.small-text {
+  font-size: 10px;
+}
+
 th.mat-sort-header-sorted {
   color: black;
 }

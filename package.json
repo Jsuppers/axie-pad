@@ -27,6 +27,7 @@
     "@types/lodash": "^4.14.170",
     "apollo-angular": "^2.6.0",
     "cookieconsent": "^3.1.1",
+    "currency-symbol-map": "^5.0.1",
     "firebase": "^8.6.8",
     "graphql": "^15.0.0",
     "lodash": "^4.17.21",
