@@ -8,6 +8,7 @@ import { UserService } from '../../services/user.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CurrencyDialogComponent } from '../currency-dialog/currency-dialog.component';
 import getSymbolFromCurrency from 'currency-symbol-map'
+import { ScholarService } from 'src/app/services/scholar.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,11 +32,11 @@ export class DashboardComponent implements OnInit {
   SLPPrice: number;
   AXSPrice: number;
   fiatCurrency: string;
-  newScholar: BehaviorSubject<FirestoreScholar> = new BehaviorSubject<FirestoreScholar>(null);
   hideAddress: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor(private service: AuthService,
               private db: AngularFirestore,
+              private scholarService: ScholarService,
               public dialog: MatDialog,
               private userService: UserService,
   ) {
@@ -72,7 +73,7 @@ export class DashboardComponent implements OnInit {
 
   addNewScholar(): void {
     const newScholar = DefaultFirestoreScholar();
-    this.newScholar.next(newScholar);
+    this.scholarService.openDialog(newScholar);
   }
 
   hideAddresses(): void {

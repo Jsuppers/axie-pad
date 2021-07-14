@@ -9,7 +9,6 @@ import { EditDialogComponent } from '../components/edit-dialog/edit-dialog.compo
 import { PayDialogComponent } from '../components/pay-dialog/pay-dialog.component';
 import { FirestoreScholar } from '../_models/scholar';
 import { AuthService } from './auth.service';
-import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root'
