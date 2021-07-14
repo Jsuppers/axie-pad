@@ -3,7 +3,7 @@ import { AuthService } from './services/auth.service';
 import { NgcCookieConsentService } from 'ngx-cookieconsent';
 import { UserService } from './services/user.service';
 import { MatDialog } from '@angular/material/dialog';
-import { CurrencyDialogComponent } from './components/currency-dialog/currency-dialog.component';
+import { CurrencyDialogComponent } from './components/dialogs/currency-dialog/currency-dialog.component';
 import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({

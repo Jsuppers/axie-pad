@@ -4,16 +4,16 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import firebase from 'firebase';
 import { cloneDeep } from 'lodash';
-import { DeleteDialogComponent } from '../components/delete-dialog/delete-dialog.component';
-import { EditDialogComponent } from '../components/edit-dialog/edit-dialog.component';
-import { PayDialogComponent } from '../components/pay-dialog/pay-dialog.component';
+import { DeleteDialogComponent } from '../components/dialogs/delete-dialog/delete-dialog.component';
+import { EditDialogComponent } from '../components/dialogs/edit-dialog/edit-dialog.component';
+import { PayDialogComponent } from '../components/dialogs/pay-dialog/pay-dialog.component';
 import { FirestoreScholar } from '../_models/scholar';
 import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ScholarService {
+export class DialogService {
 
   constructor(
     public dialog: MatDialog,

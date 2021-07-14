@@ -3,12 +3,12 @@ import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { combineLatest, Observable } from 'rxjs';
-import { FirestoreScholar, Scholar } from '../../_models/scholar';
+import { FirestoreScholar, Scholar } from '../../../../_models/scholar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserService } from '../../services/user.service';
+import { UserService } from '../../../../services/user.service';
 import { map, switchMap } from 'rxjs/operators';
-import { ScholarService } from 'src/app/services/scholar.service';
+import { DialogService } from 'src/app/services/dialog.service';
 
 interface TableData {
   position: number;
@@ -61,7 +61,7 @@ export class EarningsTableComponent implements OnInit {
     public dialog: MatDialog,
     private user: UserService,
     private snackBar: MatSnackBar,
-    private sholarService: ScholarService,
+    private sholarService: DialogService,
   ) {
   }
 

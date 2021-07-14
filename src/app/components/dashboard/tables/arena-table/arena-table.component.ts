@@ -3,14 +3,13 @@ import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Observable } from 'rxjs';
-import { FirestoreScholar, Scholar } from '../../_models/scholar';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
-import { EditDialogComponent } from '../edit-dialog/edit-dialog.component';
-import { AuthService } from '../../services/auth.service';
 import { cloneDeep } from 'lodash';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserService } from '../../services/user.service';
+import { AuthService } from 'src/app/services/auth.service';
+import { UserService } from 'src/app/services/user.service';
+import { FirestoreScholar } from 'src/app/_models/scholar';
 
 interface TableData {
   name: string;

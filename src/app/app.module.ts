@@ -12,9 +12,7 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { SignInComponent } from './components/sign-in/sign-in.component';
 import { AuthService } from './services/auth.service';
-import { EarningsTableComponent } from './components/earnings-table/earnings-table.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { EditDialogComponent } from './components/edit-dialog/edit-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -29,7 +27,6 @@ import { FlexModule } from '@angular/flex-layout';
 import { MatCardModule } from '@angular/material/card';
 import { DonateComponent } from './components/donate/donate.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { DeleteDialogComponent } from './components/delete-dialog/delete-dialog.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { TermsComponent } from './components/terms/terms.component';
 import { PrivacyComponent } from './components/privacy/privacy.component';
@@ -37,22 +34,25 @@ import {
   NgcCookieConsentConfig,
   NgcCookieConsentModule,
 } from 'ngx-cookieconsent';
-import { CurrencyDialogComponent } from './components/currency-dialog/currency-dialog.component';
+import { CurrencyDialogComponent } from './components/dialogs/currency-dialog/currency-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
 import { ShortenRoninAddressPipe } from './pipes/shorten-ronin-address.pipe';
 import { MatMenuModule } from '@angular/material/menu';
 import { ShortenNamePipe } from './pipes/shorten-name.pipe';
 import { GraphQLModule } from './graphql.module';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ArenaTableComponent } from './components/arena-table/arena-table.component';
 import { CacheMapService } from './services/cache-map.service';
 import { CachingInterceptor } from './interceptors/cache-interceptor';
 import { MatBadgeModule } from '@angular/material/badge';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import {MatChipsModule} from '@angular/material/chips';
 import { UserService } from './services/user.service';
-import { ScholarService } from './services/scholar.service';
-import { PayDialogComponent } from './components/pay-dialog/pay-dialog.component';
+import { DialogService } from './services/dialog.service';
+import { EarningsTableComponent } from './components/dashboard/tables/earnings-table/earnings-table.component';
+import { ArenaTableComponent } from './components/dashboard/tables/arena-table/arena-table.component';
+import { PayDialogComponent } from './components/dialogs/pay-dialog/pay-dialog.component';
+import { EditDialogComponent } from './components/dialogs/edit-dialog/edit-dialog.component';
+import { DeleteDialogComponent } from './components/dialogs/delete-dialog/delete-dialog.component';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -141,7 +141,7 @@ const cookieConfig: NgcCookieConsentConfig = {
   providers: [
     AuthService,
     UserService,
-    ScholarService,
+    DialogService,
     CacheMapService,
     { provide: Cache, useClass: CacheMapService },
     { provide: HTTP_INTERCEPTORS, useClass: CachingInterceptor, multi: true },

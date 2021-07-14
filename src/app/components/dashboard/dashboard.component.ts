@@ -6,9 +6,9 @@ import { DefaultFirestoreScholar, FirestoreScholar } from '../../_models/scholar
 import firebase from 'firebase';
 import { UserService } from '../../services/user.service';
 import { MatDialog } from '@angular/material/dialog';
-import { CurrencyDialogComponent } from '../currency-dialog/currency-dialog.component';
+import { CurrencyDialogComponent } from '../dialogs/currency-dialog/currency-dialog.component';
 import getSymbolFromCurrency from 'currency-symbol-map'
-import { ScholarService } from 'src/app/services/scholar.service';
+import { DialogService } from 'src/app/services/dialog.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,7 +36,7 @@ export class DashboardComponent implements OnInit {
 
   constructor(private service: AuthService,
               private db: AngularFirestore,
-              private scholarService: ScholarService,
+              private scholarService: DialogService,
               public dialog: MatDialog,
               private userService: UserService,
   ) {

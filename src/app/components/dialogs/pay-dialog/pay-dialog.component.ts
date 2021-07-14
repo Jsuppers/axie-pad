@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ScholarService } from 'src/app/services/scholar.service';
+import { DialogService } from 'src/app/services/dialog.service';
 import { UserService } from 'src/app/services/user.service';
 import { PaymentMethods, Scholar } from 'src/app/_models/scholar';
 
@@ -14,7 +14,7 @@ export class PayDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<PayDialogComponent>,
-    private scholarService: ScholarService,
+    private scholarService: DialogService,
     private userService: UserService,
     @Inject(MAT_DIALOG_DATA) public data: Scholar) {
       if (!data.scholarRoninName || data.scholarRoninName === 'unknown') {

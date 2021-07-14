@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FirestoreScholar, PaymentMethods } from '../../_models/scholar';
+import { FirestoreScholar, PaymentMethods } from '../../../_models/scholar';
 
 @Component({
   selector: 'app-edit-dialog',

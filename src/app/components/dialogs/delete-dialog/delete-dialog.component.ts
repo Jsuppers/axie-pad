@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { FirestoreScholar } from '../../_models/scholar';
+import { FirestoreScholar } from '../../../_models/scholar';
 
 @Component({
   selector: 'app-delete-dialog',
