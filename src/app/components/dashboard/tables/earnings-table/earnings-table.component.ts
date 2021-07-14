@@ -101,6 +101,13 @@ export class EarningsTableComponent implements OnInit {
         });
       });
       this.dataSource = new MatTableDataSource(tableData);
+      this.dataSource.sortingDataAccessor = (item, property) => {
+        switch(property) {
+          case 'claimableDate': return item.scholar.slp.lastClaimed;
+          case 'lastClaimedDate': return item.scholar.slp.lastClaimed;
+          default: return item[property];
+        }
+      };
       this.dataSource.sort = this.sort;
     });
     this.hideAddress$.subscribe((hideAddresses) => {
@@ -116,13 +123,22 @@ export class EarningsTableComponent implements OnInit {
     if (!element?.slp?.lastClaimed) {
       return 'unknown';
     }
-    const claimableDate: any = new Date((element.slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
-    const now: any = new Date();
-    if (claimableDate < now) {
+    const dateFuture: any = new Date((element.slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
+    const dateNow: any = new Date();
+    if (dateFuture < dateNow) {
       return 'now';
     }
 
-    return claimableDate.toLocaleDateString();
+    const seconds = Math.floor((dateFuture - (dateNow)) / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    let output = '';
+    if (days >= 0) {
+      output = days + ' days';
+    }
+    return output;
   }
 
   getClaimableTimeString(element: Scholar): string {
@@ -160,16 +176,19 @@ export class EarningsTableComponent implements OnInit {
     return 'just now';
   }
 
-  getAverageSLP(scholar: Scholar): number {
-    if (isNaN(scholar?.slp?.total) || isNaN(scholar?.slp?.inProgress)) {
+  getAverageSLP(scholar: Scholar, dateNow: Date = new Date()): number {
+    if (isNaN(scholar?.slp?.inProgress)) {
       return 0;
     }
     const inProgressSLP = scholar.slp.inProgress;
-    const dateFuture: any = new Date();
-    const dateNow: any = new Date(scholar.slp.lastClaimed * 1000);
+    const dateClaimed: Date = new Date(scholar.slp.lastClaimed * 1000);
 
-    const seconds = Math.floor((dateFuture - dateNow) / 1000);
-    return (inProgressSLP / seconds * 86400);
+    const seconds = Math.floor((dateNow.getTime() - dateClaimed.getTime()) / 1000);
+    const secondsInDay = 86400;
+    if (seconds < secondsInDay) {
+      return inProgressSLP;
+    }
+    return (inProgressSLP / seconds * secondsInDay);
   }
 
   getAverageChipColor(averageSLP: number): string {

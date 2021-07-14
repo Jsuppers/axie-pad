@@ -56,7 +56,7 @@ import { DeleteDialogComponent } from './components/dialogs/delete-dialog/delete
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
-    domain: environment.host,
+    domain: window.location.hostname,
   },
   palette: {
     popup: {
