@@ -1,0 +1,18 @@
+<h2>A Simple tool to check the profitability of breeding axies based on the average selling price</h2>
+<table>
+  <tr>
+    <td class="title-row">Breed Count</td>
+    <td class="title-row">Formula</td>
+    <td class="title-row">Profit</td>
+  </tr>
+  <tr *ngFor="let i of [0,1,2,3,4,5,6]">
+    <td class="item-row">{{i + 1}}</td>
+    <td class="item-row">{{formulaCost[i]}}</td>
+    <td class="item-row"
+    [ngClass]="{'highlight': highestProfit == totalCost[i]}">{{totalCost[i] | number: '1.2-2'}}</td>
+  </tr>
+</table>
+<h3>Enter average Axie sell price
+  <input matInput type="number" [(ngModel)]="averageValue" (change)="updateAverageValue()">
+</h3>
+

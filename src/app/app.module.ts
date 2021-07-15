@@ -53,6 +53,7 @@ import { ArenaTableComponent } from './components/dashboard/tables/arena-table/a
 import { PayDialogComponent } from './components/dialogs/pay-dialog/pay-dialog.component';
 import { EditDialogComponent } from './components/dialogs/edit-dialog/edit-dialog.component';
 import { DeleteDialogComponent } from './components/dialogs/delete-dialog/delete-dialog.component';
+import { BreedProfitTableComponent } from './components/dashboard/tables/breed-profit-table/breed-profit-table.component';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -107,6 +108,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     ShortenRoninAddressPipe,
     ShortenNamePipe,
     PayDialogComponent,
+    BreedProfitTableComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
