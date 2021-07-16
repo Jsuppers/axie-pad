@@ -18,6 +18,7 @@ export interface Scholar extends FirestoreScholar {
 export interface FirestoreScholar {
   id: string;
   name: string;
+  group: string;
   roninAddress: string;
   paidTimes: number;
   scholarRoninAddress: string;
@@ -29,6 +30,7 @@ export interface FirestoreScholar {
 export function DefaultFirestoreScholar(): FirestoreScholar {
   return {
     name: 'no name',
+    group: '',
     id: firebase.firestore().collection('tmp').doc().id,
     roninAddress: '',
     scholarRoninAddress: '',

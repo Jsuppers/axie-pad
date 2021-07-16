@@ -14,7 +14,7 @@ import { SignInComponent } from './components/sign-in/sign-in.component';
 import { AuthService } from './services/auth.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSortModule } from '@angular/material/sort';
@@ -54,6 +54,7 @@ import { PayDialogComponent } from './components/dialogs/pay-dialog/pay-dialog.c
 import { EditDialogComponent } from './components/dialogs/edit-dialog/edit-dialog.component';
 import { DeleteDialogComponent } from './components/dialogs/delete-dialog/delete-dialog.component';
 import { BreedProfitTableComponent } from './components/dashboard/tables/breed-profit-table/breed-profit-table.component';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -136,9 +137,11 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatTabsModule,
     MatBadgeModule,
     FormsModule,
+    ReactiveFormsModule,
     FlexModule,
     GraphQLModule,
     ClipboardModule,
+    MatAutocompleteModule,
   ],
   providers: [
     AuthService,

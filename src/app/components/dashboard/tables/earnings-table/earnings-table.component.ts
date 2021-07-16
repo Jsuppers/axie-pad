@@ -9,10 +9,24 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../../../services/user.service';
 import { map, switchMap } from 'rxjs/operators';
 import { DialogService } from 'src/app/services/dialog.service';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 
+const noGroupText =  '😥 no group';
+export class Group {
+  averageSLPSinceLastClaimed: number = 0;
+  averageChipColor: string;
+  managersShareSLP: number = 0;
+  inProgressSLP: number = 0;
+  claimableSLP: number = 0;
+  totalSLP: number = 0;
+	level = 0;
+  group: string = noGroupText;
+	expanded = false;
+	totalCounts = 0;
+}
 interface TableData {
-  position: number;
   name: string;
+  group: string;
   roninName: string;
   roninAddress: string;
   averageSLPSinceLastClaimed: number;
@@ -28,32 +42,46 @@ interface TableData {
   paidTimes: number;
   scholar: Scholar;
 }
-
 @Component({
   selector: 'app-earnings-table',
   templateUrl: './earnings-table.component.html',
-  styleUrls: ['./earnings-table.component.scss']
+  styleUrls: ['./earnings-table.component.scss'],
+
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
+  ],
 })
 export class EarningsTableComponent implements OnInit {
+	public dataSource = new MatTableDataSource<any | TableData>([]);
+	groupByColumns: string[] = [];
+  expandedElement: TableData | null;
   displayedColumns: string[] = [
     'position',
     'name',
     'roninAddress',
+    'claimableDate',
     'averageSLPSinceLastClaimed',
     'inProgressSLP',
     'managersShareSLP',
     'claimableSLP',
     'totalSLP',
     'paidTimes',
-    'lastClaimedDate',
-    'claimableDate',
     'actions',
     'menu',
   ];
-  dataSource: MatTableDataSource<TableData>;
+  headerColumns: string[] = [];
   @Input()
   hideAddress$: Observable<boolean>;
   hideAddresses: boolean;
+	allData: any[];
+	_allGroup: any[];
+
+	expandedCar: any[] = [];
+	expandedSubCar: TableData[] = [];
 
   @ViewChild(MatSort) sort: MatSort;
 
@@ -63,7 +91,142 @@ export class EarningsTableComponent implements OnInit {
     private snackBar: MatSnackBar,
     private sholarService: DialogService,
   ) {
+		this.groupByColumns = ['group'];
+    this.headerColumns = this.displayedColumns.filter((col) => {
+      return col != 'roninAddress' && col != 'claimableDate';
+    })
   }
+
+	getGroups(data: any[], groupByColumns: string[]): any[] {
+		const rootGroup = new Group();
+		rootGroup.expanded = false;
+		return this.getGroupList(data, 0, groupByColumns, rootGroup);
+	}
+
+	getGroupList(data: any[], level: number = 0, groupByColumns: string[], parent: Group): any[] {
+		if (level >= groupByColumns.length) {
+			return data;
+		}
+    let groups: Record<string, Group> = {};
+		const currentColumn = groupByColumns[level];
+    data.forEach((row) => {
+      const group = row?.group ? row.group : noGroupText;
+      if (!groups[group]) {
+        const result = new Group();
+        result.level = level + 1;
+        result.group = group;
+        groups[group] = result;
+      }
+      groups[group].averageSLPSinceLastClaimed += row?.averageSLPSinceLastClaimed ?? 0;
+      groups[group].claimableSLP += row?.claimableSLP ?? 0;
+      groups[group].totalSLP += row?.totalSLP ?? 0;
+      groups[group].inProgressSLP += row?.inProgressSLP ?? 0;
+      groups[group].managersShareSLP += row?.managersShareSLP ?? 0;
+    });
+
+		Object.values(groups).forEach(group => {
+			const rowsInGroup = data.filter(row => group[currentColumn] === (row[currentColumn] ? row[currentColumn] : noGroupText ));
+			group.totalCounts = rowsInGroup.length;
+      group.averageSLPSinceLastClaimed = group.averageSLPSinceLastClaimed / group.totalCounts;
+      group.averageChipColor = this.getAverageChipColor(group.averageSLPSinceLastClaimed);
+			this.expandedSubCar = [];
+		});
+
+		this._allGroup = Object.values(groups).sort((a: Group, b: Group) => {
+			const isAsc = 'asc';
+			return this.compare(a.group, b.group, isAsc);
+		});
+		return this._allGroup;
+	}
+
+	addGroupsNew(allGroup: any[], data: any[], groupByColumns: string[], dataRow: any): any[] {
+		const rootGroup = new Group();
+		rootGroup.expanded = true;
+		return this.getSublevelNew(allGroup, data, 0, groupByColumns, rootGroup, dataRow);
+	}
+
+	getSublevelNew(allGroup: any[], data: any[], level: number, groupByColumns: string[], parent: Group, dataRow: any): any[] {
+		if (level >= groupByColumns.length) {
+			return data;
+		}
+		const currentColumn = groupByColumns[level];
+		let subGroups = [];
+		allGroup.forEach(group => {
+			const rowsInGroup = data.filter(row => group[currentColumn] === row[currentColumn]);
+			group.totalCounts = rowsInGroup.length;
+
+      const dataRowGroup = dataRow.group ? dataRow.group : noGroupText;
+			if (group.group == dataRowGroup) {
+				group.expanded = dataRow.expanded;
+				const subGroup = this.getSublevelNew(allGroup, rowsInGroup, level + 1, groupByColumns, group, noGroupText);
+				this.expandedSubCar = subGroup;
+				subGroup.unshift(group);
+				subGroups = subGroups.concat(subGroup);
+			} else {
+				subGroups = subGroups.concat(group);
+			}
+		});
+		return subGroups;
+	}
+
+	uniqueBy(a, key) {
+		const seen = {};
+		return a.filter((item) => {
+			const k = key(item);
+			return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+		});
+	}
+
+	isGroup(item): boolean {
+		return item?.level;
+	}
+
+  isNotGroup(item): boolean {
+		return !item?.level;
+  }
+
+  isNotGroupCell(index, item): boolean {
+		return !item?.level;
+  }
+
+  isGroupCell(index, item): boolean {
+		return item?.level;
+  }
+
+	onSortData(sort: MatSort) {
+		let data = this.allData;
+		const index = data.findIndex(x => x['level'] == 1);
+		if (sort.active && sort.direction !== '') {
+			if (index > -1) {
+				data.splice(index, 1);
+			}
+			data = data.sort((a: TableData, b: TableData) => {
+				const isAsc = sort.direction === 'asc';
+				switch (sort.active) {
+					case 'claimableDate':
+						return this.compare(a.scholar.slp.lastClaimed, b.scholar.slp.lastClaimed, isAsc);
+					default:
+            return this.compare(a[sort.active], b[sort.active], isAsc);
+				}
+			});
+		}
+		this.dataSource.data = this.addGroupsNew(this._allGroup, data, this.groupByColumns, this.expandedCar);
+  }
+
+	private compare(a, b, isAsc) {
+		return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+	}
+
+	groupHeaderClick(row) {
+		if (row.expanded) {
+			row.expanded = false;
+			this.dataSource.data = this.getGroups(this.allData, this.groupByColumns);
+		} else {
+			row.expanded = true;
+			this.expandedCar = row;
+			this.dataSource.data = this.addGroupsNew(this._allGroup, this.allData, this.groupByColumns, row);
+		}
+	}
 
   ngOnInit(): void {
     this.user.getScholars().pipe(
@@ -83,7 +246,7 @@ export class EarningsTableComponent implements OnInit {
         const averageSLP = this.getAverageSLP(scholar);
         tableData.push({
           scholar: scholar,
-          position: index + 1,
+          group: scholar?.group ? scholar?.group : noGroupText,
           roninName: scholar?.roninName ?? 'unknown',
           paidTimes: scholar?.paidTimes ?? 0,
           roninAddress: scholar?.roninAddress,
@@ -100,19 +263,18 @@ export class EarningsTableComponent implements OnInit {
           name: scholar?.name ?? 'unknown',
         });
       });
-      this.dataSource = new MatTableDataSource(tableData);
-      this.dataSource.sortingDataAccessor = (item, property) => {
-        switch(property) {
-          case 'claimableDate': return item.scholar.slp.lastClaimed;
-          case 'lastClaimedDate': return item.scholar.slp.lastClaimed;
-          default: return item[property];
-        }
-      };
-      this.dataSource.sort = this.sort;
+
+      this.allData = tableData;
+      this.dataSource.data = this.getGroups(this.allData, this.groupByColumns);
     });
     this.hideAddress$.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
     });
+  }
+
+  getGroupName(element): string {
+    const groupName = element[this.groupByColumns[element.level-1]] ;
+    return groupName ? groupName : noGroupText;
   }
 
   openSnackBar(message: string): void {

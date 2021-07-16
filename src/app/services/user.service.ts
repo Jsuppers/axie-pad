@@ -54,6 +54,7 @@ export class UserService {
   private roninAddressNames: Map<string, string> = new Map<string, string>();
   private scholarSubjects: Record<string, BehaviorSubject<Scholar>> = {};
   private currentUser: BehaviorSubject<User> = new BehaviorSubject(null);
+  groups: string[] = [];
 
   constructor(
     private service: AuthService,
@@ -75,6 +76,7 @@ export class UserService {
         const scholars = Object.values(
           user.scholars ?? {}
         ) as FirestoreScholar[];
+        this.groups = [];
         const currency = user.currency ?? 'usd';
         this.fiatCurrency$.next(currency);
         this.setCurrency(currency);
@@ -88,6 +90,9 @@ export class UserService {
         switchMap(([oldScholars, scholars]) => {
           const output: Observable<Scholar>[] = [];
           for (const firestoreScholar of scholars) {
+            if (firestoreScholar.group && !this.groups.includes(firestoreScholar.group)) {
+              this.groups.push(firestoreScholar.group);
+            }
             const id = firestoreScholar.id;
             let scholar = this.getScholarWithSLP(firestoreScholar);
             if (!this.scholarSubjects[id]) {
@@ -104,6 +109,7 @@ export class UserService {
               currentScholar.managerShare = firestoreScholar.managerShare;
               currentScholar.paidTimes = firestoreScholar.paidTimes;
               currentScholar.name = firestoreScholar.name;
+              currentScholar.group = firestoreScholar.group;
               this.scholarSubjects[id].next(currentScholar);
             }
             output.push(this.scholarSubjects[id].asObservable());
