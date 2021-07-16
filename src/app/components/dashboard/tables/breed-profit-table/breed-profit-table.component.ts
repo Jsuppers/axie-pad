@@ -38,10 +38,10 @@ export class BreedProfitTableComponent {
           for (let j = 0; j < i + 1; j++) {
             totalBreedingtSLP += this.breedingCostSLP[j];
           }
-          const totalBreedingCostSLP = totalBreedingtSLP * slpPrice;
-          const totalBreedingCostAXS = axsPrice * (this.breedingCostAXS * (i + 1));
-          const totalBreedingCost = totalBreedingCostSLP + totalBreedingCostAXS;
           const breedCount = (i + 1);
+          const totalBreedingCostSLP = totalBreedingtSLP * slpPrice;
+          const totalBreedingCostAXS = axsPrice * (this.breedingCostAXS * breedCount);
+          const totalBreedingCost = totalBreedingCostSLP + totalBreedingCostAXS;
           this.formulaCost[i] = 'y = ' + (i ? breedCount : '') + 'x - ' + totalBreedingCost.toFixed(2);
           this.totalCost[i] = (breedCount * averagePrice) - totalBreedingCost;
           if (this.totalCost[i] > this.highestProfit) {

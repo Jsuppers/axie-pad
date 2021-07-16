@@ -158,10 +158,13 @@ export class EarningsTableComponent implements OnInit {
     if (!element?.slp?.lastClaimed) {
       return 'unknown';
     }
-    const dateFuture: any = new Date();
-    const dateNow: any = new Date(element.slp.lastClaimed * 1000);
+    const dateNow: any = new Date();
+    const dateLastClaimed: any = new Date(element.slp.lastClaimed * 1000);
+    if (dateLastClaimed > dateNow) {
+      return 'unknown';
+    }
 
-    const seconds = Math.floor((dateFuture - (dateNow)) / 1000);
+    const seconds = Math.floor((dateNow.getTime() - dateLastClaimed.getTime()) / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);

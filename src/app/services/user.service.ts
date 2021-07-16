@@ -99,15 +99,11 @@ export class UserService {
               oldScholar.roninAddress !== firestoreScholar.roninAddress
             ) {
               this.updateScholar(scholar);
-            } else if (oldScholar.paidTimes !== firestoreScholar.paidTimes) {
-              const currentScholar = this.scholarSubjects[id].getValue();
-              currentScholar.paidTimes = firestoreScholar.paidTimes;
-              this.scholarSubjects[id].next(currentScholar);
-            } else if (
-              oldScholar.managerShare !== firestoreScholar.managerShare
-            ) {
+            } else {
               const currentScholar = this.scholarSubjects[id].getValue();
               currentScholar.managerShare = firestoreScholar.managerShare;
+              currentScholar.paidTimes = firestoreScholar.paidTimes;
+              currentScholar.name = firestoreScholar.name;
               this.scholarSubjects[id].next(currentScholar);
             }
             output.push(this.scholarSubjects[id].asObservable());
@@ -330,7 +326,7 @@ export class UserService {
               output.total + (output?.blockchain_related?.checkpoint ?? 0);
             scholar.slp.inProgress = output.total;
             scholar.slp.inWallet = output?.blockchain_related?.balance ?? 0;
-            scholar.slp.lastClaimed = output.last_claimed_item_at;
+            scholar.slp.lastClaimed = output?.last_claimed_item_at ?? 0;
             this.scholarSubjects[scholar.id].next(scholar);
           });
       } catch (e) {
