@@ -3,16 +3,21 @@ import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { combineLatest, Observable } from 'rxjs';
-import { FirestoreScholar, Scholar } from '../../../../_models/scholar';
+import { Scholar } from '../../../../_models/scholar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../../../services/user.service';
 import { map, switchMap } from 'rxjs/operators';
 import { DialogService } from 'src/app/services/dialog.service';
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import _ from 'lodash';
 
 const noGroupText =  '😥 no group';
 export class Group {
+  // this will be the earlist claim date from within this group
+  claimableDate: string;
+  claimableTime: string;
+  lastClaimed: number = 0;
   averageSLPSinceLastClaimed: number = 0;
   averageChipColor: string;
   managersShareSLP: number = 0;
@@ -24,10 +29,11 @@ export class Group {
 	expanded = false;
 	totalCounts = 0;
 }
-interface TableData {
+export interface TableEarningsData {
   name: string;
   group: string;
   roninName: string;
+  expanded: boolean;
   roninAddress: string;
   averageSLPSinceLastClaimed: number;
   averageChipColor: string;
@@ -56,20 +62,16 @@ interface TableData {
   ],
 })
 export class EarningsTableComponent implements OnInit {
-	public dataSource = new MatTableDataSource<any | TableData>([]);
+	public dataSource = new MatTableDataSource<any | TableEarningsData>([]);
 	groupByColumns: string[] = [];
-  expandedElement: TableData | null;
   displayedColumns: string[] = [
     'position',
     'name',
-    'roninAddress',
     'claimableDate',
     'averageSLPSinceLastClaimed',
     'inProgressSLP',
     'managersShareSLP',
     'claimableSLP',
-    'totalSLP',
-    'paidTimes',
     'actions',
     'menu',
   ];
@@ -81,7 +83,7 @@ export class EarningsTableComponent implements OnInit {
 	_allGroup: any[];
 
 	expandedCar: any[] = [];
-	expandedSubCar: TableData[] = [];
+	expandedSubCar: TableEarningsData[] = [];
 
   @ViewChild(MatSort) sort: MatSort;
 
@@ -92,9 +94,7 @@ export class EarningsTableComponent implements OnInit {
     private sholarService: DialogService,
   ) {
 		this.groupByColumns = ['group'];
-    this.headerColumns = this.displayedColumns.filter((col) => {
-      return col != 'roninAddress' && col != 'claimableDate';
-    })
+    this.headerColumns = this.displayedColumns;
   }
 
 	getGroups(data: any[], groupByColumns: string[]): any[] {
@@ -117,6 +117,14 @@ export class EarningsTableComponent implements OnInit {
         result.group = group;
         groups[group] = result;
       }
+
+      const scholarLastClaimed = row.scholar?.slp?.lastClaimed;
+      if (scholarLastClaimed && (groups[group].lastClaimed ==  0 || scholarLastClaimed < groups[group].lastClaimed)) {
+        groups[group].lastClaimed = scholarLastClaimed;
+        groups[group].claimableDate = row.claimableDate;
+        groups[group].claimableTime = row.claimableTime;
+      }
+
       groups[group].averageSLPSinceLastClaimed += row?.averageSLPSinceLastClaimed ?? 0;
       groups[group].claimableSLP += row?.claimableSLP ?? 0;
       groups[group].totalSLP += row?.totalSLP ?? 0;
@@ -200,7 +208,7 @@ export class EarningsTableComponent implements OnInit {
 			if (index > -1) {
 				data.splice(index, 1);
 			}
-			data = data.sort((a: TableData, b: TableData) => {
+			data = data.sort((a: TableEarningsData, b: TableEarningsData) => {
 				const isAsc = sort.direction === 'asc';
 				switch (sort.active) {
 					case 'claimableDate':
@@ -240,11 +248,12 @@ export class EarningsTableComponent implements OnInit {
       return combineLatest(output);
 
     })).subscribe((scholars) => {
-      const tableData: TableData[] = [];
+      const tableData: TableEarningsData[] = [];
       scholars.forEach((scholar, index) => {
         const inProgress = scholar?.slp?.inProgress ?? 0;
         const averageSLP = this.getAverageSLP(scholar);
         tableData.push({
+          expanded: false,
           scholar: scholar,
           group: scholar?.group ? scholar?.group : noGroupText,
           roninName: scholar?.roninName ?? 'unknown',
@@ -265,11 +274,19 @@ export class EarningsTableComponent implements OnInit {
       });
 
       this.allData = tableData;
-      this.dataSource.data = this.getGroups(this.allData, this.groupByColumns);
+      const newGroups = this.getGroups(this.allData, this.groupByColumns);
+      if (_.isEmpty(this.dataSource.data) || !_.isEqual(newGroups, this.dataSource.data )) {
+        this.dataSource.data  = newGroups;
+      }
+
     });
     this.hideAddress$.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
     });
+  }
+
+  expandScholar(element): void {
+    element.expanded = !element.expanded;
   }
 
   getGroupName(element): string {
@@ -369,19 +386,19 @@ export class EarningsTableComponent implements OnInit {
     return '#FF00FF'; // pink
   }
 
-  openPaidDialog(data: TableData): void {
+  openPaidDialog(data: TableEarningsData): void {
     this.sholarService.openPayDialog({
       ...data.scholar,
     });
   }
 
-  openDialog(data: TableData): void {
+  openDialog(data: TableEarningsData): void {
     this.sholarService.openDialog({
       ...data.scholar,
     });
   }
 
-  deleteScholar(data: TableData): void {
+  deleteScholar(data: TableEarningsData): void {
     this.sholarService.deleteScholar(data.scholar.id);
   }
 

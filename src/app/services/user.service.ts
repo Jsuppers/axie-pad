@@ -284,7 +284,6 @@ export class UserService {
   private updateScholar(scholar: Scholar): void {
     this.updateLeaderBoardDetails(scholar);
     this.updateSLP(scholar);
-    this.getRoninName(scholar, 'roninAddress', 'roninName');
   }
 
   // Example request
@@ -371,11 +370,15 @@ export class UserService {
   }
 
   async getScholarRoninName(scholar: Scholar): Promise<void> {
-    return this.getRoninName(
+    return this._getRoninName(
       scholar,
       'scholarRoninAddress',
       'scholarRoninName'
     );
+  }
+
+  async getRoninName(scholar: Scholar): Promise<void> {
+    return this._getRoninName(scholar, 'roninAddress', 'roninName');
   }
 
   /**
@@ -383,13 +386,16 @@ export class UserService {
    * @param roninAddress
    * @private
    */
-  private async getRoninName(
+  private async _getRoninName(
     scholar: Scholar,
     addressField: string,
     nameField: string
   ): Promise<void> {
     const address = scholar[addressField];
     let name = 'unknown';
+    if (!address) {
+      return;
+    }
     if (this.roninAddressNames.has(address)) {
       name = this.roninAddressNames.get(address);
     } else if (address.length === 0) {
@@ -415,6 +421,5 @@ export class UserService {
       this.roninAddressNames.set(address, name);
     }
     scholar[nameField] = name;
-    this.scholarSubjects[scholar.id].next(scholar);
   }
 }

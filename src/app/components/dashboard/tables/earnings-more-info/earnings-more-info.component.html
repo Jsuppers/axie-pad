@@ -1,0 +1,67 @@
+<table style="text-align: start;padding-left: 10px;">
+  <tr>
+    <td class="title-row">Ronin Name</td>
+    <td class="item-row">{{scholar.scholar.roninName | shortenName: false}}</td>
+  </tr>
+  <tr [cdkCopyToClipboard]="scholar.roninAddress" (click)="openSnackBar(scholar.roninAddress)">
+    <td class="title-row">Ronin Address</td>
+    <td class="item-row" >
+      <mat-icon>file_copy</mat-icon>{{scholar.roninAddress | shortenRoninAddress: false}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">SLP In Progress</td>
+    <td class="item-row">{{scholar.inProgressSLP}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">Manager's Share</td>
+    <td class="item-row">
+      <div>
+        {{ scholar.managersShareSLP | number: "1.0-0" }}
+        <span class="small-text">
+          {{ "(" + scholar.managersSharePercentage + "%)" }}
+        </span>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td class="title-row">Scholar's Share</td>
+    <td class="item-row">
+      <div>
+        {{ (scholar.inProgressSLP - scholar.managersShareSLP) | number: "1.0-0" }}
+        <span class="small-text">
+          {{ "(" + (100 - scholar.managersSharePercentage) + "%)" }}
+        </span>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <td class="title-row">Total SLP Earned </td>
+    <td class="item-row">{{scholar.totalSLP}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">Paid Times</td>
+    <td class="item-row">{{scholar.paidTimes}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">Last Claimed Date</td>
+    <td class="item-row">{{getLastClaimDate()}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">Next Claimable Date</td>
+    <td class="item-row">{{getNextClaimDate()}}</td>
+  </tr>
+  <tr *ngIf="scholar.scholar.preferredPaymentMethod === paymentMethods.ronin">
+    <td class="title-row">Ronin Name</td>
+    <td class="item-row">{{scholar.scholar.scholarRoninName | shortenName: false}}</td>
+  </tr>
+  <tr *ngIf="scholar.scholar.preferredPaymentMethod === paymentMethods.ronin" [cdkCopyToClipboard]="scholar.scholar.scholarRoninAddress" (click)="openSnackBar(scholar.scholar.scholarRoninAddress)">
+    <td class="title-row">Scholar Ronin Address</td>
+    <td class="item-row">
+      <mat-icon>file_copy</mat-icon>{{scholar.scholar.scholarRoninAddress | shortenRoninAddress: false}}</td>
+  </tr>
+  <tr *ngIf="scholar.scholar.preferredPaymentMethod === paymentMethods.eth" [cdkCopyToClipboard]="scholar.scholar.scholarEthAddress" (click)="openSnackBar(scholar.scholar.scholarEthAddress)">
+    <td class="title-row">Scholar Ethereum Address </td>
+    <td class="item-row">
+      <mat-icon>file_copy</mat-icon>{{scholar.scholar.scholarEthAddress | shortenRoninAddress: false}}</td>
+  </tr>
+</table>

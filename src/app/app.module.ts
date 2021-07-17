@@ -55,6 +55,7 @@ import { EditDialogComponent } from './components/dialogs/edit-dialog/edit-dialo
 import { DeleteDialogComponent } from './components/dialogs/delete-dialog/delete-dialog.component';
 import { BreedProfitTableComponent } from './components/dashboard/tables/breed-profit-table/breed-profit-table.component';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import { EarningsMoreInfoComponent } from './components/dashboard/tables/earnings-more-info/earnings-more-info.component';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -110,6 +111,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     ShortenNamePipe,
     PayDialogComponent,
     BreedProfitTableComponent,
+    EarningsMoreInfoComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
