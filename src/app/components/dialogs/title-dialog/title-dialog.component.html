@@ -1,0 +1,10 @@
+<h2>Title</h2>
+<mat-form-field appearance="fill">
+  <mat-label>Title</mat-label>
+  <input matInput [(ngModel)]="title">
+</mat-form-field>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="title" cdkFocusInitial>Save</button>
+</div>

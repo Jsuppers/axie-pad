@@ -1,13 +1,19 @@
 <div fxLayout="column" fxFlexFill>
 
-  <mat-toolbar style="background: #F0F0F0">
-    <a mat-button class="companyName" routerLink="/dashboard">
-      <span>Axie Pad</span>
+  <mat-toolbar style="background: #F0F0F0; padding-bottom: 10px;">
+    <a mat-button class="companyName" routerLink="/dashboard" (click)="openTitleDialog()">
+      <span>{{title}}</span>
     </a>
     <span class="example-spacer"></span>
     <div fxShow="true" fxHide.lt-md="true" *ngIf="signedIn()">
       <a mat-button routerLink="/donate"><mat-icon style="padding-bottom: 3px;">favorite</mat-icon></a>
-      <a mat-button (click)="openCurrencyDialog()">{{fiatCurrency?.toUpperCase()}}</a>
+    <button mat-raised-button (click)="navigateSLPChart()" class="crypto-button">
+      <img src="assets/slp.webp" style="width: 20px"><span style="padding-left: 5px;">{{ fiatCurrency }}{{SLPPrice | number : '1.2-2'}}</span>
+    </button>
+    <button mat-raised-button (click)="navigateAXSChart()" class="crypto-button">
+      <img src="assets/axs.webp" style="width: 20px"><span style="padding-left: 5px;">{{ fiatCurrency }}{{AXSPrice | number : '1.2-2'}}</span>
+    </button>
+      <a mat-button (click)="openCurrencyDialog()">{{fiatCurrencyTitle?.toUpperCase()}}</a>
       <a mat-button (click)="signOut()"><mat-icon>exit_to_app</mat-icon> Sign out</a>
     </div>
   </mat-toolbar>

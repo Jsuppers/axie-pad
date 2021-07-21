@@ -1,69 +1,113 @@
-<div style="display: flex; margin-right: 10px;">
-  <mat-card class="header-card" *ngIf="authService.userState.getValue() as user">
-  <table style="text-align: start;">
-    <tr style="margin-bottom: 10px;">
-      <td class="title-row" >In Progress</td>
-      <td class="title-row">Total Earnings</td>
-    </tr>
-    <tr>
-      <td class="item-row">{{ progressManagerSLP | number : '1.2-2' }} SLP <span class="small-text"> ({{ progressSLP | number : '1.2-2'}} Total)</span></td>
-      <td class="item-row">{{ totalManagerSLP | number : '1.2-2' }} SLP <span class="small-text"> ({{ totalSLP | number : '1.2-2'}} Total)</span></td>
-    </tr>
-    <tr>
-      <td class="item-row">{{ fiatCurrency + (progressManagerFiat | number : '1.2-2')}} <span class="small-text"> ({{ progressFiat | number : '1.2-2'}} Total)</span></td>
-      <td class="item-row">{{ fiatCurrency + (totalManagerFiat | number : '1.2-2' )}} <span class="small-text"> ({{ totalFiat | number : '1.2-2'}} Total)</span></td>
-    </tr>
-  </table>
+<div fxLayout='row' class="zero">
+
+  <div fxFlex="70">
+    <mat-card
+    class="header-card"
+    *ngIf="authService.userState.getValue() as user"
+  >
+    <app-slp-chart></app-slp-chart>
+    <table style="text-align: start">
+      <tr style="margin-bottom: 10px">
+        <td class="title-row">In Progress</td>
+        <td class="title-row">Total Earnings</td>
+      </tr>
+      <tr>
+        <td class="item-row">
+          {{ progressManagerSLP | number: "1.2-2" }} SLP
+          <span class="small-text">
+            ({{ progressSLP | number: "1.2-2" }} Total)</span
+          >
+        </td>
+        <td class="item-row">
+          {{ totalManagerSLP | number: "1.2-2" }} SLP
+          <span class="small-text">
+            ({{ totalSLP | number: "1.2-2" }} Total)</span
+          >
+        </td>
+      </tr>
+      <tr>
+        <td class="item-row">
+          {{ fiatCurrency + (progressManagerFiat | number: "1.2-2") }}
+          <span class="small-text">
+            ({{ progressFiat | number: "1.2-2" }} Total)</span
+          >
+        </td>
+        <td class="item-row">
+          {{ fiatCurrency + (totalManagerFiat | number: "1.2-2") }}
+          <span class="small-text">
+            ({{ totalFiat | number: "1.2-2" }} Total)</span
+          >
+        </td>
+      </tr>
+    </table>
   </mat-card>
-  <div class="buttons-card" style="width: 100px;">
-    <button mat-raised-button (click)="navigateSLPChart()" class="crypto-button">
-      <img src="assets/slp.webp" style="width: 20px"><span style="padding-left: 5px;">{{ fiatCurrency }}{{SLPPrice | number : '1.2-2'}}</span>
-    </button>
-    <button mat-raised-button (click)="navigateAXSChart()" class="crypto-button">
-      <img src="assets/axs.webp" style="width: 20px"><span style="padding-left: 5px;">{{ fiatCurrency }}{{AXSPrice | number : '1.2-2'}}</span>
-    </button>
-</div>
-  <div class="buttons-card" style="align-self: flex-end; margin-left: auto; width: 200px;">
-    <button mat-raised-button (click)="refresh()" class="add-scholar-button">
-      <mat-icon>refresh</mat-icon><span style="padding-left: 5px;">{{ 'Refresh' }}</span>
-    </button>
-    <button mat-raised-button (click)="hideAddresses()" class="add-scholar-button">
-      {{ hideAddress.getValue() ? 'Show Information' : 'Hide Information'}}
-    </button>
-    <button mat-raised-button (click)="addNewScholar()" class="add-scholar-button">
-      <mat-icon>add</mat-icon><span style="padding-left: 5px;"> Add New Scholar</span>
-    </button>
+  </div>
+  <div fxFlex>
+    <mat-card *ngIf="authService.userState.getValue() as user" style="margin-top: 10px; margin-right: 10px; height: 200px">
+      <h2>Top Earners</h2>
+      <mat-list class="content" id="style-2">
+        <mat-list-item *ngFor="let scholar of scholars; let i = index">
+
+          <h3 matLine>
+            {{i < 3 ? leaderBoardEmojis[i] : ''}}
+            {{ hideAddress.getValue() ? 'Scholar' : scholar.name}}
+            <span style="font-size: 10px;">(Average: {{scholar.average | number: "1.2-2"}})</span></h3>
+          <mat-divider style="width: calc(100% - 10px);"></mat-divider>
+        </mat-list-item>
+    </mat-list>
+    </mat-card>
   </div>
 </div>
-<mat-tab-group style="
-    margin-left: 15px;
-    margin-right: 15px;">
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <img src="assets/slp.webp" style="width: 20px;margin-right: 10px;">
-      <span>Earnings</span>
-    </ng-template>
-    <app-earnings-table [hideAddress$]="hideAddress"></app-earnings-table>
-  </mat-tab>
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <img src="assets/arena.png" style="height: 20px;margin-right: 10px;">
-      <span>Arena</span>
-    </ng-template>
-    <app-arena-table [hideAddress$]="hideAddress"></app-arena-table>
-  </mat-tab>
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <img src="assets/axie.png" style="height: 20px;margin-right: 10px;">
-      <span>Axies</span>
-    </ng-template>
-    Coming soon!
-  </mat-tab>
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon style="color: pink; padding-right: 10px;">favorite</mat-icon>
-      <span>Breed Profit</span>
-    </ng-template>
-   <app-breed-profit-table></app-breed-profit-table>
-  </mat-tab>
-</mat-tab-group>
+<mat-card style="margin: 10px;">
+  <mat-tab-group >
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <img src="assets/slp.webp" style="width: 20px; margin-right: 10px" />
+        <span>SLP Earnings</span>
+      </ng-template>
+      <app-earnings-table [hideAddress$]="hideAddress"></app-earnings-table>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span><span style="font-size: 18px;">⚔️ </span>Arena</span>
+      </ng-template>
+      <app-arena-table [hideAddress$]="hideAddress"></app-arena-table>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <img src="assets/axie.png" style="height: 20px; margin-right: 10px" />
+        <span>Axies</span>
+      </ng-template>
+      Coming soon!
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span><span style="font-size: 20px;">🧰 </span>Tools</span>
+      </ng-template>
+      <app-breed-profit-table></app-breed-profit-table>
+    </mat-tab>
+    <mat-tab disabled class="last-tab">
+        <ng-template mat-tab-label >
+          <button mat-raised-button (click)="refresh()" class="add-scholar-button">
+            <mat-icon>refresh</mat-icon>
+          </button>
+          <button
+            mat-raised-button
+            (click)="hideAddresses()"
+            class="add-scholar-button"
+          >
+          <mat-icon>{{ hideAddress.getValue() ?  "visibility_off" : "visibility" }}</mat-icon>
+
+          </button>
+          <button
+          mat-raised-button
+          (click)="addNewScholar()"
+          class="add-scholar-button"
+        >
+          <mat-icon>add</mat-icon
+            ><span style="padding-left: 5px"> Add Scholar</span>
+          </button>
+        </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</mat-card>

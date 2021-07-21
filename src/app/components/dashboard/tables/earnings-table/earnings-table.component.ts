@@ -314,8 +314,12 @@ export class EarningsTableComponent implements OnInit {
     const days = Math.floor(hours / 24);
 
     let output = '';
-    if (days >= 0) {
-      output = days + ' days';
+    if (days > 0) {
+      return days + ' days';
+    }
+    const currentHours = (hours - (days * 24));
+    if (currentHours > 0) {
+      return currentHours + ' hours';
     }
     return output;
   }

@@ -168,6 +168,10 @@ export class UserService {
     return this.fiatSLPPrice$.asObservable();
   }
 
+  getTitle(): Observable<string> {
+    return this.currentUser$().pipe(map((user) => user?.title));
+  }
+
   getAXSPrice(): Observable<number> {
     return this.fiatAXSPrice$.asObservable();
   }
@@ -287,51 +291,38 @@ export class UserService {
   }
 
   // Example request
-  // https://lunacia.skymavis.com/game-api/clients/RONIN_ADDRESS_STARTING_WITH_0x/items/1
-  /* {
-     "success": true,
-    "client_id": "0x961209...f764b61",
-    "item_id":1,
-    "total":1332,
-    "blockchain_related": {
-      "signature": {
-        "signature": "0x042..45",
-        "amount":1661,
-        "timestamp":1625474407
-      },
-      "balance":1,
-      "checkpoint":1661,
-      "block_number":4837349
-   },
-  "claimable_total":1,
-  "last_claimed_item_at":1625474407,
-  "item": {
-    "id":1,
-    "name": "Breeding Potion",
-  "description":"Breeding Potion is required to breed two Axies",
-  "image_url":"",
-  "updated_at":1576669291,
-  "created_at":1576669291,
-}
-} */
+  // https://api.lunaciarover.com/stats/
+  //   {
+  //     "ronin_address": "0x509ef...e1513",
+  //     "updated_on": 1626899497,
+  //     "last_claim_amount": 134,
+  //     "last_claim_timestamp": 1626333108,
+  //     "ronin_slp": 4330,
+  //     "total_slp": 4534,
+  //     "in_game_slp": 204,
+  //     "slp_success": true,
+  //     "ign": null,
+  //     "rank": 0,
+  //     "mmr": 0,
+  //     "total_matches": 0,
+  //     "win_rate": 0,
+  //     "game_stats_success": false,
+  // }
   private async updateSLP(scholar: Scholar): Promise<void> {
     if (scholar.roninAddress) {
       try {
         // TODO poll again every x seconds
         const url =
-          'https://lunacia.skymavis.com/game-api/clients/' +
-          scholar.roninAddress.replace('ronin:', '0x') +
-          '/items/1';
+          'https://api.lunaciarover.com/stats/' + scholar.roninAddress.replace('ronin:', '0x');
         this.http
           .get<any>(url)
           .toPromise()
           .then((output) => {
-            scholar.slp.claimable = output.claimable_total;
-            scholar.slp.total =
-              output.total + (output?.blockchain_related?.checkpoint ?? 0);
-            scholar.slp.inProgress = output.total;
-            scholar.slp.inWallet = output?.blockchain_related?.balance ?? 0;
-            scholar.slp.lastClaimed = output?.last_claimed_item_at ?? 0;
+            scholar.slp.claimable = output?.total_slp ?? 0;
+            scholar.slp.total = output?.total_slp ?? 0;
+            scholar.slp.inProgress = output?.in_game_slp ?? 0;
+            scholar.slp.inWallet = output?.ronin_slp ?? 0;
+            scholar.slp.lastClaimed = output?.last_claim_timestamp ?? 0;
             this.scholarSubjects[scholar.id].next(scholar);
           });
       } catch (e) {
@@ -341,7 +332,7 @@ export class UserService {
   }
 
   // Example request
-  // TODO find open leaderboard request
+  // TODO use the request above
   private updateLeaderBoardDetails(scholar: Scholar): void {
     return;
 

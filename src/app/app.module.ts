@@ -45,7 +45,7 @@ import { CacheMapService } from './services/cache-map.service';
 import { CachingInterceptor } from './interceptors/cache-interceptor';
 import { MatBadgeModule } from '@angular/material/badge';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import {MatChipsModule} from '@angular/material/chips';
+import { MatChipsModule } from '@angular/material/chips';
 import { UserService } from './services/user.service';
 import { DialogService } from './services/dialog.service';
 import { EarningsTableComponent } from './components/dashboard/tables/earnings-table/earnings-table.component';
@@ -54,8 +54,15 @@ import { PayDialogComponent } from './components/dialogs/pay-dialog/pay-dialog.c
 import { EditDialogComponent } from './components/dialogs/edit-dialog/edit-dialog.component';
 import { DeleteDialogComponent } from './components/dialogs/delete-dialog/delete-dialog.component';
 import { BreedProfitTableComponent } from './components/dashboard/tables/breed-profit-table/breed-profit-table.component';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { EarningsMoreInfoComponent } from './components/dashboard/tables/earnings-more-info/earnings-more-info.component';
+import { ChartsModule } from 'ng2-charts';
+import { SlpChartComponent } from './slp-chart/slp-chart.component';
+import { TitleDialogComponent } from './components/dialogs/title-dialog/title-dialog.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { MatListModule } from '@angular/material/list';
+import { MatDividerModule } from '@angular/material/divider';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -112,6 +119,8 @@ const cookieConfig: NgcCookieConsentConfig = {
     PayDialogComponent,
     BreedProfitTableComponent,
     EarningsMoreInfoComponent,
+    SlpChartComponent,
+    TitleDialogComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -127,6 +136,8 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatInputModule,
     MatFormFieldModule,
     MatSortModule,
+    MatListModule,
+    MatDividerModule,
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
@@ -144,6 +155,9 @@ const cookieConfig: NgcCookieConsentConfig = {
     GraphQLModule,
     ClipboardModule,
     MatAutocompleteModule,
+    FlexLayoutModule,
+    ChartsModule,
+    ScrollingModule,
   ],
   providers: [
     AuthService,

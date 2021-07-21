@@ -6,15 +6,8 @@
 }
 
 .add-scholar-button {
-  width: 170px;
   text-align: center;
-  margin-top: 10px;
-}
-
-.crypto-button {
-  width: 100px;
-  text-align: center;
-  margin-top: 10px;
+  margin-right: 10px;
 }
 
 
@@ -24,11 +17,51 @@
 
 .title-row {
   font-weight: 520;
-  font-size: 24px;
-  padding-bottom: 10px;
+  font-size: 14px;
+  padding-bottom: 5px;
 }
 
 .item-row {
-  padding-right: 10px;
-  font-size: 20px;
+  padding-right: 5px;
+  font-size: 14px;
+}
+
+::ng-deep.mat-tab-labels, ::ng-deep:last-child.mat-tab-label {
+  min-width: 0 !important;
+  padding: 0 0px !important;
+  color: unset !important;
+  opacity: unset !important;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.content {
+  height: 160px;
+  overflow: auto;
+}
+
+mat-list {
+  flex-grow: 1;
+  overflow: auto;
+}
+
+#style-2::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#style-2::-webkit-scrollbar
+{
+	width: 12px;
+	background-color: #F5F5F5;
+}
+
+#style-2::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: rgb(116, 116, 116);;
 }

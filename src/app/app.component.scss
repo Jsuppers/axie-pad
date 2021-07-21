@@ -1,6 +1,5 @@
 .companyName{
   font-size: 150%;
-  color: #888888;
 }
 div {
   overflow: inherit;
@@ -33,6 +32,14 @@ html, body {
 
 
 ::ng-deep .mat-sort-header-container {
-  justify-content: center !important;
+  justify-content: center;
   text-align:center;
+}
+
+.crypto-button {
+  width: 100px;
+  text-align: center;
+  margin-top: 10px;
+  margin-right: 10px;
+  font-size: 14px;
 }
