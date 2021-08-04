@@ -5,7 +5,6 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { FirestoreScholar, Scholar } from '../_models/scholar';
 import { HttpClient } from '@angular/common/http';
 import {
-  distinctUntilChanged,
   filter,
   map,
   pairwise,
@@ -331,7 +330,6 @@ private async updateSLP(scholar: Scholar): Promise<void> {
         .get<any>(url)
         .toPromise()
         .then((output) => {
-          scholar.slp.claimable = output.claimable_total;
           scholar.slp.total = output.total;
           scholar.slp.inWallet = output?.blockchain_related?.balance ?? 0;
           scholar.slp.inProgress = scholar.slp.total - scholar.slp.inWallet;

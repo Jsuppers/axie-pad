@@ -13,6 +13,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import _ from 'lodash';
 
 const noGroupText =  '😥 no group';
+const claimableNow = 'now';
 export class Group {
   // this will be the earlist claim date from within this group
   claimableDate: string;
@@ -124,6 +125,8 @@ export class EarningsTableComponent implements OnInit {
         groups[group].claimableDate = row.claimableDate;
         groups[group].claimableTime = row.claimableTime;
       }
+
+      debugger;
 
       groups[group].averageSLPSinceLastClaimed += row?.averageSLPSinceLastClaimed ?? 0;
       groups[group].claimableSLP += row?.claimableSLP ?? 0;
@@ -252,6 +255,7 @@ export class EarningsTableComponent implements OnInit {
       scholars.forEach((scholar, index) => {
         const inProgress = scholar?.slp?.inProgress ?? 0;
         const averageSLP = this.getAverageSLP(scholar);
+        const claimableDate = this.getClaimableDateString(scholar);
         tableData.push({
           expanded: false,
           scholar: scholar,
@@ -259,13 +263,13 @@ export class EarningsTableComponent implements OnInit {
           roninName: scholar?.roninName ?? 'unknown',
           paidTimes: scholar?.paidTimes ?? 0,
           roninAddress: scholar?.roninAddress,
-          inProgressSLP: scholar?.slp?.inProgress ?? 0,
+          inProgressSLP: inProgress,
           managersShareSLP: inProgress * ((scholar?.managerShare ?? 0) / 100),
           managersSharePercentage: (scholar?.managerShare ?? 0),
-          claimableDate: this.getClaimableDateString(scholar),
+          claimableDate: claimableDate,
           claimableTime: this.getClaimableTimeString(scholar),
           lastClaimedDate: this.getLastClaimedDate(scholar),
-          claimableSLP: scholar?.slp?.claimable ?? 0,
+          claimableSLP: claimableDate === claimableNow ? inProgress : 0,
           averageSLPSinceLastClaimed: averageSLP,
           averageChipColor: this.getAverageChipColor(averageSLP),
           totalSLP: scholar?.slp?.total ?? 0,
@@ -305,7 +309,7 @@ export class EarningsTableComponent implements OnInit {
     const dateFuture: any = new Date((element.slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
     const dateNow: any = new Date();
     if (dateFuture < dateNow) {
-      return 'now';
+      return claimableNow;
     }
 
     const seconds = Math.floor((dateFuture - (dateNow)) / 1000);
@@ -317,9 +321,11 @@ export class EarningsTableComponent implements OnInit {
     if (days > 0) {
       return days + ' days';
     }
-    const currentHours = (hours - (days * 24));
-    if (currentHours > 0) {
-      return currentHours + ' hours';
+    if (hours > 0) {
+      return hours + ' hours';
+    }
+    if (minutes > 0) {
+      return minutes + ' minutes';
     }
     return output;
   }

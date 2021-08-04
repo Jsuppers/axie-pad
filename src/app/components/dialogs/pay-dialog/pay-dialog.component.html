@@ -9,13 +9,13 @@
     <td class="item-row">{{data.roninAddress | shortenRoninAddress: false}}</td>
   </tr>
   <tr>
-    <td class="title-row">Total Claimable </td>
-    <td class="item-row">{{data.slp.claimable}}</td>
+    <td class="title-row">Total In Progress </td>
+    <td class="item-row">{{data.slp.inProgress}}</td>
   </tr>
   <tr>
     <td class="title-row">Scholar Share (To Pay) </td>
-    <td *ngIf="data.managerShare" class="item-row">{{data.slp.claimable * ((100 - data.managerShare) / 100)}} <span class="small-text">({{100 - data.managerShare}}%)</span></td>
-    <td *ngIf="!data.managerShare" class="item-row">{{data.slp.claimable}}</td>
+    <td *ngIf="data.managerShare" class="item-row">{{data.slp.inProgress * ((100 - data.managerShare) / 100)}} <span class="small-text">({{100 - data.managerShare}}%)</span></td>
+    <td *ngIf="!data.managerShare" class="item-row">{{data.slp.inProgress}}</td>
   </tr>
   <tr>
     <td class="title-row">Payment Method</td>
