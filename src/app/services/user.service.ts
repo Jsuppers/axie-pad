@@ -290,6 +290,60 @@ export class UserService {
     this.updateSLP(scholar);
   }
 
+
+    // Example request
+  // https://lunacia.skymavis.com/game-api/clients/RONIN_ADDRESS_STARTING_WITH_0x/items/1
+  /* {
+     "success": true,
+    "client_id": "0x961209...f764b61",
+    "item_id":1,
+    "total":1332,
+    "blockchain_related": {
+      "signature": {
+        "signature": "0x042..45",
+        "amount":1661,
+        "timestamp":1625474407
+      },
+      "balance":1,
+      "checkpoint":1661,
+      "block_number":4837349
+   },
+  "claimable_total":1,
+  "last_claimed_item_at":1625474407,
+  "item": {
+    "id":1,
+    "name": "Breeding Potion",
+  "description":"Breeding Potion is required to breed two Axies",
+  "image_url":"",
+  "updated_at":1576669291,
+  "created_at":1576669291,
+}
+} */
+private async updateSLP(scholar: Scholar): Promise<void> {
+  if (scholar.roninAddress) {
+    try {
+      // TODO poll again every x seconds
+      const url =
+        'https://game-api.skymavis.com/game-api/clients/' +
+        scholar.roninAddress.replace('ronin:', '0x') +
+        '/items/1';
+      this.http
+        .get<any>(url)
+        .toPromise()
+        .then((output) => {
+          scholar.slp.claimable = output.claimable_total;
+          scholar.slp.total = output.total;
+          scholar.slp.inWallet = output?.blockchain_related?.balance ?? 0;
+          scholar.slp.inProgress = scholar.slp.total - scholar.slp.inWallet;
+          scholar.slp.lastClaimed = output.last_claimed_item_at;
+          this.scholarSubjects[scholar.id].next(scholar);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+}
+
   // Example request
   // https://api.lunaciarover.com/stats/
   //   {
@@ -308,28 +362,28 @@ export class UserService {
   //     "win_rate": 0,
   //     "game_stats_success": false,
   // }
-  private async updateSLP(scholar: Scholar): Promise<void> {
-    if (scholar.roninAddress) {
-      try {
-        // TODO poll again every x seconds
-        const url =
-          'https://api.lunaciarover.com/stats/' + scholar.roninAddress.replace('ronin:', '0x');
-        this.http
-          .get<any>(url)
-          .toPromise()
-          .then((output) => {
-            scholar.slp.claimable = output?.total_slp ?? 0;
-            scholar.slp.total = output?.total_slp ?? 0;
-            scholar.slp.inProgress = output?.in_game_slp ?? 0;
-            scholar.slp.inWallet = output?.ronin_slp ?? 0;
-            scholar.slp.lastClaimed = output?.last_claim_timestamp ?? 0;
-            this.scholarSubjects[scholar.id].next(scholar);
-          });
-      } catch (e) {
-        console.log(e);
-      }
-    }
-  }
+  // private async updateSLP(scholar: Scholar): Promise<void> {
+  //   if (scholar.roninAddress) {
+  //     try {
+  //       // TODO poll again every x seconds
+  //       const url =
+  //         'https://api.lunaciarover.com/stats/' + scholar.roninAddress.replace('ronin:', '0x');
+  //       this.http
+  //         .get<any>(url)
+  //         .toPromise()
+  //         .then((output) => {
+  //           scholar.slp.claimable = output?.total_slp ?? 0;
+  //           scholar.slp.total = output?.total_slp ?? 0;
+  //           scholar.slp.inProgress = output?.in_game_slp ?? 0;
+  //           scholar.slp.inWallet = output?.ronin_slp ?? 0;
+  //           scholar.slp.lastClaimed = output?.last_claim_timestamp ?? 0;
+  //           this.scholarSubjects[scholar.id].next(scholar);
+  //         });
+  //     } catch (e) {
+  //       console.log(e);
+  //     }
+  //   }
+  // }
 
   // Example request
   // TODO use the request above
