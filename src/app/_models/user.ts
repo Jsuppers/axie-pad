@@ -4,4 +4,6 @@ export interface User {
   scholars: Record<string, FirestoreScholar>;
   currency: string;
   title: string;
+  // Average SLP colors, 4 colors red, orange, green, pink
+  colors: number[];
 }

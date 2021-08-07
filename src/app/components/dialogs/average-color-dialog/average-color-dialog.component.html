@@ -1,0 +1,22 @@
+<h2>Color Dialog</h2>
+<mat-form-field >
+  <mat-label >This and Below will be <span style="background-color: #FF0000;">red</span></mat-label>
+  <input matInput type="number" [(ngModel)]="this.colors[0]" >
+</mat-form-field>
+<mat-form-field >
+  <mat-label >This and Below will be <span style="background-color: #FF8000;">orange</span></mat-label>
+  <input matInput type="number" [(ngModel)]="this.colors[1]" >
+</mat-form-field>
+<mat-form-field >
+  <mat-label >This and Below will be <span  style="background-color: #00CC00;">green</span></mat-label>
+  <input matInput type="number" [(ngModel)]="this.colors[2]">
+</mat-form-field>
+<mat-form-field >
+  <mat-label>Above will be <span  style="background-color: #FF00FF;">pink</span></mat-label>
+  <input matInput [value]="this.colors[2] + '+'" readonly='true' >
+</mat-form-field>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="save()" cdkFocusInitial>Save</button>
+</div>

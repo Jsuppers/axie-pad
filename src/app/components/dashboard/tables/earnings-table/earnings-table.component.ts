@@ -11,6 +11,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { DialogService } from 'src/app/services/dialog.service';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import _ from 'lodash';
+import { AverageColorDialogComponent } from 'src/app/components/dialogs/average-color-dialog/average-color-dialog.component';
 
 const noGroupText =  '😥 no group';
 const claimableNow = 'now';
@@ -384,13 +385,14 @@ export class EarningsTableComponent implements OnInit {
   }
 
   getAverageChipColor(averageSLP: number): string {
-    if (Math.round(averageSLP) < 100) {
+    const colors = this.user.currentColors();
+    if (Math.round(averageSLP) < colors[0]) {
       return '#FF0000'; // red
     }
-    if (Math.round(averageSLP) < 150) {
+    if (Math.round(averageSLP) < colors[1]) {
       return '#FF8000'; // orange
     }
-    if (Math.round(averageSLP) < 200) {
+    if (Math.round(averageSLP) < colors[2]) {
       return '#00CC00'; // green
     }
     return '#FF00FF'; // pink
@@ -414,5 +416,12 @@ export class EarningsTableComponent implements OnInit {
 
   navigateToScholar(roninAddress: string) {
     this.sholarService.navigateToScholar(roninAddress);
+  }
+
+
+  openAverageColorDialog(): void {
+    const dialogRef = this.dialog.open(AverageColorDialogComponent, {
+      width: '400px'
+    });
   }
 }

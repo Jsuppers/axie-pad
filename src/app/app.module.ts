@@ -63,6 +63,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
+import { AverageColorDialogComponent } from './components/dialogs/average-color-dialog/average-color-dialog.component';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -121,6 +122,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     EarningsMoreInfoComponent,
     SlpChartComponent,
     TitleDialogComponent,
+    AverageColorDialogComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),

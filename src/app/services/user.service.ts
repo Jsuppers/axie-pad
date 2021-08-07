@@ -19,6 +19,7 @@ import { DefaultSLP } from '../_models/slp';
 import { DefaultLeaderboardDetails } from '../_models/leaderboard';
 import { Apollo, gql } from 'apollo-angular';
 import { FirebaseApp } from '@angular/fire';
+import { defaultColors } from '../constants';
 
 export interface TotalValues {
   managerTotal: number;
@@ -149,6 +150,10 @@ export class UserService {
 
   currentUser$(): Observable<User> {
     return this.currentUser.asObservable();
+  }
+
+  currentColors(): number[] {
+    return isEmpty(this.currentUser.getValue()?.colors) ? defaultColors: this.currentUser.getValue().colors;
   }
 
   refresh(): void {

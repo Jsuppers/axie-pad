@@ -52,7 +52,7 @@
       </div>
     </th>
     <td mat-cell *matCellDef="let element">
-          <mat-chip
+          <mat-chip (click)="openAverageColorDialog()"
           style="display: inline-flex;
           padding: 0px 12px;
           border-radius: 16px;
