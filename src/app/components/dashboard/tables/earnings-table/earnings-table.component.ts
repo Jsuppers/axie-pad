@@ -127,8 +127,6 @@ export class EarningsTableComponent implements OnInit {
         groups[group].claimableTime = row.claimableTime;
       }
 
-      debugger;
-
       groups[group].averageSLPSinceLastClaimed += row?.averageSLPSinceLastClaimed ?? 0;
       groups[group].claimableSLP += row?.claimableSLP ?? 0;
       groups[group].totalSLP += row?.totalSLP ?? 0;

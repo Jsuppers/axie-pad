@@ -1,0 +1,20 @@
+
+
+      <h2>Top Earners
+        <button mat-button (click)="close()" style="float:right">Close</button>
+        <mat-icon style="float:right; cursor: pointer;
+        font-size: 18px;
+        margin: 10px;" (click)="sortScholars()">sort</mat-icon>
+    </h2>
+
+      <div style="margin: 10px; height: calc(100vh - 140px);">
+        <mat-list class="content" id="style-2">
+          <mat-list-item *ngFor="let scholar of scholars; let i = index">
+
+            <h3 matLine> {{ scholar.name}}
+              <span style="font-size: 10px;">(Average: {{scholar.average | number: "1.2-2"}})</span></h3>
+            <mat-divider style="width: calc(100% - 10px);"></mat-divider>
+          </mat-list-item>
+      </mat-list>
+      </div>
+

@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CurrencyDialogComponent } from '../dialogs/currency-dialog/currency-dialog.component';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { DialogService } from 'src/app/services/dialog.service';
+import { TopEarnersComponent } from '../dialogs/top-earners/top-earners.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -102,6 +103,12 @@ export class DashboardComponent implements OnInit {
       return inProgressSLP;
     }
     return (inProgressSLP / seconds * secondsInDay);
+  }
+
+  openTopEarnerDialog(): void {
+    const dialogRef = this.dialog.open(TopEarnersComponent, {
+      width: '400px',
+    });
   }
 
 }
