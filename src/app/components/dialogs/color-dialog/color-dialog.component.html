@@ -1,0 +1,13 @@
+<h1 mat-dialog-title>{{data}}</h1>
+<div mat-dialog-content>
+  <mat-label>Pick group Color</mat-label>
+  <mat-form-field>
+    <input matInput [ngxMatColorPicker]="picker" [formControl]="colorCtr">
+    <ngx-mat-color-toggle matSuffix [for]="picker"></ngx-mat-color-toggle>
+    <ngx-mat-color-picker #picker [touchUi]="touchUi"></ngx-mat-color-picker>
+</mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="colorCtr.value?.hex" cdkFocusInitial>Save</button>
+</div>

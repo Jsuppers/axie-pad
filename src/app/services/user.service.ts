@@ -156,6 +156,11 @@ export class UserService {
     return isEmpty(this.currentUser.getValue()?.colors) ? defaultColors: this.currentUser.getValue().colors;
   }
 
+
+  currentGroupColors(): Record<string, string> {
+    return isEmpty(this.currentUser.getValue()?.groupColors) ? {}: this.currentUser.getValue().groupColors;
+  }
+
   refresh(): void {
     const scholars = this.scholars$.getValue() ?? [];
     scholars.forEach((scholar) => {

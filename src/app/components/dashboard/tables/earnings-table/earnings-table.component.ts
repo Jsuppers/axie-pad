@@ -408,12 +408,23 @@ export class EarningsTableComponent implements OnInit {
     });
   }
 
+  openColorDialog(data: any): void {
+    this.sholarService.openColorDialog(data.group);
+  }
+
   deleteScholar(data: TableEarningsData): void {
     this.sholarService.deleteScholar(data.scholar.id);
   }
 
   navigateToScholar(roninAddress: string) {
     this.sholarService.navigateToScholar(roninAddress);
+  }
+
+  getGroupColor(element: TableEarningsData) {
+    const color = this.user.currentGroupColors()[element?.group];
+    if (color) {
+      return '#' + color;
+    }
   }
 
 

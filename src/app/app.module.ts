@@ -65,6 +65,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { AverageColorDialogComponent } from './components/dialogs/average-color-dialog/average-color-dialog.component';
 import { TopEarnersComponent } from './components/dialogs/top-earners/top-earners.component';
+import { ColorDialogComponent } from './components/dialogs/color-dialog/color-dialog.component';
+import { MAT_COLOR_FORMATS, NgxMatColorPickerModule, NGX_MAT_COLOR_FORMATS } from '@angular-material-components/color-picker';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -125,6 +127,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     TitleDialogComponent,
     AverageColorDialogComponent,
     TopEarnersComponent,
+    ColorDialogComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -157,6 +160,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     ReactiveFormsModule,
     FlexModule,
     GraphQLModule,
+    NgxMatColorPickerModule,
     ClipboardModule,
     MatAutocompleteModule,
     FlexLayoutModule,
@@ -170,6 +174,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     CacheMapService,
     { provide: Cache, useClass: CacheMapService },
     { provide: HTTP_INTERCEPTORS, useClass: CachingInterceptor, multi: true },
+    { provide: MAT_COLOR_FORMATS, useValue: NGX_MAT_COLOR_FORMATS }
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

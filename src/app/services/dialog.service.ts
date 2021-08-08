@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import firebase from 'firebase';
 import { cloneDeep } from 'lodash';
+import { ColorDialogComponent } from '../components/dialogs/color-dialog/color-dialog.component';
 import { DeleteDialogComponent } from '../components/dialogs/delete-dialog/delete-dialog.component';
 import { EditDialogComponent } from '../components/dialogs/edit-dialog/edit-dialog.component';
 import { PayDialogComponent } from '../components/dialogs/pay-dialog/pay-dialog.component';
@@ -54,6 +55,23 @@ export class DialogService {
         const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
         await userDocument.ref.update({
           ['scholars.' + result.id]: result
+        });
+      }
+    });
+  }
+
+  openColorDialog(group: string): void {
+    const dialogRef = this.dialog.open(ColorDialogComponent, {
+      width: '400px',
+      data: group,
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: string) => {
+      const user = this.authService.userState.getValue();
+      if (user && result) {
+        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
+        await userDocument.ref.update({
+          ['groupColors.' + group]: result
         });
       }
     });

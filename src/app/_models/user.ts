@@ -6,4 +6,5 @@ export interface User {
   title: string;
   // Average SLP colors, 4 colors red, orange, green, pink
   colors: number[];
+  groupColors: Record<string, string>;
 }

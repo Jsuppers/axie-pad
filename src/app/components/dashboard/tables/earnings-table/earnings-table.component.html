@@ -112,6 +112,13 @@
             <mat-icon style="margin-left: 5px; color: #f2738c">delete</mat-icon>Delete</button>
         </mat-menu>
       </div>
+      <div *ngIf="isGroup(element)">
+        <button mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="openColorDialog(element)">
+            <mat-icon style="margin-left: 5px;" color="primary">palette</mat-icon>Color</button>
+        </mat-menu>
+      </div>
     </td>
   </ng-container>
 
@@ -125,7 +132,7 @@
 </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let element; columns: headerColumns; when: isGroupCell"></tr>
+  <tr mat-row *matRowDef="let element; columns: headerColumns; when: isGroupCell" [style.background-color]="getGroupColor(element)" style=" border-radius: 25px;"></tr>
   <tr mat-row *matRowDef="let element; columns: displayedColumns; when: isNotGroupCell"
     class="example-element-row"
     [class.example-expanded-row]="element.expanded"></tr>
