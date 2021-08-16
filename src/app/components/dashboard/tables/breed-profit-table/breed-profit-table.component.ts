@@ -22,7 +22,7 @@ export class BreedProfitTableComponent {
     3900,
     6300
   ];
-  breedingCostAXS = 4;
+  breedingCostAXS = 2;
   highestProfit = -1;
 
   constructor(private userService: UserService) {
