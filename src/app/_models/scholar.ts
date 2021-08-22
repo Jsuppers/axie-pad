@@ -40,3 +40,17 @@ export function DefaultFirestoreScholar(): FirestoreScholar {
     managerShare: 50,
   };
 }
+
+export function ExtractFirestoreScholar(scholar: Scholar): FirestoreScholar {
+  return {
+    name: scholar.name ?? 'no name',
+    group: scholar.group ?? '',
+    id: scholar.id ?? firebase.firestore().collection('tmp').doc().id,
+    roninAddress: scholar.roninAddress ?? '',
+    scholarRoninAddress: scholar.scholarRoninAddress ?? '',
+    paidTimes: scholar.paidTimes ?? 0,
+    scholarEthAddress: scholar.scholarEthAddress ?? '',
+    preferredPaymentMethod: scholar.preferredPaymentMethod ?? PaymentMethods.ronin,
+    managerShare: scholar.managerShare ?? 50,
+  };
+}

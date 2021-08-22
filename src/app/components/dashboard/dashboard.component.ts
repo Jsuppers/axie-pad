@@ -79,7 +79,7 @@ export class DashboardComponent implements OnInit {
 
   addNewScholar(): void {
     const newScholar = DefaultFirestoreScholar();
-    this.scholarService.openDialog(newScholar);
+    this.scholarService.openEditDialog(newScholar);
   }
 
   hideAddresses(): void {

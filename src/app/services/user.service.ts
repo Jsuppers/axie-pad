@@ -103,7 +103,8 @@ export class UserService {
               !oldScholar ||
               oldScholar.roninAddress !== firestoreScholar.roninAddress
             ) {
-              this.updateScholar(scholar);
+              // this.updateSLP(scholar);
+              this.updateAllStats(scholar);
             } else {
               const currentScholar = this.scholarSubjects[id].getValue();
               currentScholar.managerShare = firestoreScholar.managerShare;
@@ -164,7 +165,7 @@ export class UserService {
   refresh(): void {
     const scholars = this.scholars$.getValue() ?? [];
     scholars.forEach((scholar) => {
-      this.updateScholar(scholar);
+      this.updateAllStats(scholar);
     });
   }
 
@@ -294,10 +295,11 @@ export class UserService {
     return scholar;
   }
 
-  private updateScholar(scholar: Scholar): void {
-    this.updateLeaderBoardDetails(scholar);
-    this.updateSLP(scholar);
-  }
+  // private updateScholar(scholar: Scholar): void {
+  //   this.updateLeaderBoardDetails(scholar);
+  //   // this.updateSLP(scholar);
+  //   this.updateAllStats(scholar);
+  // }
 
 
     // Example request
@@ -328,10 +330,9 @@ export class UserService {
   "created_at":1576669291,
 }
 } */
-private async updateSLP(scholar: Scholar): Promise<void> {
+public async updateSLP(scholar: Scholar): Promise<void> {
   if (scholar.roninAddress) {
     try {
-      // TODO poll again every x seconds
       const url =
         'https://game-api.skymavis.com/game-api/clients/' +
         scholar.roninAddress.replace('ronin:', '0x') +
@@ -344,6 +345,62 @@ private async updateSLP(scholar: Scholar): Promise<void> {
           scholar.slp.inWallet = output?.blockchain_related?.balance ?? 0;
           scholar.slp.inProgress = scholar.slp.total - scholar.slp.inWallet;
           scholar.slp.lastClaimed = output.last_claimed_item_at;
+          this.scholarSubjects[scholar.id].next(scholar);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+}
+
+// https://axiesworld.firebaseapp.com/updateSpecific?wallet=RONIN_ADDRESS_STARTING_WITH_0x
+/*
+ {
+   "walletData": {
+     "adventureSLP":0,
+     "calendar": {
+       "delta":118,
+       "todaySLP":118,
+       "yesterdayDelta":0,
+       "yesterdaySLP":0,
+      },
+      "claim_timestamp":1629386062,
+      "ingame_slp":118,
+      "last_claim_amount":1532,
+      "lastupdate":1629538984,
+      "next_claim_timestamp":1630682062,
+      "pvpData": {
+        "elo":959,
+        "rank":1002677,
+      },
+      "ronin_slp":0,
+      "total_slp":118}}
+*/
+private async updateAllStats(scholar: Scholar): Promise<void> {
+  if (scholar.roninAddress) {
+    try {
+      const url =
+        '/api/updateSpecific?wallet=' +
+        scholar.roninAddress.replace('ronin:', '0x');
+      this.http
+        .get<any>(url)
+        .toPromise()
+        .then((output) => {
+          // SLP stats
+          const inProgress = output?.walletData?.ingame_slp ?? 0;
+          const inWallet = output?.walletData?.ronin_slp ?? 0;
+          const totalSLP = output?.walletData?.total_slp ?? 0;
+          const adventureSLP = output?.walletData?.adventureSLP ?? 0;
+          scholar.slp.inWallet = inWallet;
+          scholar.slp.inProgress = inProgress;
+          scholar.slp.total = totalSLP;
+          scholar.slp.adventureSLP = adventureSLP;
+          scholar.slp.lastClaimed = output.walletData?.claim_timestamp;
+
+          // PVP stats
+          scholar.leaderboardDetails.elo = output?.pvpData?.elo;
+          scholar.leaderboardDetails.rank = output?.pvpData?.rank;
+
           this.scholarSubjects[scholar.id].next(scholar);
         });
     } catch (e) {

@@ -1,19 +1,25 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { combineLatest, Observable } from 'rxjs';
-import { Scholar } from '../../../../_models/scholar';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { ExtractFirestoreScholar, FirestoreScholar, Scholar } from '../../../../_models/scholar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../../../services/user.service';
-import { map, switchMap } from 'rxjs/operators';
+import { delay, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { DialogService } from 'src/app/services/dialog.service';
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import _ from 'lodash';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import _, { isEqual } from 'lodash';
 import { AverageColorDialogComponent } from 'src/app/components/dialogs/average-color-dialog/average-color-dialog.component';
 
-const noGroupText =  '😥 no group';
+const noGroupText = '😥 no group';
 const claimableNow = 'now';
 export class Group {
   // this will be the earlist claim date from within this group
@@ -26,10 +32,11 @@ export class Group {
   inProgressSLP: number = 0;
   claimableSLP: number = 0;
   totalSLP: number = 0;
-	level = 0;
+  level = 0;
+  isGroup = true;
   group: string = noGroupText;
-	expanded = false;
-	totalCounts = 0;
+  expanded = false;
+  totalCounts = 0;
 }
 export interface TableEarningsData {
   name: string;
@@ -57,15 +64,18 @@ export interface TableEarningsData {
 
   animations: [
     trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+      state('collapsed', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ),
     ]),
   ],
 })
 export class EarningsTableComponent implements OnInit {
-	public dataSource = new MatTableDataSource<any | TableEarningsData>([]);
-	groupByColumns: string[] = [];
+  public dataSource = new MatTableDataSource<any | TableEarningsData>([]);
+  groupByColumns: string[] = [];
   displayedColumns: string[] = [
     'position',
     'name',
@@ -81,11 +91,13 @@ export class EarningsTableComponent implements OnInit {
   @Input()
   hideAddress$: Observable<boolean>;
   hideAddresses: boolean;
-	allData: any[];
-	_allGroup: any[];
+  allData: any[];
+  _allGroup: any[];
+  _numberOfGroups = 0;
 
-	expandedCar: any[] = [];
-	expandedSubCar: TableEarningsData[] = [];
+  expandedCar: any[] = [];
+  expandedSubCar: TableEarningsData[] = [];
+  scholarTableData: Record<string, BehaviorSubject<TableEarningsData>> = {};
 
   @ViewChild(MatSort) sort: MatSort;
 
@@ -95,22 +107,138 @@ export class EarningsTableComponent implements OnInit {
     private snackBar: MatSnackBar,
     private sholarService: DialogService,
   ) {
-		this.groupByColumns = ['group'];
+    this.groupByColumns = ['group'];
     this.headerColumns = this.displayedColumns;
   }
 
-	getGroups(data: any[], groupByColumns: string[]): any[] {
-		const rootGroup = new Group();
-		rootGroup.expanded = false;
-		return this.getGroupList(data, 0, groupByColumns, rootGroup);
-	}
+  getTableData(scholar: Scholar): TableEarningsData {
+    const inProgress = scholar?.slp?.inProgress ?? 0;
+    const averageSLP = this.getAverageSLP(scholar);
+    const claimableDate = this.getClaimableDateString(scholar);
+    return {
+      expanded: false,
+      scholar: scholar,
+      group: scholar?.group ? scholar?.group : noGroupText,
+      roninName: scholar?.roninName ?? 'unknown',
+      paidTimes: scholar?.paidTimes ?? 0,
+      roninAddress: scholar?.roninAddress,
+      inProgressSLP: inProgress,
+      managersShareSLP: inProgress * ((scholar?.managerShare ?? 0) / 100),
+      managersSharePercentage: scholar?.managerShare ?? 0,
+      claimableDate: claimableDate,
+      claimableTime: this.getClaimableTimeString(scholar),
+      lastClaimedDate: this.getLastClaimedDate(scholar),
+      claimableSLP: claimableDate === claimableNow ? inProgress : 0,
+      averageSLPSinceLastClaimed: averageSLP,
+      averageChipColor: this.getAverageChipColor(averageSLP),
+      totalSLP: scholar?.slp?.total ?? 0,
+      name: scholar?.name ?? 'unknown',
+    };
+  }
 
-	getGroupList(data: any[], level: number = 0, groupByColumns: string[], parent: Group): any[] {
-		if (level >= groupByColumns.length) {
-			return data;
-		}
+  ngOnInit(): void {
+    this.user
+      .getScholars()
+      .pipe(
+        switchMap((scholars) => {
+          this.allData = [];
+          this.scholarTableData = {};
+          const output: Observable<Scholar>[] = [];
+          scholars.forEach((scholar) => {
+            output.push(
+              this.user.getScholar(scholar.id).pipe(map((mapScholar) => {
+                const index = this.allData.findIndex((value) => value?.scholar?.id === mapScholar.id);
+                const tableData = this.getTableData(scholar);
+                if (index >= 0) {
+                  if (!isEqual(this.allData[index], tableData)) {
+                    this.allData[index] = {
+                      ...tableData
+                    };
+                  }
+
+                } else {
+                  this.allData.push(tableData);
+                }
+                const dsIndex = this.dataSource.data.findIndex((value) => value?.scholar?.id === mapScholar.id);
+                if (dsIndex >= 0 && !isEqual(this.dataSource.data[dsIndex], tableData)) {
+                  const expanded = this.dataSource.data[dsIndex].expanded;
+                  this.dataSource.data[dsIndex] = {
+                    ...tableData,
+                    expanded
+                  };
+
+
+                  // a hack to force the data to refresh
+                  this.dataSource.data = this.dataSource.data;
+                }
+                return scholar;
+              }))
+            );
+          });
+          return combineLatest(output);
+        }),
+        switchMap((scholarObs) => {
+          scholarObs.forEach((scholar) => {
+            const tableData = this.getTableData(scholar);
+            if (!this.scholarTableData[scholar.id]) {
+              this.scholarTableData[scholar.id] = new BehaviorSubject(tableData);
+            } else {
+              this.scholarTableData[scholar.id].next(tableData);
+            }
+          });
+          return combineLatest(Object.values(this.scholarTableData));
+        }),
+      )
+      .subscribe((tableData) => {
+        const newGroups = this.getGroups(tableData, this.groupByColumns);
+        if (
+          _.isEmpty(this.dataSource.data) ||
+          newGroups.length != this._numberOfGroups
+        ) {
+          this._numberOfGroups = newGroups.length;
+          this.dataSource.data = newGroups;
+        } else {
+          newGroups.forEach((group) => {
+            if(group.isGroup) {
+              const dsIndex =
+                this.dataSource.data.findIndex((value) => value?.group === group.group && value?.isGroup);
+              if (dsIndex >= 0 && !isEqual(this.dataSource.data[dsIndex], group)) {
+                const expanded = this.dataSource.data[dsIndex].expanded;
+                this.dataSource.data[dsIndex] = {
+                  ...group,
+                  expanded
+                };
+              }
+            }
+
+          });
+
+          this.dataSource.data = this.dataSource.data;
+        }
+      });
+
+    this.hideAddress$.subscribe((hideAddresses) => {
+      this.hideAddresses = hideAddresses;
+    });
+  }
+
+  getGroups(data: any[], groupByColumns: string[]): any[] {
+    const rootGroup = new Group();
+    rootGroup.expanded = false;
+    return this.getGroupList(data, 0, groupByColumns, rootGroup);
+  }
+
+  getGroupList(
+    data: any[],
+    level: number = 0,
+    groupByColumns: string[],
+    parent: Group
+  ): any[] {
+    if (level >= groupByColumns.length) {
+      return data;
+    }
     let groups: Record<string, Group> = {};
-		const currentColumn = groupByColumns[level];
+    const currentColumn = groupByColumns[level];
     data.forEach((row) => {
       const group = row?.group ? row.group : noGroupText;
       if (!groups[group]) {
@@ -121,171 +249,175 @@ export class EarningsTableComponent implements OnInit {
       }
 
       const scholarLastClaimed = row.scholar?.slp?.lastClaimed;
-      if (scholarLastClaimed && (groups[group].lastClaimed ==  0 || scholarLastClaimed < groups[group].lastClaimed)) {
+      if (
+        scholarLastClaimed &&
+        (groups[group].lastClaimed == 0 ||
+          scholarLastClaimed < groups[group].lastClaimed)
+      ) {
         groups[group].lastClaimed = scholarLastClaimed;
         groups[group].claimableDate = row.claimableDate;
         groups[group].claimableTime = row.claimableTime;
       }
 
-      groups[group].averageSLPSinceLastClaimed += row?.averageSLPSinceLastClaimed ?? 0;
+      groups[group].averageSLPSinceLastClaimed +=
+        row?.averageSLPSinceLastClaimed ?? 0;
       groups[group].claimableSLP += row?.claimableSLP ?? 0;
       groups[group].totalSLP += row?.totalSLP ?? 0;
       groups[group].inProgressSLP += row?.inProgressSLP ?? 0;
       groups[group].managersShareSLP += row?.managersShareSLP ?? 0;
     });
 
-		Object.values(groups).forEach(group => {
-			const rowsInGroup = data.filter(row => group[currentColumn] === (row[currentColumn] ? row[currentColumn] : noGroupText ));
-			group.totalCounts = rowsInGroup.length;
-      group.averageSLPSinceLastClaimed = group.averageSLPSinceLastClaimed / group.totalCounts;
-      group.averageChipColor = this.getAverageChipColor(group.averageSLPSinceLastClaimed);
-			this.expandedSubCar = [];
-		});
+    Object.values(groups).forEach((group) => {
+      const rowsInGroup = data.filter(
+        (row) =>
+          group[currentColumn] ===
+          (row[currentColumn] ? row[currentColumn] : noGroupText)
+      );
+      group.totalCounts = rowsInGroup.length;
+      group.averageSLPSinceLastClaimed =
+        group.averageSLPSinceLastClaimed / group.totalCounts;
+      group.averageChipColor = this.getAverageChipColor(
+        group.averageSLPSinceLastClaimed
+      );
+      this.expandedSubCar = [];
+    });
 
-		this._allGroup = Object.values(groups).sort((a: Group, b: Group) => {
-			const isAsc = 'asc';
-			return this.compare(a.group, b.group, isAsc);
-		});
-		return this._allGroup;
-	}
+    this._allGroup = Object.values(groups).sort((a: Group, b: Group) => {
+      const isAsc = 'asc';
+      return this.compare(a.group, b.group, isAsc);
+    });
+    return this._allGroup;
+  }
 
-	addGroupsNew(allGroup: any[], data: any[], groupByColumns: string[], dataRow: any): any[] {
-		const rootGroup = new Group();
-		rootGroup.expanded = true;
-		return this.getSublevelNew(allGroup, data, 0, groupByColumns, rootGroup, dataRow);
-	}
+  addGroupsNew(
+    allGroup: any[],
+    data: any[],
+    groupByColumns: string[],
+    dataRow: any
+  ): any[] {
+    const rootGroup = new Group();
+    rootGroup.expanded = true;
+    return this.getSublevelNew(
+      allGroup,
+      data,
+      0,
+      groupByColumns,
+      rootGroup,
+      dataRow
+    );
+  }
 
-	getSublevelNew(allGroup: any[], data: any[], level: number, groupByColumns: string[], parent: Group, dataRow: any): any[] {
-		if (level >= groupByColumns.length) {
-			return data;
-		}
-		const currentColumn = groupByColumns[level];
-		let subGroups = [];
-		allGroup.forEach(group => {
-			const rowsInGroup = data.filter(row => group[currentColumn] === row[currentColumn]);
-			group.totalCounts = rowsInGroup.length;
+  getSublevelNew(
+    allGroup: any[],
+    data: any[],
+    level: number,
+    groupByColumns: string[],
+    parent: Group,
+    dataRow: any
+  ): any[] {
+    if (level >= groupByColumns.length) {
+      return data;
+    }
+    const currentColumn = groupByColumns[level];
+    let subGroups = [];
+    allGroup.forEach((group) => {
+      const rowsInGroup = data.filter(
+        (row) => group[currentColumn] === row[currentColumn]
+      );
+      group.totalCounts = rowsInGroup.length;
 
       const dataRowGroup = dataRow.group ? dataRow.group : noGroupText;
-			if (group.group == dataRowGroup) {
-				group.expanded = dataRow.expanded;
-				const subGroup = this.getSublevelNew(allGroup, rowsInGroup, level + 1, groupByColumns, group, noGroupText);
-				this.expandedSubCar = subGroup;
-				subGroup.unshift(group);
-				subGroups = subGroups.concat(subGroup);
-			} else {
-				subGroups = subGroups.concat(group);
-			}
-		});
-		return subGroups;
-	}
+      if (group.group == dataRowGroup) {
+        group.expanded = dataRow.expanded;
+        const subGroup = this.getSublevelNew(
+          allGroup,
+          rowsInGroup,
+          level + 1,
+          groupByColumns,
+          group,
+          noGroupText
+        );
+        this.expandedSubCar = subGroup;
+        subGroup.unshift(group);
+        subGroups = subGroups.concat(subGroup);
+      } else {
+        subGroups = subGroups.concat(group);
+      }
+    });
+    return subGroups;
+  }
 
-	uniqueBy(a, key) {
-		const seen = {};
-		return a.filter((item) => {
-			const k = key(item);
-			return seen.hasOwnProperty(k) ? false : (seen[k] = true);
-		});
-	}
+  uniqueBy(a, key) {
+    const seen = {};
+    return a.filter((item) => {
+      const k = key(item);
+      return seen.hasOwnProperty(k) ? false : (seen[k] = true);
+    });
+  }
 
-	isGroup(item): boolean {
-		return item?.level;
-	}
+  isGroup(item): boolean {
+    return item?.level;
+  }
 
   isNotGroup(item): boolean {
-		return !item?.level;
+    return !item?.level;
   }
 
   isNotGroupCell(index, item): boolean {
-		return !item?.level;
+    return !item?.level;
   }
 
   isGroupCell(index, item): boolean {
-		return item?.level;
+    return item?.level;
   }
 
-	onSortData(sort: MatSort) {
-		let data = this.allData;
-		const index = data.findIndex(x => x['level'] == 1);
-		if (sort.active && sort.direction !== '') {
-			if (index > -1) {
-				data.splice(index, 1);
-			}
-			data = data.sort((a: TableEarningsData, b: TableEarningsData) => {
-				const isAsc = sort.direction === 'asc';
-				switch (sort.active) {
-					case 'claimableDate':
-						return this.compare(a.scholar.slp.lastClaimed, b.scholar.slp.lastClaimed, isAsc);
-					default:
-            return this.compare(a[sort.active], b[sort.active], isAsc);
-				}
-			});
-		}
-		this.dataSource.data = this.addGroupsNew(this._allGroup, data, this.groupByColumns, this.expandedCar);
-  }
-
-	private compare(a, b, isAsc) {
-		return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
-	}
-
-	groupHeaderClick(row) {
-		if (row.expanded) {
-			row.expanded = false;
-			this.dataSource.data = this.getGroups(this.allData, this.groupByColumns);
-		} else {
-			row.expanded = true;
-			this.expandedCar = row;
-			this.dataSource.data = this.addGroupsNew(this._allGroup, this.allData, this.groupByColumns, row);
-		}
-	}
-
-  ngOnInit(): void {
-    this.user.getScholars().pipe(
-      map((scholars) => {
-      return (scholars ?? []).sort((a, b) => b?.slp?.inProgress - a?.slp?.inProgress)
-    })).pipe(switchMap((scholars) => {
-      const output: Observable<Scholar>[] = [];
-      scholars.forEach((scholar) => {
-        output.push(this.user.getScholar(scholar.id));
-      });
-      return combineLatest(output);
-
-    })).subscribe((scholars) => {
-      const tableData: TableEarningsData[] = [];
-      scholars.forEach((scholar, index) => {
-        const inProgress = scholar?.slp?.inProgress ?? 0;
-        const averageSLP = this.getAverageSLP(scholar);
-        const claimableDate = this.getClaimableDateString(scholar);
-        tableData.push({
-          expanded: false,
-          scholar: scholar,
-          group: scholar?.group ? scholar?.group : noGroupText,
-          roninName: scholar?.roninName ?? 'unknown',
-          paidTimes: scholar?.paidTimes ?? 0,
-          roninAddress: scholar?.roninAddress,
-          inProgressSLP: inProgress,
-          managersShareSLP: inProgress * ((scholar?.managerShare ?? 0) / 100),
-          managersSharePercentage: (scholar?.managerShare ?? 0),
-          claimableDate: claimableDate,
-          claimableTime: this.getClaimableTimeString(scholar),
-          lastClaimedDate: this.getLastClaimedDate(scholar),
-          claimableSLP: claimableDate === claimableNow ? inProgress : 0,
-          averageSLPSinceLastClaimed: averageSLP,
-          averageChipColor: this.getAverageChipColor(averageSLP),
-          totalSLP: scholar?.slp?.total ?? 0,
-          name: scholar?.name ?? 'unknown',
-        });
-      });
-
-      this.allData = tableData;
-      const newGroups = this.getGroups(this.allData, this.groupByColumns);
-      if (_.isEmpty(this.dataSource.data) || !_.isEqual(newGroups, this.dataSource.data )) {
-        this.dataSource.data  = newGroups;
+  onSortData(sort: MatSort) {
+    let data = this.allData;
+    const index = data.findIndex((x) => x['level'] == 1);
+    if (sort.active && sort.direction !== '') {
+      if (index > -1) {
+        data.splice(index, 1);
       }
+      data = data.sort((a: TableEarningsData, b: TableEarningsData) => {
+        const isAsc = sort.direction === 'asc';
+        switch (sort.active) {
+          case 'claimableDate':
+            return this.compare(
+              a.scholar.slp.lastClaimed,
+              b.scholar.slp.lastClaimed,
+              isAsc
+            );
+          default:
+            return this.compare(a[sort.active], b[sort.active], isAsc);
+        }
+      });
+    }
+    this.dataSource.data = this.addGroupsNew(
+      this._allGroup,
+      data,
+      this.groupByColumns,
+      this.expandedCar
+    );
+  }
 
-    });
-    this.hideAddress$.subscribe((hideAddresses) => {
-      this.hideAddresses = hideAddresses;
-    });
+  private compare(a, b, isAsc) {
+    return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+  }
+
+  groupHeaderClick(row) {
+    if (row.expanded) {
+      row.expanded = false;
+      this.dataSource.data = this.getGroups(this.allData, this.groupByColumns);
+    } else {
+      row.expanded = true;
+      this.expandedCar = row;
+      this.dataSource.data = this.addGroupsNew(
+        this._allGroup,
+        this.allData,
+        this.groupByColumns,
+        row
+      );
+    }
   }
 
   expandScholar(element): void {
@@ -293,25 +425,30 @@ export class EarningsTableComponent implements OnInit {
   }
 
   getGroupName(element): string {
-    const groupName = element[this.groupByColumns[element.level-1]] ;
+    const groupName = element[this.groupByColumns[element.level - 1]];
     return groupName ? groupName : noGroupText;
   }
 
   openSnackBar(message: string): void {
-    this.snackBar.open(message + ' copied', undefined, { duration: 5000 , verticalPosition: 'top'});
+    this.snackBar.open(message + ' copied', undefined, {
+      duration: 5000,
+      verticalPosition: 'top',
+    });
   }
 
   getClaimableDateString(element: Scholar): string {
     if (!element?.slp?.lastClaimed) {
       return 'unknown';
     }
-    const dateFuture: any = new Date((element.slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
+    const dateFuture: any = new Date(
+      (element.slp.lastClaimed + 60 * 60 * 24 * 14) * 1000
+    );
     const dateNow: any = new Date();
     if (dateFuture < dateNow) {
       return claimableNow;
     }
 
-    const seconds = Math.floor((dateFuture - (dateNow)) / 1000);
+    const seconds = Math.floor((dateFuture - dateNow) / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
@@ -333,7 +470,9 @@ export class EarningsTableComponent implements OnInit {
     if (!element?.slp?.lastClaimed) {
       return 'unknown';
     }
-    const claimableDate: any = new Date((element.slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000);
+    const claimableDate: any = new Date(
+      (element.slp.lastClaimed + 60 * 60 * 24 * 14) * 1000
+    );
     const now: any = new Date();
     if (claimableDate < now) {
       return '';
@@ -352,12 +491,14 @@ export class EarningsTableComponent implements OnInit {
       return 'unknown';
     }
 
-    const seconds = Math.floor((dateNow.getTime() - dateLastClaimed.getTime()) / 1000);
+    const seconds = Math.floor(
+      (dateNow.getTime() - dateLastClaimed.getTime()) / 1000
+    );
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    const currentHours = (hours - (days * 24));
+    const currentHours = hours - days * 24;
     if (days > 0) {
       return days + ' days';
     }
@@ -374,12 +515,14 @@ export class EarningsTableComponent implements OnInit {
     const inProgressSLP = scholar.slp.inProgress;
     const dateClaimed: Date = new Date(scholar.slp.lastClaimed * 1000);
 
-    const seconds = Math.floor((dateNow.getTime() - dateClaimed.getTime()) / 1000);
+    const seconds = Math.floor(
+      (dateNow.getTime() - dateClaimed.getTime()) / 1000
+    );
     const secondsInDay = 86400;
     if (seconds < secondsInDay) {
       return inProgressSLP;
     }
-    return (inProgressSLP / seconds * secondsInDay);
+    return (inProgressSLP / seconds) * secondsInDay;
   }
 
   getAverageChipColor(averageSLP: number): string {
@@ -402,10 +545,9 @@ export class EarningsTableComponent implements OnInit {
     });
   }
 
-  openDialog(data: TableEarningsData): void {
-    this.sholarService.openDialog({
-      ...data.scholar,
-    });
+  openEditDialog(data: TableEarningsData): void {
+    const firestStoreScholar = ExtractFirestoreScholar(data.scholar);
+    this.sholarService.openEditDialog(firestStoreScholar);
   }
 
   openColorDialog(data: any): void {
@@ -427,10 +569,9 @@ export class EarningsTableComponent implements OnInit {
     }
   }
 
-
   openAverageColorDialog(): void {
     const dialogRef = this.dialog.open(AverageColorDialogComponent, {
-      width: '400px'
+      width: '400px',
     });
   }
 }

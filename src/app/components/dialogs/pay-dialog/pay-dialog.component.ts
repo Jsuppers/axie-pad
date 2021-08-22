@@ -20,6 +20,7 @@ export class PayDialogComponent {
       if (!data.scholarRoninName || data.scholarRoninName === 'unknown') {
         this.userService.getScholarRoninName(data);
       }
+      this.userService.updateSLP(data);
     }
 
   onNoClick(): void {

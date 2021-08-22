@@ -34,13 +34,13 @@ export class DialogService {
         result.paidTimes = (result?.paidTimes ?? 0) + 1;
         const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
         await userDocument.ref.update({
-          ['scholars.' + result.id]: result
+          ['scholars.' + result.id + '.paidTimes']: result.paidTimes
         });
       }
     });
   }
 
-  openDialog(scholar: FirestoreScholar): void {
+  openEditDialog(scholar: FirestoreScholar): void {
     const dialogRef = this.dialog.open(EditDialogComponent, {
       width: '400px',
       data: cloneDeep(scholar),

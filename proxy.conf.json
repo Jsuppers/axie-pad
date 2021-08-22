@@ -1,0 +1,10 @@
+{
+  "/api": {
+    "target": "https://axiesworld.firebaseapp.com",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}
