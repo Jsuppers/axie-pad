@@ -379,8 +379,14 @@ public async updateSLP(scholar: Scholar): Promise<void> {
 private async updateAllStats(scholar: Scholar): Promise<void> {
   if (scholar.roninAddress) {
     try {
-      const url =
-        '/api/updateSpecific?wallet=' +
+      // proxy when testing to fix cors issues
+      // TODO set up environment to use this when in testing environment
+      // const url =
+      //   '/api/updateSpecific?wallet=' +
+      //   scholar.roninAddress.replace('ronin:', '0x');
+
+        const url =
+        'https://axiesworld.firebaseapp.com/updateSpecific?wallet=' +
         scholar.roninAddress.replace('ronin:', '0x');
       this.http
         .get<any>(url)
