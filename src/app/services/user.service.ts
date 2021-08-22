@@ -103,8 +103,8 @@ export class UserService {
               !oldScholar ||
               oldScholar.roninAddress !== firestoreScholar.roninAddress
             ) {
-              // this.updateSLP(scholar);
-              this.updateAllStats(scholar);
+              this.updateSLP(scholar);
+              // this.updateAllStats(scholar);
             } else {
               const currentScholar = this.scholarSubjects[id].getValue();
               currentScholar.managerShare = firestoreScholar.managerShare;
@@ -165,7 +165,7 @@ export class UserService {
   refresh(): void {
     const scholars = this.scholars$.getValue() ?? [];
     scholars.forEach((scholar) => {
-      this.updateAllStats(scholar);
+      this.updateSLP(scholar);
     });
   }
 
@@ -388,8 +388,11 @@ private async updateAllStats(scholar: Scholar): Promise<void> {
         const url =
         'https://axiesworld.firebaseapp.com/updateSpecific?wallet=' +
         scholar.roninAddress.replace('ronin:', '0x');
+        const corsHeaders = {
+          'Access-Control-Allow-Origin': '*',
+        };
       this.http
-        .get<any>(url)
+        .get<any>(url, {headers: corsHeaders})
         .toPromise()
         .then((output) => {
           // SLP stats
