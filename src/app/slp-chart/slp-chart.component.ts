@@ -48,11 +48,15 @@ export class SlpChartComponent implements OnInit {
   ngOnInit() {
     this.userService.getScholars().subscribe((scholars) => {
 
-      const managerShareDataRecord: Record<number, {scholarShare: number, managerShare: number, projectedShare: number}> = {};
+      const managerShareDataRecord: Record<number, {
+        timestamp: number,
+        scholarShare: number,
+        managerShare: number,
+        projectedShare: number}> = {};
       scholars.forEach((scholar) => {
         if (scholar?.slp?.lastClaimed) {
           const timestamp = (scholar?.slp?.lastClaimed  + (60 * 60 * 24 * 14)) * 1000;
-          const day = timestamp - (timestamp % millisecondsInDay);
+          const day = new Date(timestamp).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
           const managerSharePercentage = (scholar?.managerShare ? scholar.managerShare : 100) / 100;
           let scholarShare = scholar?.slp?.total * (1 - managerSharePercentage);
           let managerShare = scholar?.slp?.total - scholarShare;
@@ -66,22 +70,25 @@ export class SlpChartComponent implements OnInit {
             scholarShare,
             managerShare,
             projectedShare,
+            timestamp,
           }
         }
       });
 
-      const sortedKeys = Object.keys(managerShareDataRecord).sort();
+      var sortedValues = Object.values(managerShareDataRecord)
+        .sort((a,b) => a.timestamp - b.timestamp);
       this.barChartLabels   = [];
       this.managerShareData = [];
       this.scholarData      = [];
       this.projectedData    = [];
-      for (let key of sortedKeys) {
-        const dayOfWeek = new Date(Number(key)).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
-        this.barChartLabels.push(dayOfWeek);
-        const data = managerShareDataRecord[key];
-        this.scholarData.push(data.scholarShare);
-        this.managerShareData.push(data.managerShare);
-        this.projectedData.push(data.projectedShare);
+      for (let value of sortedValues) {
+        const day = new Date(value.timestamp)
+          .toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
+
+        this.barChartLabels.push(day);
+        this.scholarData.push(value.scholarShare);
+        this.managerShareData.push(value.managerShare);
+        this.projectedData.push(value.projectedShare);
       };
 
       this.updateChart();

@@ -465,19 +465,14 @@ export class EarningsTableComponent implements OnInit {
     const seconds = Math.floor((dateFuture - dateNow) / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
 
-    let output = '';
-    if (days > 0) {
-      return days + ' days';
-    }
-    if (hours > 0) {
+    if (hours < 24) {
+      if (hours == 0 && minutes > 0) {
+        return minutes + ' minutes';
+      }
       return hours + ' hours';
     }
-    if (minutes > 0) {
-      return minutes + ' minutes';
-    }
-    return output;
+    return dateFuture.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
 
   getClaimableTimeString(element: Scholar): string {
