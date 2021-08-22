@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
-import { FirestoreScholar } from 'src/app/_models/scholar';
+import { FirestoreScholar, Scholar } from 'src/app/_models/scholar';
 
 interface TableData {
   name: string;
@@ -18,6 +18,7 @@ interface TableData {
   loses: number;
   rank: number;
   wins: number;
+  roninAddress: string;
 }
 
 @Component({
@@ -61,6 +62,7 @@ export class ArenaTableComponent implements OnInit {
           wins: scholar?.leaderboardDetails?.wins,
           loses: scholar?.leaderboardDetails?.loses,
           draws: scholar?.leaderboardDetails?.draws,
+          roninAddress: scholar?.roninAddress,
         });
       });
       this.dataSource = new MatTableDataSource(tableData);
@@ -71,11 +73,8 @@ export class ArenaTableComponent implements OnInit {
     });
   }
 
-  openSnackBar(message: string): void {
-    this.snackBar.open(message + ' copied', undefined, { duration: 5000, verticalPosition: 'top' });
-  }
-
-  navigateToScholar(element: FirestoreScholar): void {
-    window.open('https://marketplace.axieinfinity.com/profile/' + element.roninAddress.replace('ronin:', '0x') + '/axie', '_blank');
+  navigateToScholar(element: TableData): void {
+    debugger;
+    window.open('https://marketplace.axieinfinity.com/profile/' + element.roninAddress + '/axie', '_blank');
   }
 }

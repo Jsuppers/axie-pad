@@ -67,6 +67,7 @@ import { AverageColorDialogComponent } from './components/dialogs/average-color-
 import { TopEarnersComponent } from './components/dialogs/top-earners/top-earners.component';
 import { ColorDialogComponent } from './components/dialogs/color-dialog/color-dialog.component';
 import { MAT_COLOR_FORMATS, NgxMatColorPickerModule, NGX_MAT_COLOR_FORMATS } from '@angular-material-components/color-picker';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -139,6 +140,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     HttpClientModule,
     BrowserAnimationsModule,
     MatTableModule,
+    MatPaginatorModule,
     MatDialogModule,
     MatInputModule,
     MatFormFieldModule,
