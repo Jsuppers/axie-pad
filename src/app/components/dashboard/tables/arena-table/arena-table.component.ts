@@ -5,11 +5,10 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Observable } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
-import { cloneDeep } from 'lodash';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
-import { FirestoreScholar, Scholar } from 'src/app/_models/scholar';
+import { MatPaginator } from '@angular/material/paginator';
 
 interface TableData {
   name: string;
@@ -39,8 +38,11 @@ export class ArenaTableComponent implements OnInit {
   @Input()
   hideAddress$: Observable<boolean>;
   hideAddresses: boolean;
+  resultsLength = 0;
 
   @ViewChild(MatSort) sort: MatSort;
+
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   constructor(
     public dialog: MatDialog,
@@ -67,6 +69,8 @@ export class ArenaTableComponent implements OnInit {
       });
       this.dataSource = new MatTableDataSource(tableData);
       this.dataSource.sort = this.sort;
+      this.resultsLength = scholars.length;
+      this.dataSource.paginator = this.paginator;
     });
     this.hideAddress$.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
@@ -74,7 +78,6 @@ export class ArenaTableComponent implements OnInit {
   }
 
   navigateToScholar(element: TableData): void {
-    debugger;
     window.open('https://marketplace.axieinfinity.com/profile/' + element.roninAddress + '/axie', '_blank');
   }
 }
