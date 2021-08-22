@@ -398,8 +398,10 @@ private async updateAllStats(scholar: Scholar): Promise<void> {
           scholar.slp.lastClaimed = output.walletData?.claim_timestamp;
 
           // PVP stats
-          scholar.leaderboardDetails.elo = output?.pvpData?.elo;
-          scholar.leaderboardDetails.rank = output?.pvpData?.rank;
+          scholar.leaderboardDetails.elo = output?.walletData?.pvpData?.elo;
+          scholar.leaderboardDetails.rank = output?.walletData?.pvpData?.rank;
+
+          debugger;
 
           this.scholarSubjects[scholar.id].next(scholar);
         });

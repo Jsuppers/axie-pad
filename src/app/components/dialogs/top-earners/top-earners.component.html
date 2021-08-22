@@ -2,6 +2,15 @@
 
       <h2>Top Earners
         <button mat-button (click)="close()" style="float:right">Close</button>
+        <button mat-raised-button class="crypto-button">
+          <div *ngIf="viewMode$.getValue() === viewMode.elo" (click)="showSLP()">
+            <img src="assets/slp.webp" style="width: 20px"><span style="padding-left: 5px;"></span>
+          </div>
+          <div *ngIf="viewMode$.getValue() === viewMode.slp" (click)="showElo()">
+            <span style="padding-left: 5px;">⚔️</span>
+          </div>
+        </button>
+
         <mat-icon style="float:right; cursor: pointer;
         font-size: 18px;
         margin: 10px;" (click)="sortScholars()">sort</mat-icon>
@@ -12,7 +21,10 @@
           <mat-list-item *ngFor="let scholar of scholars; let i = index">
 
             <h3 matLine> {{ scholar.name}}
-              <span style="font-size: 10px;">(Average: {{scholar.average | number: "1.2-2"}})</span></h3>
+              <span *ngIf="viewMode$.getValue() === viewMode.slp" style="font-size: 10px;">(Average: {{scholar.average | number: "1.2-2"}})</span>
+              <span *ngIf="viewMode$.getValue() === viewMode.elo" style="font-size: 10px;">(Elo: {{scholar.elo | number: '1.0-0'}})</span>
+
+            </h3>
             <mat-divider style="width: calc(100% - 10px);"></mat-divider>
           </mat-list-item>
       </mat-list>

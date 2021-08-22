@@ -1,7 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { UserService } from 'src/app/services/user.service';
 import { Scholar } from 'src/app/_models/scholar';
+
+
+enum ViewMode {
+  slp,
+  elo,
+}
 
 @Component({
   selector: 'app-top-earners',
@@ -9,7 +16,9 @@ import { Scholar } from 'src/app/_models/scholar';
   styleUrls: ['./top-earners.component.scss']
 })
 export class TopEarnersComponent implements OnInit {
-  scholars: {name: string, average: number}[] = [];
+  scholars: {name: string, average: number, elo: number}[] = [];
+  viewMode$ = new BehaviorSubject<ViewMode>(ViewMode.slp);
+  viewMode = ViewMode;
 
   constructor(
     public dialogRef: MatDialogRef<TopEarnersComponent>,
@@ -18,15 +27,24 @@ export class TopEarnersComponent implements OnInit {
 
 
     async ngOnInit(): Promise<void> {
-      this.userService.getScholars().subscribe((scholars) => {
+      combineLatest([
+      this.userService.getScholars(),
+      this.viewMode$,
+    ]).subscribe(([scholars, viewMode]) => {
         this.scholars = [];
         scholars.forEach((scholar) => {
           this.scholars.push({
             name: scholar.name,
             average: this.getAverageSLP(scholar) ?? 0,
+            elo: scholar?.leaderboardDetails?.elo ?? 0,
           })
         });
-        this.scholars.sort((a, b) => b.average - a.average);
+        if (viewMode === ViewMode.slp) {
+          this.scholars.sort((a, b) => b.average - a.average);
+        }
+        if (viewMode === ViewMode.elo) {
+          this.scholars.sort((a, b) => b.elo - a.elo);
+        }
       });
     }
 
@@ -54,4 +72,11 @@ export class TopEarnersComponent implements OnInit {
     this.scholars.reverse();
   }
 
+  showElo() {
+    this.viewMode$.next(ViewMode.elo);
+  }
+
+  showSLP() {
+    this.viewMode$.next(ViewMode.slp);
+  }
 }
