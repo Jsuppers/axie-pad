@@ -169,6 +169,13 @@ export class UserService {
     });
   }
 
+  refreshLeaderBoardStats(): void {
+    const scholars = this.scholars$.getValue() ?? [];
+    scholars.forEach((scholar) => {
+      this.updateLeaderBoard(scholar);
+    });
+  }
+
   setCurrency(currency: string): void {
     this.pollSLPPrice(currency).then((price) => this.fiatSLPPrice$.next(price));
     this.pollAXSPrice(currency).then((price) => this.fiatAXSPrice$.next(price));
@@ -345,6 +352,32 @@ public async updateSLP(scholar: Scholar): Promise<void> {
           scholar.slp.inWallet = output?.blockchain_related?.balance ?? 0;
           scholar.slp.inProgress = scholar.slp.total - scholar.slp.inWallet;
           scholar.slp.lastClaimed = output.last_claimed_item_at;
+          this.scholarSubjects[scholar.id].next(scholar);
+
+          // temp
+          this.updateLeaderBoard(scholar);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+}
+
+public async updateLeaderBoard(scholar: Scholar): Promise<void> {
+  if (scholar.roninAddress) {
+    try {
+      const url =
+        'https://axie-proxy.secret-shop.buzz/_basicStats/' +
+        scholar.roninAddress.replace('ronin:', '0x');
+      this.http
+        .get<any>(url)
+        .toPromise()
+        .then((output) => {
+          scholar.leaderboardDetails.wins = output?.stats?.win_total ?? 0;
+          scholar.leaderboardDetails.loses = output?.stats?.lose_total ?? 0;
+          scholar.leaderboardDetails.draws = output?.stats?.draw_total ?? 0;
+          scholar.leaderboardDetails.elo = output?.stats?.elo ?? 0;
+          scholar.leaderboardDetails.rank = output?.stats?.rank ?? 0;
           this.scholarSubjects[scholar.id].next(scholar);
         });
     } catch (e) {
