@@ -391,6 +391,20 @@ export class EarningsTableComponent implements OnInit {
             return this.compare(a[sort.active], b[sort.active], isAsc);
         }
       });
+
+      this._allGroup = this._allGroup.sort((a: Group, b: Group) => {
+        const isAsc = sort.direction === 'asc';
+        switch (sort.active) {
+          case 'claimableDate':
+            return this.compare(
+              a.lastClaimed,
+              b.lastClaimed,
+              isAsc
+            );
+          default:
+            return this.compare(a[sort.active], b[sort.active], isAsc);
+        }
+      });
     }
     this.dataSource.data = this.addGroupsNew(
       this._allGroup,
@@ -407,7 +421,7 @@ export class EarningsTableComponent implements OnInit {
   groupHeaderClick(row) {
     if (row.expanded) {
       row.expanded = false;
-      this.dataSource.data = this.getGroups(this.allData, this.groupByColumns);
+      this.dataSource.data = this.dataSource.data.filter((value) => value?.isGroup);
     } else {
       row.expanded = true;
       this.expandedCar = row;
