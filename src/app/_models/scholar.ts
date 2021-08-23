@@ -1,6 +1,7 @@
 import firebase from 'firebase';
 import { SLP } from './slp';
 import { LeaderboardDetails } from './leaderboard';
+import { Axie } from './axie';
 
 export enum PaymentMethods {
   ronin,
@@ -10,6 +11,7 @@ export enum PaymentMethods {
 export interface Scholar extends FirestoreScholar {
   id: string;
   slp: SLP;
+  axies: Axie[];
   leaderboardDetails: LeaderboardDetails;
   roninName: string;
   scholarRoninName: string;

@@ -1,0 +1,38 @@
+table {
+  width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+th.mat-sort-header-sorted {
+  color: black;
+}
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+td {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.mat-column-rank {
+  padding-left: 15px;
+}
+
+.mat-column-actions {
+  padding-left: 15px;
+}
+
+.mat-column-elo {
+}
+
+.mat-column-wins {
+}
+
+.mat-column-draws {
+}
+
+
+
+

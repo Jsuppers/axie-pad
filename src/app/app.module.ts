@@ -68,6 +68,7 @@ import { TopEarnersComponent } from './components/dialogs/top-earners/top-earner
 import { ColorDialogComponent } from './components/dialogs/color-dialog/color-dialog.component';
 import { MAT_COLOR_FORMATS, NgxMatColorPickerModule, NGX_MAT_COLOR_FORMATS } from '@angular-material-components/color-picker';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { AxieTableComponent } from './components/dashboard/tables/axie-table/axie-table.component';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -129,6 +130,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     AverageColorDialogComponent,
     TopEarnersComponent,
     ColorDialogComponent,
+    AxieTableComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),

@@ -295,6 +295,7 @@ export class UserService {
       ...firestoreScholar,
       leaderboardDetails,
       slp,
+      axies: [],
       roninName: leaderboardDetails.name,
       scholarRoninName: 'unknown',
     };
@@ -356,6 +357,41 @@ public async updateSLP(scholar: Scholar): Promise<void> {
 
           // temp
           this.updateLeaderBoard(scholar);
+          this.getAxies(scholar);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+}
+
+public async getAxies(scholar: Scholar): Promise<void> {
+  if (scholar.roninAddress) {
+    try {
+      const url =
+        'https://axie-proxy.secret-shop.buzz/_axiesPlease/' +
+        scholar.roninAddress.replace('ronin:', '0x');
+      this.http
+        .get<any>(url)
+        .toPromise()
+        .then((output) => {
+
+          if (output?.available_axies &&
+            output?.available_axies?.results &&
+            output?.available_axies?.results?.length > 0) {
+              scholar.axies = [];
+            (output?.available_axies?.results as any[]).forEach((axie) => {
+              scholar.axies.push({
+                name: axie?.name,
+                id: axie?.id,
+                image: axie?.image,
+                breedCount: axie?.breedCount,
+                class: axie?.class,
+              });
+            })
+          }
+
+          this.scholarSubjects[scholar.id].next(scholar);
         });
     } catch (e) {
       console.log(e);
