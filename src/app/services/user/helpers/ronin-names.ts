@@ -1,4 +1,4 @@
-import { Scholar } from '../../../_models/scholar';
+import { FirestoreScholar } from '../../../_models/scholar';
 import { Apollo, gql } from 'apollo-angular';
 
 
@@ -24,31 +24,16 @@ export class RoninNames {
     this._apollo = apollo;
   }
 
-  async getScholarRoninName(scholar: Scholar): Promise<void> {
-    return this._getRoninName(
-      scholar,
-      'scholarRoninAddress',
-      'scholarRoninName'
-    );
+  getRoninName(roninAddress: string): string {
+    return this._roninAddressNames[roninAddress] ?? 'unknown';
   }
 
-  async getRoninName(scholar: Scholar): Promise<void> {
-    return this._getRoninName(
-      scholar,
-      'roninAddress',
-      'roninName',
-    );
-  }
-
-  private async _getRoninName(
-    scholar: Scholar,
-    addressField: string,
-    nameField: string
-  ): Promise<void> {
-    const address = scholar[addressField];
+  async updateRoninName(
+    address: string,
+  ): Promise<string> {
     let name = 'unknown';
     if (!address) {
-      return;
+      return 'none';
     }
     if (this._roninAddressNames.has(address)) {
       name = this._roninAddressNames.get(address);
@@ -74,6 +59,6 @@ export class RoninNames {
       }
       this._roninAddressNames.set(address, name);
     }
-    scholar[nameField] = name;
+    return name;
   }
 }

@@ -2,13 +2,14 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { MatPaginator } from '@angular/material/paginator';
+import { map, switchMap } from 'rxjs/operators';
 
 interface TableData {
   name: string;
@@ -54,24 +55,36 @@ export class ArenaTableComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.user.getScholars().subscribe((scholars) => {
-      const tableData: TableData[] = [];
-      scholars.forEach((scholar) => {
-        tableData.push({
-          name: scholar?.name ?? 'unknown',
-          rank: scholar?.leaderboardDetails?.rank,
-          elo: scholar?.leaderboardDetails?.elo,
-          wins: scholar?.leaderboardDetails?.wins,
-          loses: scholar?.leaderboardDetails?.loses,
-          draws: scholar?.leaderboardDetails?.draws,
-          roninAddress: scholar?.roninAddress,
+    this.user
+      .getScholars()
+      .pipe(
+        switchMap((scholars) => {
+          const output: Observable<TableData>[] = [];
+          scholars.forEach((scholar) => {
+            output.push(
+              this.user.getScholarsLeaderboardDetails(scholar.id).pipe(
+                map((leaderboardDetails) => {
+                  return {
+                    name:  this.user.getRoninName(scholar.roninAddress),
+                    rank:  leaderboardDetails?.rank,
+                    elo:   leaderboardDetails?.elo,
+                    wins:  leaderboardDetails?.wins,
+                    loses: leaderboardDetails?.loses,
+                    draws: leaderboardDetails?.draws,
+                    roninAddress: scholar?.roninAddress,
+                  };
+              }))
+          );
         });
+        return combineLatest(output);
+      })).subscribe((tableData) => {
+
+        this.dataSource = new MatTableDataSource(tableData);
+        this.dataSource.sort = this.sort;
+        this.resultsLength = tableData.length;
+        this.dataSource.paginator = this.paginator;
       });
-      this.dataSource = new MatTableDataSource(tableData);
-      this.dataSource.sort = this.sort;
-      this.resultsLength = scholars.length;
-      this.dataSource.paginator = this.paginator;
-    });
+
     this.hideAddress$.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
     });

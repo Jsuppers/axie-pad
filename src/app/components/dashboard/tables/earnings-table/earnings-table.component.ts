@@ -1,13 +1,13 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { ExtractFirestoreScholar, FirestoreScholar, Scholar } from '../../../../_models/scholar';
+import { FirestoreScholar } from '../../../../_models/scholar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../../../services/user/user.service';
-import { delay, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { DialogService } from 'src/app/services/dialog.service';
 import {
   animate,
@@ -18,6 +18,7 @@ import {
 } from '@angular/animations';
 import _, { isEqual } from 'lodash';
 import { AverageColorDialogComponent } from 'src/app/components/dialogs/average-color-dialog/average-color-dialog.component';
+import { SLP } from 'src/app/_models/slp';
 
 const noGroupText = '😥 no group';
 const claimableNow = 'now';
@@ -55,7 +56,8 @@ export interface TableEarningsData {
   claimableTime: string;
   lastClaimedDate: string;
   paidTimes: number;
-  scholar: Scholar;
+  scholar: FirestoreScholar;
+  slp: SLP;
 }
 @Component({
   selector: 'app-earnings-table',
@@ -111,28 +113,33 @@ export class EarningsTableComponent implements OnInit {
     this.headerColumns = this.displayedColumns;
   }
 
-  getTableData(scholar: Scholar): TableEarningsData {
-    const inProgress = scholar?.slp?.inProgress ?? 0;
-    const averageSLP = this.getAverageSLP(scholar);
-    const claimableDate = this.getClaimableDateString(scholar);
+  getTableData(
+      scholar: FirestoreScholar,
+      slp: SLP,
+      ): TableEarningsData {
+
+    const inProgress = slp?.inProgress ?? 0;
+    const averageSLP = this.getAverageSLP(slp);
+    const claimableDate = this.getClaimableDateString(slp);
     return {
       expanded: false,
       scholar: scholar,
       group: scholar?.group ? scholar?.group : noGroupText,
-      roninName: scholar?.roninName ?? 'unknown',
+      roninName: this.user.getRoninName(scholar.roninAddress),
       paidTimes: scholar?.paidTimes ?? 0,
       roninAddress: scholar?.roninAddress,
       inProgressSLP: inProgress,
       managersShareSLP: inProgress * ((scholar?.managerShare ?? 0) / 100),
       managersSharePercentage: scholar?.managerShare ?? 0,
       claimableDate: claimableDate,
-      claimableTime: this.getClaimableTimeString(scholar),
-      lastClaimedDate: this.getLastClaimedDate(scholar),
+      claimableTime: this.getClaimableTimeString(slp),
+      lastClaimedDate: this.getLastClaimedDate(slp),
       claimableSLP: claimableDate === claimableNow ? inProgress : 0,
       averageSLPSinceLastClaimed: averageSLP,
       averageChipColor: this.getAverageChipColor(averageSLP),
-      totalSLP: scholar?.slp?.total ?? 0,
+      totalSLP: slp?.total ?? 0,
       name: scholar?.name ?? 'unknown',
+      slp: slp,
     };
   }
 
@@ -143,12 +150,12 @@ export class EarningsTableComponent implements OnInit {
         switchMap((scholars) => {
           this.allData = [];
           this.scholarTableData = {};
-          const output: Observable<Scholar>[] = [];
+          const output: Observable<TableEarningsData>[] = [];
           scholars.forEach((scholar) => {
             output.push(
-              this.user.getScholar(scholar.id).pipe(map((mapScholar) => {
-                const index = this.allData.findIndex((value) => value?.scholar?.id === mapScholar.id);
-                const tableData = this.getTableData(scholar);
+               this.user.getScholarsSLP(scholar.id).pipe(map((slp) => {
+                const index = this.allData.findIndex((value) => value?.scholar?.id === scholar.id);
+                const tableData = this.getTableData(scholar, slp);
                 if (index >= 0) {
                   if (!isEqual(this.allData[index], tableData)) {
                     this.allData[index] = {
@@ -159,7 +166,7 @@ export class EarningsTableComponent implements OnInit {
                 } else {
                   this.allData.push(tableData);
                 }
-                const dsIndex = this.dataSource.data.findIndex((value) => value?.scholar?.id === mapScholar.id);
+                const dsIndex = this.dataSource.data.findIndex((value) => value?.scholar?.id === scholar.id);
                 if (dsIndex >= 0 && !isEqual(this.dataSource.data[dsIndex], tableData)) {
                   const expanded = this.dataSource.data[dsIndex].expanded;
                   this.dataSource.data[dsIndex] = {
@@ -171,22 +178,11 @@ export class EarningsTableComponent implements OnInit {
                   // a hack to force the data to refresh
                   this.dataSource.data = this.dataSource.data;
                 }
-                return scholar;
+                return tableData;
               }))
             );
           });
           return combineLatest(output);
-        }),
-        switchMap((scholarObs) => {
-          scholarObs.forEach((scholar) => {
-            const tableData = this.getTableData(scholar);
-            if (!this.scholarTableData[scholar.id]) {
-              this.scholarTableData[scholar.id] = new BehaviorSubject(tableData);
-            } else {
-              this.scholarTableData[scholar.id].next(tableData);
-            }
-          });
-          return combineLatest(Object.values(this.scholarTableData));
         }),
       )
       .subscribe((tableData) => {
@@ -222,14 +218,14 @@ export class EarningsTableComponent implements OnInit {
     });
   }
 
-  getGroups(data: any[], groupByColumns: string[]): any[] {
+  getGroups(data: TableEarningsData[], groupByColumns: string[]): any[] {
     const rootGroup = new Group();
     rootGroup.expanded = false;
     return this.getGroupList(data, 0, groupByColumns, rootGroup);
   }
 
   getGroupList(
-    data: any[],
+    data: TableEarningsData[],
     level: number = 0,
     groupByColumns: string[],
     parent: Group
@@ -248,7 +244,7 @@ export class EarningsTableComponent implements OnInit {
         groups[group] = result;
       }
 
-      const scholarLastClaimed = row.scholar?.slp?.lastClaimed;
+      const scholarLastClaimed = row?.slp?.lastClaimed;
       if (
         scholarLastClaimed &&
         (groups[group].lastClaimed == 0 ||
@@ -383,8 +379,8 @@ export class EarningsTableComponent implements OnInit {
         switch (sort.active) {
           case 'claimableDate':
             return this.compare(
-              a.scholar.slp.lastClaimed,
-              b.scholar.slp.lastClaimed,
+              a.slp.lastClaimed,
+              b.slp.lastClaimed,
               isAsc
             );
           default:
@@ -450,12 +446,12 @@ export class EarningsTableComponent implements OnInit {
     });
   }
 
-  getClaimableDateString(element: Scholar): string {
-    if (!element?.slp?.lastClaimed) {
+  getClaimableDateString(slp: SLP): string {
+    if (!slp?.lastClaimed) {
       return 'unknown';
     }
     const dateFuture: any = new Date(
-      (element.slp.lastClaimed + 60 * 60 * 24 * 14) * 1000
+      (slp.lastClaimed + 60 * 60 * 24 * 14) * 1000
     );
     const dateNow: any = new Date();
     if (dateFuture < dateNow) {
@@ -475,12 +471,12 @@ export class EarningsTableComponent implements OnInit {
     return dateFuture.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
 
-  getClaimableTimeString(element: Scholar): string {
-    if (!element?.slp?.lastClaimed) {
+  getClaimableTimeString(slp: SLP): string {
+    if (!slp?.lastClaimed) {
       return 'unknown';
     }
     const claimableDate: any = new Date(
-      (element.slp.lastClaimed + 60 * 60 * 24 * 14) * 1000
+      (slp.lastClaimed + 60 * 60 * 24 * 14) * 1000
     );
     const now: any = new Date();
     if (claimableDate < now) {
@@ -490,12 +486,12 @@ export class EarningsTableComponent implements OnInit {
     return claimableDate.toLocaleTimeString();
   }
 
-  getLastClaimedDate(element: Scholar): string {
-    if (!element?.slp?.lastClaimed) {
+  getLastClaimedDate(slp: SLP): string {
+    if (!slp?.lastClaimed) {
       return 'unknown';
     }
     const dateNow: any = new Date();
-    const dateLastClaimed: any = new Date(element.slp.lastClaimed * 1000);
+    const dateLastClaimed: any = new Date(slp.lastClaimed * 1000);
     if (dateLastClaimed > dateNow) {
       return 'unknown';
     }
@@ -517,12 +513,12 @@ export class EarningsTableComponent implements OnInit {
     return 'just now';
   }
 
-  getAverageSLP(scholar: Scholar, dateNow: Date = new Date()): number {
-    if (isNaN(scholar?.slp?.inProgress)) {
+  getAverageSLP(slp: SLP, dateNow: Date = new Date()): number {
+    if (isNaN(slp?.inProgress)) {
       return 0;
     }
-    const inProgressSLP = scholar.slp.inProgress;
-    const dateClaimed: Date = new Date(scholar.slp.lastClaimed * 1000);
+    const inProgressSLP = slp.inProgress;
+    const dateClaimed: Date = new Date(slp.lastClaimed * 1000);
 
     const seconds = Math.floor(
       (dateNow.getTime() - dateClaimed.getTime()) / 1000
@@ -555,8 +551,7 @@ export class EarningsTableComponent implements OnInit {
   }
 
   openEditDialog(data: TableEarningsData): void {
-    const firestStoreScholar = ExtractFirestoreScholar(data.scholar);
-    this.sholarService.openEditDialog(firestStoreScholar);
+    this.sholarService.openEditDialog(data.scholar);
   }
 
   openColorDialog(data: any): void {

@@ -2,9 +2,8 @@ import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Apollo } from 'apollo-angular';
 import { DialogService } from 'src/app/services/dialog.service';
-import { RoninNames } from 'src/app/services/user/helpers/ronin-names';
 import { UserService } from 'src/app/services/user/user.service';
-import { PaymentMethods, Scholar } from 'src/app/_models/scholar';
+import { FirestoreScholar, PaymentMethods } from 'src/app/_models/scholar';
 
 @Component({
   selector: 'app-pay-dialog',
@@ -13,22 +12,24 @@ import { PaymentMethods, Scholar } from 'src/app/_models/scholar';
 })
 export class PayDialogComponent {
   readonly paymentMethods = PaymentMethods;
-  _roninNames: RoninNames;
+  roninName: string;
+  scholarRoninName: string;
 
   constructor(
     public dialogRef: MatDialogRef<PayDialogComponent>,
     private scholarService: DialogService,
-    private apollo: Apollo,
-    private userService: UserService,
-    @Inject(MAT_DIALOG_DATA) public data: Scholar) {
-      this._roninNames = new RoninNames(apollo);
-      if (!data.roninAddress || data.roninName === 'unknown') {
-        this._roninNames.getRoninName(data);
-      }
-      if (!data.scholarRoninName || data.scholarRoninName === 'unknown') {
-        this._roninNames.getScholarRoninName(data);
-      }
-      this.userService.updateSLP(data);
+    private user: UserService,
+    @Inject(MAT_DIALOG_DATA) public data: FirestoreScholar) {
+      const roninName = this.user.getRoninName(this.data.roninAddress);
+    if (!roninName || roninName === 'unknown') {
+      this.user.updateRoninName(this.data).then((roninName) => this.roninName = roninName);
+    }
+
+    const scholarRoninName = this.user.getRoninName(this.data.scholarRoninAddress);
+    if (!scholarRoninName || scholarRoninName === 'unknown') {
+      this.user.updateScholarRoninName(this.data).then((roninName) => this.scholarRoninName = roninName);
+    }
+      this.user.updateSLP(data);
     }
 
   onNoClick(): void {

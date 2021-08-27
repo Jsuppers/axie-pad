@@ -1,7 +1,7 @@
 <table style="text-align: start;padding-left: 10px;">
   <tr>
     <td class="title-row">Ronin Name</td>
-    <td class="item-row">{{scholar.scholar.roninName | shortenName: false}}</td>
+    <td class="item-row">{{roninName | shortenName: false}}</td>
   </tr>
   <tr [cdkCopyToClipboard]="scholar.roninAddress" (click)="openSnackBar(scholar.roninAddress)">
     <td class="title-row">Ronin Address</td>
@@ -52,7 +52,7 @@
   </tr>
   <tr *ngIf="scholar.scholar.preferredPaymentMethod === paymentMethods.ronin">
     <td class="title-row">Ronin Name</td>
-    <td class="item-row">{{scholar.scholar.scholarRoninName | shortenName: false}}</td>
+    <td class="item-row">{{scholarRoninName | shortenName: false}}</td>
   </tr>
   <tr *ngIf="scholar.scholar.preferredPaymentMethod === paymentMethods.ronin" [cdkCopyToClipboard]="scholar.scholar.scholarRoninAddress" (click)="openSnackBar(scholar.scholar.scholarRoninAddress)">
     <td class="title-row">Scholar Ronin Address</td>

@@ -2,11 +2,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService } from 'src/app/services/user/user.service';
 import { Axie } from '../../../../_models/axie';
 import { MatPaginator } from '@angular/material/paginator';
+import { map, switchMap } from 'rxjs/operators';
 
 interface TableData {
   name: string;
@@ -42,21 +43,34 @@ export class AxieTableComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.user.getScholars().subscribe((scholars) => {
-      const tableData: TableData[] = [];
-      scholars.forEach((scholar) => {
-        tableData.push({
-          name: scholar?.name ?? 'unknown',
-          roninAddress: scholar?.roninAddress,
-          axies: scholar.axies,
-          elo: scholar?.leaderboardDetails?.elo ?? 0,
+    this.user
+      .getScholars()
+      .pipe(
+        switchMap((scholars) => {
+          const output: Observable<TableData>[] = [];
+          scholars.forEach((scholar) => {
+            output.push(
+              combineLatest([
+                this.user.getScholarsAxies(scholar.id),
+                this.user.getScholarsLeaderboardDetails(scholar.id),
+              ]).pipe(
+                map(([axies, leaderboardDetails]) => {
+                  return {
+                    name: this.user.getRoninName(scholar?.roninAddress),
+                    roninAddress: scholar?.roninAddress,
+                    axies: axies,
+                    elo: leaderboardDetails?.elo ?? 0,
+                  };
+              }))
+          );
         });
+        return combineLatest(output);
+      })).subscribe((tableData) => {
+        this.dataSource = new MatTableDataSource(tableData);
+        this.dataSource.sort = this.sort;
+        this.resultsLength = tableData.length;
+        this.dataSource.paginator = this.paginator;
       });
-      this.dataSource = new MatTableDataSource(tableData);
-      this.dataSource.sort = this.sort;
-      this.resultsLength = scholars.length;
-      this.dataSource.paginator = this.paginator;
-    });
   }
 
   navigateToScholar(element: TableData): void {

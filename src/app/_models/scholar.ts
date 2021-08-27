@@ -1,20 +1,8 @@
 import firebase from 'firebase';
-import { SLP } from './slp';
-import { LeaderboardDetails } from './leaderboard';
-import { Axie } from './axie';
 
 export enum PaymentMethods {
   ronin,
   eth,
-}
-
-export interface Scholar extends FirestoreScholar {
-  id: string;
-  slp: SLP;
-  axies: Axie[];
-  leaderboardDetails: LeaderboardDetails;
-  roninName: string;
-  scholarRoninName: string;
 }
 
 export interface FirestoreScholar {
@@ -40,19 +28,5 @@ export function DefaultFirestoreScholar(): FirestoreScholar {
     scholarEthAddress: '',
     preferredPaymentMethod: PaymentMethods.ronin,
     managerShare: 50,
-  };
-}
-
-export function ExtractFirestoreScholar(scholar: Scholar): FirestoreScholar {
-  return {
-    name: scholar.name ?? 'no name',
-    group: scholar.group ?? '',
-    id: scholar.id ?? firebase.firestore().collection('tmp').doc().id,
-    roninAddress: scholar.roninAddress ?? '',
-    scholarRoninAddress: scholar.scholarRoninAddress ?? '',
-    paidTimes: scholar.paidTimes ?? 0,
-    scholarEthAddress: scholar.scholarEthAddress ?? '',
-    preferredPaymentMethod: scholar.preferredPaymentMethod ?? PaymentMethods.ronin,
-    managerShare: scholar.managerShare ?? 50,
   };
 }

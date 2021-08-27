@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { FirestoreScholar, Scholar } from '../../_models/scholar';
+import { FirestoreScholar } from '../../_models/scholar';
 import { HttpClient } from '@angular/common/http';
 import {
   filter,
@@ -14,9 +14,9 @@ import {
 } from 'rxjs/operators';
 import { fromPromise } from 'rxjs/internal-compatibility';
 import { User } from '../../_models/user';
-import _, { isEmpty } from 'lodash';
+import _, { isEmpty, isEqual } from 'lodash';
 import { DefaultSLP, SLP } from '../../_models/slp';
-import { DefaultLeaderboardDetails } from '../../_models/leaderboard';
+import { DefaultLeaderboardDetails, LeaderboardDetails } from '../../_models/leaderboard';
 import { RoninNames } from '../user/helpers/ronin-names';
 import { LeaderboardStats } from '../user/helpers/leaderboard-stats';
 import { AccountAxies } from './helpers/account-axies';
@@ -24,6 +24,7 @@ import { SLPStats } from './helpers/slp-stats';
 import { CoinGecko } from './helpers/coin-gecko';
 import { Apollo } from 'apollo-angular';
 import { defaultColors } from 'src/app/constants';
+import { Axie } from 'src/app/_models/axie';
 
 export interface TotalValues {
   managerTotal: number;
@@ -34,21 +35,29 @@ export interface TotalValues {
   providedIn: 'root',
 })
 export class UserService {
-  private firestoreScholars$: BehaviorSubject<FirestoreScholar[]> =
-    new BehaviorSubject<FirestoreScholar[]>([]);
-  private scholars$: BehaviorSubject<Scholar[]> = new BehaviorSubject<
-    Scholar[]
-  >([]);
-  private fiatSLPPrice$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
-  private fiatAXSPrice$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
-  private fiatCurrency$: BehaviorSubject<string> = new BehaviorSubject<string>(
-    'usd'
-  );
-  private scholarSubjects: Record<string, BehaviorSubject<Scholar>> = {};
+  private firestoreScholars$: BehaviorSubject<Record<string, BehaviorSubject<FirestoreScholar>>>
+    = new BehaviorSubject({});
+
+
+  private scholarSLP$: BehaviorSubject<Record<string, SLP>>
+    = new BehaviorSubject({});
+  private scholarLeaderBoardDetails$: BehaviorSubject<Record<string, LeaderboardDetails>>
+    = new BehaviorSubject({});
+  private scholarAxies$: BehaviorSubject<Record<string, Axie[]>>
+    = new BehaviorSubject({});
+
+
+  private fiatSLPPrice$: BehaviorSubject<number>
+    = new BehaviorSubject<number>(0);
+  private fiatAXSPrice$: BehaviorSubject<number>
+    = new BehaviorSubject<number>(0);
+  private fiatCurrency$: BehaviorSubject<string>
+    = new BehaviorSubject<string>('usd');
+
   private currentUser: BehaviorSubject<User> = new BehaviorSubject(null);
   groups: string[] = [];
-  roninNames: RoninNames;
-  _accountAxies: AccountAxies;
+  private _roninNames: RoninNames;
+  private _accountAxies: AccountAxies;
 
   constructor(
     private service: AuthService,
@@ -56,7 +65,7 @@ export class UserService {
     private apollo: Apollo,
     private http: HttpClient
   ) {
-    this.roninNames = new RoninNames(apollo);
+    this._roninNames = new RoninNames(apollo);
     this._accountAxies = new AccountAxies(apollo);
     this.service.userState
       .pipe(
@@ -76,68 +85,111 @@ export class UserService {
         const currency = user.currency ?? 'usd';
         this.fiatCurrency$.next(currency);
         this.setCurrency(currency);
-        this.firestoreScholars$.next(scholars);
+
+        var oldKeys = Object.keys(this.firestoreScholars$.getValue());
+        scholars.forEach((scholar) => {
+          // add group to groups
+          if (scholar.group && !this.groups.includes(scholar.group)) {
+            this.groups.push(scholar.group);
+          }
+
+          // if there is a new scholar we want to update the current resources
+          if (!this.firestoreScholars$.getValue()[scholar.id]) {
+            this.firestoreScholars$.getValue()[scholar.id] = new BehaviorSubject(scholar);
+
+            // update SLP subject
+            var slp = DefaultSLP();
+            this.scholarSLP$[scholar.id] = new BehaviorSubject(slp);
+            this.updateSLP(scholar);
+
+            // update leaderboard subject
+            var leaderboardDetails = DefaultLeaderboardDetails();
+            this.scholarLeaderBoardDetails$[scholar.id] = new BehaviorSubject(leaderboardDetails);
+            this.updateLeaderBoardDetails(scholar);
+
+            // update axies
+            this.scholarAxies$[scholar.id] = new BehaviorSubject([]);
+            this.updateAxies(scholar);
+          } else {
+            const currentValue = this.firestoreScholars$.getValue()[scholar.id].getValue();
+
+            // ronin address has updated
+            if (scholar?.roninAddress && currentValue?.roninAddress != scholar?.roninAddress) {
+              this.updateSLP(scholar);
+              this.updateLeaderBoardDetails(scholar);
+              this.updateAxies(scholar);
+            }
+
+            if (!isEqual(scholar, currentValue)) {
+              this.firestoreScholars$.getValue()[scholar.id].next(scholar);
+            }
+
+            // remove current scholar from old key
+            oldKeys = oldKeys.filter(item => item !== (scholar.id));
+          }
+        });
+
+        // remove old values
+        oldKeys.forEach((key) => {
+          delete this.firestoreScholars$.getValue()[key];
+          delete this.scholarSLP$[key];
+        });
+
         this.currentUser.next(user);
       });
-
-    this.firestoreScholars$
-      .pipe(
-        pairwise(),
-        switchMap(([oldScholars, scholars]) => {
-          const output: Observable<Scholar>[] = [];
-          for (const firestoreScholar of scholars) {
-            if (firestoreScholar.group && !this.groups.includes(firestoreScholar.group)) {
-              this.groups.push(firestoreScholar.group);
-            }
-            const id = firestoreScholar.id;
-            let scholar = this.getScholarWithSLP(firestoreScholar);
-            if (!this.scholarSubjects[id]) {
-              this.scholarSubjects[id] = new BehaviorSubject(scholar);
-            }
-            const oldScholar = oldScholars.find((value) => value.id === id);
-            if (
-              !oldScholar ||
-              oldScholar.roninAddress !== firestoreScholar.roninAddress
-            ) {
-              this.updateAllStats(scholar);
-            } else {
-              const currentScholar = this.scholarSubjects[id].getValue();
-              currentScholar.managerShare = firestoreScholar.managerShare;
-              currentScholar.paidTimes = firestoreScholar.paidTimes;
-              currentScholar.name = firestoreScholar.name;
-              currentScholar.group = firestoreScholar.group;
-              this.scholarSubjects[id].next(currentScholar);
-            }
-            output.push(this.scholarSubjects[id].asObservable());
-          }
-          return combineLatest(output);
-        }),
-        // cached result of transformation
-        publishReplay(),
-        refCount()
-      )
-      .subscribe((scholars) => {
-        this.scholars$.next(scholars);
-      });
   }
 
-  async updateSLP(scholar: Scholar): Promise<void> {
-    // SLP Stats
-    scholar.slp = await SLPStats.getSLPStats(this.http, scholar.roninAddress);
-    this.scholarSubjects[scholar.id].next(scholar);
+  async updateRoninName(scholar: FirestoreScholar): Promise<string> {
+    return this._roninNames.updateRoninName(scholar.roninAddress);
   }
 
-  private async updateAllStats(scholar: Scholar): Promise<void> {
-    // SLP Stats
-    this.updateSLP(scholar);
+  async updateScholarRoninName(scholar: FirestoreScholar): Promise<string> {
+    return this._roninNames.updateRoninName(scholar.scholarRoninAddress);
+  }
 
+  getRoninName(roninAddress: string): string {
+    return this._roninNames.getRoninName(roninAddress);
+  }
+
+  getScholar(scholarID: string):  Observable<FirestoreScholar> {
+    return this.firestoreScholars$.getValue()[scholarID]?.asObservable();
+  }
+
+  getScholarsSLP(scholarID: string): Observable<SLP> {
+    return this.scholarSLP$.pipe(map((data) => data[scholarID] ?? DefaultSLP()));
+  }
+
+  getScholarsLeaderboardDetails(scholarID: string): Observable<LeaderboardDetails> {
+    return this.scholarLeaderBoardDetails$.pipe(map((data) => data[scholarID] ?? DefaultLeaderboardDetails()));
+  }
+
+  getScholarsAxies(scholarID: string): Observable<Axie[]> {
+    return this.scholarAxies$.pipe(map((data) => data[scholarID] ?? []));
+  }
+
+  async updateSLP(scholar: FirestoreScholar): Promise<void> {
+    // SLP Stats
+    const slp = await SLPStats.getSLPStats(this.http, scholar.roninAddress);
+    this.scholarSLP$[scholar.id].next(slp);
+  }
+
+
+  async updateLeaderBoardDetails(scholar: FirestoreScholar): Promise<void> {
     // leaderboard stats
-    scholar.leaderboardDetails = await LeaderboardStats.getLeaderBoardStats(this.http, scholar.roninAddress);
-    this.scholarSubjects[scholar.id].next(scholar);
+    const leaderboardDetails = await LeaderboardStats.getLeaderBoardStats(this.http, scholar.roninAddress);
+    this.scholarLeaderBoardDetails$[scholar.id].next(leaderboardDetails);
+  }
 
+  async updateAxies(scholar: FirestoreScholar): Promise<void> {
     // account axies
-    scholar.axies = await this._accountAxies.getAxies(scholar.roninAddress);
-    this.scholarSubjects[scholar.id].next(scholar);
+    const axies = await this._accountAxies.getAxies(scholar.roninAddress);
+    this.scholarAxies$[scholar.id].next(axies);
+  }
+
+  private async updateAllStats(scholar: FirestoreScholar): Promise<void> {
+    this.updateSLP(scholar);
+    this.updateLeaderBoardDetails(scholar);
+    this.updateAxies(scholar);
   }
 
   async ensureDocumentCreated(user: any): Promise<any> {
@@ -159,9 +211,9 @@ export class UserService {
     return user;
   }
 
-  getScholar(scholarId: string): Observable<Scholar> {
-    return this.scholarSubjects[scholarId].asObservable();
-  }
+  // getScholar(scholarId: string): Observable<Scholar> {
+  //   return this.scholarSubjects[scholarId].asObservable();
+  // }
 
   currentUser$(): Observable<User> {
     return this.currentUser.asObservable();
@@ -177,10 +229,9 @@ export class UserService {
   }
 
   refresh(): void {
-    const scholars = this.scholars$.getValue() ?? [];
-    scholars.forEach((scholar) => {
-      this.updateAllStats(scholar);
-    });
+    Object.values(this.firestoreScholars$.getValue()).forEach((scholarSubject) => {
+      this.updateAllStats(scholarSubject.getValue());
+    })
   }
 
   setCurrency(currency: string): void {
@@ -201,17 +252,17 @@ export class UserService {
   }
 
   // Sort the scholars
-  getScholars(): Observable<Scholar[]> {
-    return this.scholars$.asObservable();
+  getScholars(): Observable<FirestoreScholar[]> {
+    return this.currentUser.pipe(map((user) => Object.values(user.scholars ?? {})));
   }
 
   getTotalSLP(): Observable<TotalValues> {
-    return this.getScholars().pipe(
-      map((scholars) => {
+    return combineLatest([this.getScholars(), this.scholarSLP$ ]).pipe(
+      map(([scholars, SLPMap]) => {
         let total = 0;
         let managerTotal = 0;
         scholars.forEach((scholar) => {
-          const currentTotal = scholar?.slp?.total ?? 0;
+          const currentTotal = SLPMap[scholar.id]?.total ?? 0;
           total += currentTotal;
           managerTotal += currentTotal * (scholar.managerShare / 100);
         });
@@ -246,12 +297,12 @@ export class UserService {
   }
 
   getInProgressSLP(): Observable<TotalValues> {
-    return this.getScholars().pipe(
-      map((scholars) => {
+    return combineLatest([this.getScholars(), this.scholarSLP$ ]).pipe(
+      map(([scholars, SLPMap]) => {
         let total = 0;
         let managerTotal = 0;
         scholars.forEach((scholar) => {
-          const currentTotal = scholar?.slp?.inProgress ?? 0;
+          const currentTotal = SLPMap[scholar.id]?.inProgress ?? 0;
           total += currentTotal;
           managerTotal += currentTotal * (scholar.managerShare / 100);
         });
@@ -265,21 +316,5 @@ export class UserService {
 
   getFiatCurrency(): Observable<string> {
     return this.fiatCurrency$.asObservable();
-  }
-
-  private getScholarWithSLP(firestoreScholar: FirestoreScholar): Scholar {
-    const slp = DefaultSLP();
-    const leaderboardDetails = DefaultLeaderboardDetails();
-
-    const scholar: Scholar = {
-      ...firestoreScholar,
-      leaderboardDetails,
-      slp,
-      axies: [],
-      roninName: leaderboardDetails.name,
-      scholarRoninName: 'unknown',
-    };
-
-    return scholar;
   }
 }
