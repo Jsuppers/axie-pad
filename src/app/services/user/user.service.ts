@@ -48,6 +48,7 @@ export class UserService {
   private currentUser: BehaviorSubject<User> = new BehaviorSubject(null);
   groups: string[] = [];
   roninNames: RoninNames;
+  _accountAxies: AccountAxies;
 
   constructor(
     private service: AuthService,
@@ -56,6 +57,7 @@ export class UserService {
     private http: HttpClient
   ) {
     this.roninNames = new RoninNames(apollo);
+    this._accountAxies = new AccountAxies(apollo);
     this.service.userState
       .pipe(
         filter((user) => !!user),
@@ -134,7 +136,7 @@ export class UserService {
     this.scholarSubjects[scholar.id].next(scholar);
 
     // account axies
-    scholar.axies = await AccountAxies.getAxies(this.http, scholar.roninAddress);
+    scholar.axies = await this._accountAxies.getAxies(scholar.roninAddress);
     this.scholarSubjects[scholar.id].next(scholar);
   }
 
