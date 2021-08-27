@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import Chart from 'chart.js';
 import { ChartDataSets, ChartOptions, ChartType } from 'chart.js';
 import { Label } from 'ng2-charts';
-import { UserService } from '../services/user.service';
+import { UserService } from '../services/user/user.service';
 import { Scholar } from '../_models/scholar';
 import { millisecondsInDay } from '../constants';
 

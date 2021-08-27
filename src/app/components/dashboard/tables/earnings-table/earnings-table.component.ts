@@ -6,7 +6,7 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { ExtractFirestoreScholar, FirestoreScholar, Scholar } from '../../../../_models/scholar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserService } from '../../../../services/user.service';
+import { UserService } from '../../../../services/user/user.service';
 import { delay, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { DialogService } from 'src/app/services/dialog.service';
 import {

@@ -4,7 +4,7 @@ import { AbstractControl, FormControl } from '@angular/forms';
 import { ThemePalette } from '@angular/material/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { isEmpty } from 'lodash';
-import { UserService } from 'src/app/services/user.service';
+import { UserService } from 'src/app/services/user/user.service';
 import { FirestoreScholar } from 'src/app/_models/scholar';
 
 @Component({

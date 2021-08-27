@@ -1,12 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { DefaultFirestoreScholar, FirestoreScholar, Scholar } from '../../_models/scholar';
+import { BehaviorSubject } from 'rxjs';
+import { DefaultFirestoreScholar, Scholar } from '../../_models/scholar';
 import firebase from 'firebase';
-import { UserService } from '../../services/user.service';
+import { UserService } from '../../services/user/user.service';
 import { MatDialog } from '@angular/material/dialog';
-import { CurrencyDialogComponent } from '../dialogs/currency-dialog/currency-dialog.component';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { DialogService } from 'src/app/services/dialog.service';
 import { TopEarnersComponent } from '../dialogs/top-earners/top-earners.component';

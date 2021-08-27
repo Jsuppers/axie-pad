@@ -46,7 +46,7 @@ import { CachingInterceptor } from './interceptors/cache-interceptor';
 import { MatBadgeModule } from '@angular/material/badge';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MatChipsModule } from '@angular/material/chips';
-import { UserService } from './services/user.service';
+import { UserService } from './services/user/user.service';
 import { DialogService } from './services/dialog.service';
 import { EarningsTableComponent } from './components/dashboard/tables/earnings-table/earnings-table.component';
 import { ArenaTableComponent } from './components/dashboard/tables/arena-table/arena-table.component';
