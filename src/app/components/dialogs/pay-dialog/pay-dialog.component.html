@@ -2,7 +2,7 @@
 <table>
   <tr>
     <td class="title-row">Ronin Name</td>
-    <td class="item-row">{{data.roninName}}</td>
+    <td class="item-row">{{roninName}}</td>
   </tr>
   <tr>
     <td class="title-row">Ronin Address</td>
@@ -10,12 +10,12 @@
   </tr>
   <tr>
     <td class="title-row">Total In Progress </td>
-    <td class="item-row">{{data.slp.inProgress}}</td>
+    <td class="item-row">{{slp.inProgress}}</td>
   </tr>
   <tr>
     <td class="title-row">Scholar Share (To Pay) </td>
-    <td *ngIf="data.managerShare" class="item-row">{{data.slp.inProgress * ((100 - data.managerShare) / 100)}} <span class="small-text">({{100 - data.managerShare}}%)</span></td>
-    <td *ngIf="!data.managerShare" class="item-row">{{data.slp.inProgress}}</td>
+    <td *ngIf="data.managerShare" class="item-row">{{slp.inProgress * ((100 - data.managerShare) / 100)}} <span class="small-text">({{100 - data.managerShare}}%)</span></td>
+    <td *ngIf="!data.managerShare" class="item-row">{{slp.inProgress}}</td>
   </tr>
   <tr>
     <td class="title-row">Payment Method</td>

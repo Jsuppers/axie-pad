@@ -1,13 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { BehaviorSubject } from 'rxjs';
-import { DefaultFirestoreScholar, Scholar } from '../../_models/scholar';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { DefaultFirestoreScholar, FirestoreScholar } from '../../_models/scholar';
 import firebase from 'firebase';
 import { UserService } from '../../services/user/user.service';
 import { MatDialog } from '@angular/material/dialog';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { DialogService } from 'src/app/services/dialog.service';
 import { TopEarnersComponent } from '../dialogs/top-earners/top-earners.component';
+import { SLP } from 'src/app/_models/slp';
+import { map, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+
+class TopEarningData {
+  name: string;
+  average: number;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -17,7 +25,7 @@ import { TopEarnersComponent } from '../dialogs/top-earners/top-earners.componen
 export class DashboardComponent implements OnInit {
   authService: AuthService;
   userDocument: firebase.firestore.DocumentSnapshot<unknown>;
-  scholars: {name: string, average: number}[] = [];
+  scholars: TopEarningData[] = [];
   leaderBoardEmojis: string[] = ['🥇', '🥈', '🥉'];
 
   totalSLP: number;
@@ -44,14 +52,22 @@ export class DashboardComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    this.userService.getScholars().subscribe((scholars) => {
-      this.scholars = [];
+    this.userService.getScholars().pipe(switchMap((scholars) => {
+      const output: Observable<TopEarningData>[] = [];
       scholars.forEach((scholar) => {
-        this.scholars.push({
-          name: scholar.name,
-          average: this.getAverageSLP(scholar) ?? 0,
-        })
+        output.push(
+          this.userService.getScholarsSLP(scholar.id).pipe(
+            map((slp) => {
+            return {
+              name: scholar.name,
+              average: this.getAverageSLP(slp) ?? 0,
+            }
+          }))
+          )
       });
+      return combineLatest(output);
+    })).subscribe((listData) => {
+      this.scholars = listData;
       this.scholars.sort((a, b) => b.average - a.average);
     });
     this.userService.getTotalSLP().subscribe((totalSLP) => {
@@ -88,12 +104,12 @@ export class DashboardComponent implements OnInit {
     this.userService.refresh();
   }
 
-  getAverageSLP(scholar: Scholar, dateNow: Date = new Date()): number {
-    if (isNaN(scholar?.slp?.inProgress)) {
+  getAverageSLP(slp: SLP, dateNow: Date = new Date()): number {
+    if (isNaN(slp?.inProgress)) {
       return 0;
     }
-    const inProgressSLP = scholar.slp.inProgress;
-    const dateClaimed: Date = new Date(scholar.slp.lastClaimed * 1000);
+    const inProgressSLP = slp.inProgress;
+    const dateClaimed: Date = new Date(slp.lastClaimed * 1000);
 
     const seconds = Math.floor((dateNow.getTime() - dateClaimed.getTime()) / 1000);
     const secondsInDay = 86400;

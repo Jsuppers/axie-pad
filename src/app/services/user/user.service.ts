@@ -35,16 +35,10 @@ export interface TotalValues {
   providedIn: 'root',
 })
 export class UserService {
-  private firestoreScholars$: BehaviorSubject<Record<string, BehaviorSubject<FirestoreScholar>>>
-    = new BehaviorSubject({});
-
-
-  private scholarSLP$: BehaviorSubject<Record<string, SLP>>
-    = new BehaviorSubject({});
-  private scholarLeaderBoardDetails$: BehaviorSubject<Record<string, LeaderboardDetails>>
-    = new BehaviorSubject({});
-  private scholarAxies$: BehaviorSubject<Record<string, Axie[]>>
-    = new BehaviorSubject({});
+  private firestoreScholars$: Record<string, BehaviorSubject<FirestoreScholar>> = {};
+  private scholarSLP$: Record<string, BehaviorSubject<SLP>> = {};
+  private scholarLeaderBoardDetails$: Record<string, BehaviorSubject<LeaderboardDetails>> = {};
+  private scholarAxies$: Record<string, BehaviorSubject<Axie[]>> = {};
 
 
   private fiatSLPPrice$: BehaviorSubject<number>
@@ -86,7 +80,7 @@ export class UserService {
         this.fiatCurrency$.next(currency);
         this.setCurrency(currency);
 
-        var oldKeys = Object.keys(this.firestoreScholars$.getValue());
+        var oldKeys = Object.keys(this.firestoreScholars$);
         scholars.forEach((scholar) => {
           // add group to groups
           if (scholar.group && !this.groups.includes(scholar.group)) {
@@ -94,8 +88,8 @@ export class UserService {
           }
 
           // if there is a new scholar we want to update the current resources
-          if (!this.firestoreScholars$.getValue()[scholar.id]) {
-            this.firestoreScholars$.getValue()[scholar.id] = new BehaviorSubject(scholar);
+          if (!this.firestoreScholars$[scholar.id]) {
+            this.firestoreScholars$[scholar.id] = new BehaviorSubject(scholar);
 
             // update SLP subject
             var slp = DefaultSLP();
@@ -111,7 +105,7 @@ export class UserService {
             this.scholarAxies$[scholar.id] = new BehaviorSubject([]);
             this.updateAxies(scholar);
           } else {
-            const currentValue = this.firestoreScholars$.getValue()[scholar.id].getValue();
+            const currentValue = this.firestoreScholars$[scholar.id].getValue();
 
             // ronin address has updated
             if (scholar?.roninAddress && currentValue?.roninAddress != scholar?.roninAddress) {
@@ -121,7 +115,7 @@ export class UserService {
             }
 
             if (!isEqual(scholar, currentValue)) {
-              this.firestoreScholars$.getValue()[scholar.id].next(scholar);
+              this.firestoreScholars$[scholar.id].next(scholar);
             }
 
             // remove current scholar from old key
@@ -131,7 +125,7 @@ export class UserService {
 
         // remove old values
         oldKeys.forEach((key) => {
-          delete this.firestoreScholars$.getValue()[key];
+          delete this.firestoreScholars$[key];
           delete this.scholarSLP$[key];
         });
 
@@ -152,19 +146,19 @@ export class UserService {
   }
 
   getScholar(scholarID: string):  Observable<FirestoreScholar> {
-    return this.firestoreScholars$.getValue()[scholarID]?.asObservable();
+    return this.firestoreScholars$[scholarID]?.asObservable();
   }
 
   getScholarsSLP(scholarID: string): Observable<SLP> {
-    return this.scholarSLP$.pipe(map((data) => data[scholarID] ?? DefaultSLP()));
+    return this.scholarSLP$[scholarID];
   }
 
   getScholarsLeaderboardDetails(scholarID: string): Observable<LeaderboardDetails> {
-    return this.scholarLeaderBoardDetails$.pipe(map((data) => data[scholarID] ?? DefaultLeaderboardDetails()));
+    return this.scholarLeaderBoardDetails$[scholarID];
   }
 
   getScholarsAxies(scholarID: string): Observable<Axie[]> {
-    return this.scholarAxies$.pipe(map((data) => data[scholarID] ?? []));
+    return this.scholarAxies$[scholarID];
   }
 
   async updateSLP(scholar: FirestoreScholar): Promise<void> {
@@ -229,7 +223,7 @@ export class UserService {
   }
 
   refresh(): void {
-    Object.values(this.firestoreScholars$.getValue()).forEach((scholarSubject) => {
+    Object.values(this.firestoreScholars$).forEach((scholarSubject) => {
       this.updateAllStats(scholarSubject.getValue());
     })
   }
@@ -253,26 +247,9 @@ export class UserService {
 
   // Sort the scholars
   getScholars(): Observable<FirestoreScholar[]> {
-    return this.currentUser.pipe(map((user) => Object.values(user.scholars ?? {})));
+    return this.currentUser.pipe(map((user) => Object.values(user?.scholars ?? {})));
   }
 
-  getTotalSLP(): Observable<TotalValues> {
-    return combineLatest([this.getScholars(), this.scholarSLP$ ]).pipe(
-      map(([scholars, SLPMap]) => {
-        let total = 0;
-        let managerTotal = 0;
-        scholars.forEach((scholar) => {
-          const currentTotal = SLPMap[scholar.id]?.total ?? 0;
-          total += currentTotal;
-          managerTotal += currentTotal * (scholar.managerShare / 100);
-        });
-        return {
-          total,
-          managerTotal,
-        };
-      })
-    );
-  }
 
   getTotalFiat(): Observable<TotalValues> {
     return combineLatest([this.getTotalSLP(), this.fiatSLPPrice$]).pipe(
@@ -297,14 +274,49 @@ export class UserService {
   }
 
   getInProgressSLP(): Observable<TotalValues> {
-    return combineLatest([this.getScholars(), this.scholarSLP$ ]).pipe(
-      map(([scholars, SLPMap]) => {
+    return this.getScholars().pipe(
+      switchMap((scholars) => {
+        let output: Observable<{slp: SLP, managerShare: number}>[] = [];
+        scholars.forEach((scholar) => {
+          output.push(this.getScholarsSLP(scholar.id).pipe(map((slp) => (
+            {slp: slp, managerShare: scholar.managerShare}))));
+        });
+
+        return combineLatest(output)}),
+        map((output) => {
+          let total = 0;
+        let managerTotal = 0;
+        output.forEach((data) => {
+          const currentTotal = data?.slp?.inProgress ?? 0;
+          total += currentTotal;
+          managerTotal += currentTotal * (data?.managerShare / 100);
+        });
+        return {
+          total,
+          managerTotal,
+        };
+      })
+    );
+  }
+
+  getTotalSLP(): Observable<TotalValues> {
+    return this.getScholars().pipe(
+      switchMap((scholars) => {
+        let output: Observable<{slp: SLP, managerShare: number}>[] = [];
+        scholars.forEach((scholar) => {
+          output.push(this.getScholarsSLP(scholar.id).pipe(map((slp) => (
+            {slp: slp, managerShare: scholar.managerShare}))));
+        });
+
+        return combineLatest(output)}),
+        map((output) => {
+
         let total = 0;
         let managerTotal = 0;
-        scholars.forEach((scholar) => {
-          const currentTotal = SLPMap[scholar.id]?.inProgress ?? 0;
+        output.forEach((data) => {
+          const currentTotal = data?.slp?.total ?? 0;
           total += currentTotal;
-          managerTotal += currentTotal * (scholar.managerShare / 100);
+          managerTotal += currentTotal * (data?.managerShare / 100);
         });
         return {
           total,

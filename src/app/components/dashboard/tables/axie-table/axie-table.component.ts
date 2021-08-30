@@ -56,7 +56,7 @@ export class AxieTableComponent implements OnInit {
               ]).pipe(
                 map(([axies, leaderboardDetails]) => {
                   return {
-                    name: this.user.getRoninName(scholar?.roninAddress),
+                    name: scholar?.name ?? 'unknown',
                     roninAddress: scholar?.roninAddress,
                     axies: axies,
                     elo: leaderboardDetails?.elo ?? 0,

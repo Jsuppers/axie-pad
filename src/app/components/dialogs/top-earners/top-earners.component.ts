@@ -1,13 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest } from 'rxjs';
+import { map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { UserService } from 'src/app/services/user/user.service';
-import { Scholar } from 'src/app/_models/scholar';
+import { LeaderboardDetails } from 'src/app/_models/leaderboard';
+import { FirestoreScholar } from 'src/app/_models/scholar';
+import { SLP } from 'src/app/_models/slp';
 
 
 enum ViewMode {
   slp,
   elo,
+}
+
+class TableData {
+  name: string;
+  average: number;
+  elo: number
 }
 
 @Component({
@@ -16,7 +26,7 @@ enum ViewMode {
   styleUrls: ['./top-earners.component.scss']
 })
 export class TopEarnersComponent implements OnInit {
-  scholars: {name: string, average: number, elo: number}[] = [];
+  scholars: TableData[] = [];
   viewMode$ = new BehaviorSubject<ViewMode>(ViewMode.slp);
   viewMode = ViewMode;
 
@@ -30,15 +40,31 @@ export class TopEarnersComponent implements OnInit {
       combineLatest([
       this.userService.getScholars(),
       this.viewMode$,
-    ]).subscribe(([scholars, viewMode]) => {
-        this.scholars = [];
+    ]).pipe(switchMap(([scholars, viewMode]) => {
+      let output: Observable<TableData>[] = [];
         scholars.forEach((scholar) => {
-          this.scholars.push({
-            name: scholar.name,
-            average: this.getAverageSLP(scholar) ?? 0,
-            elo: scholar?.leaderboardDetails?.elo ?? 0,
-          })
+          output.push(
+            combineLatest([
+              this.userService.getScholarsLeaderboardDetails(scholar.id),
+              this.userService.getScholarsSLP(scholar.id),
+            ]).pipe(
+                map(([details, slp]) => {
+                  const tableData: TableData = {
+                    name: scholar.name,
+                    average: this.getAverageSLP(slp),
+                    elo: details?.elo ?? 0,
+                  };
+                  return tableData;
+              })
+              ),
+            );
         });
+        return combineLatest(output);
+    }),
+    withLatestFrom(this.viewMode$),
+    )
+    .subscribe(([tableData, viewMode]) => {
+        this.scholars = tableData;
         if (viewMode === ViewMode.slp) {
           this.scholars.sort((a, b) => b.average - a.average);
         }
@@ -48,13 +74,16 @@ export class TopEarnersComponent implements OnInit {
       });
     }
 
+  convertToTableData(scholar: FirestoreScholar): Observable<LeaderboardDetails> {
+    return this.userService.getScholarsLeaderboardDetails(scholar.id);
+  }
 
-  getAverageSLP(scholar: Scholar, dateNow: Date = new Date()): number {
-    if (isNaN(scholar?.slp?.inProgress)) {
+  getAverageSLP(slp: SLP, dateNow: Date = new Date()): number {
+    if (isNaN(slp?.inProgress)) {
       return 0;
     }
-    const inProgressSLP = scholar.slp.inProgress;
-    const dateClaimed: Date = new Date(scholar.slp.lastClaimed * 1000);
+    const inProgressSLP = slp.inProgress;
+    const dateClaimed: Date = new Date(slp.lastClaimed * 1000);
 
     const seconds = Math.floor((dateNow.getTime() - dateClaimed.getTime()) / 1000);
     const secondsInDay = 86400;

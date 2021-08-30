@@ -65,7 +65,7 @@ export class ArenaTableComponent implements OnInit {
               this.user.getScholarsLeaderboardDetails(scholar.id).pipe(
                 map((leaderboardDetails) => {
                   return {
-                    name:  this.user.getRoninName(scholar.roninAddress),
+                    name:  scholar?.name ?? 'unknown',
                     rank:  leaderboardDetails?.rank,
                     elo:   leaderboardDetails?.elo,
                     wins:  leaderboardDetails?.wins,

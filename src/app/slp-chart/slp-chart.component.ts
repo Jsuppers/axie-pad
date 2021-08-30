@@ -1,11 +1,22 @@
-import { Statement } from '@angular/compiler';
 import { Component, OnInit } from '@angular/core';
 import Chart from 'chart.js';
 import { ChartDataSets, ChartOptions, ChartType } from 'chart.js';
 import { Label } from 'ng2-charts';
 import { UserService } from '../services/user/user.service';
-import { Scholar } from '../_models/scholar';
-import { millisecondsInDay } from '../constants';
+import { combineLatest } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { SLP } from '../_models/slp';
+
+
+class ChartData {
+  timestamp: number;
+  scholarShare: number;
+  managerShare: number;
+  projectedShare: number;
+  day: string;
+}
+
 
 @Component({
   selector: 'app-slp-chart',
@@ -39,28 +50,51 @@ export class SlpChartComponent implements OnInit {
   public barChartType: ChartType = 'bar';
   public barChartLegend = true;
   public barChartPlugins = [];
-  public barChartData: ChartDataSets[];
+  public barChartData: ChartDataSets[] = [];
 
   constructor(private userService: UserService) {
     Chart.defaults.global.defaultFontColor = "#fff";
   }
 
   ngOnInit() {
-    this.userService.getScholars().subscribe((scholars) => {
-
-      const managerShareDataRecord: Record<number, {
-        timestamp: number,
-        scholarShare: number,
-        managerShare: number,
-        projectedShare: number}> = {};
+    this.userService.getScholars().pipe(switchMap((scholars) => {
+      const output: Observable<ChartData>[] = [];
       scholars.forEach((scholar) => {
-        if (scholar?.slp?.lastClaimed) {
-          const timestamp = (scholar?.slp?.lastClaimed  + (60 * 60 * 24 * 14)) * 1000;
-          const day = new Date(timestamp).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
-          const managerSharePercentage = (scholar?.managerShare ? scholar.managerShare : 100) / 100;
-          let scholarShare = scholar?.slp?.total * (1 - managerSharePercentage);
-          let managerShare = scholar?.slp?.total - scholarShare;
-          let projectedShare = this.getAverageSLP(scholar) * this.getDays(scholar);
+        output.push(
+          this.userService.getScholarsSLP(scholar.id).pipe(map((slp) => {
+            const timestamp = (slp?.lastClaimed  + (60 * 60 * 24 * 14)) * 1000;
+            const day = new Date(timestamp).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
+            const managerSharePercentage = (scholar?.managerShare ? scholar.managerShare : 100) / 100;
+            let scholarShare = 0;
+            let managerShare = 0;
+            let projectedShare = 0;
+
+            if (slp?.lastClaimed) {
+              scholarShare = slp?.total * (1 - managerSharePercentage);
+              managerShare = slp?.total - scholarShare;
+              projectedShare = this.getAverageSLP(slp) * this.getDays(slp);
+            }
+            const chartData: ChartData = {
+              scholarShare,
+              managerShare,
+              projectedShare,
+              timestamp,
+              day,
+            }
+            return chartData;
+        })))
+
+      });
+
+      return combineLatest(output);
+    })).subscribe((chartdata) => {
+      const managerShareDataRecord: Record<number, ChartData> = {};
+      chartdata.forEach((data) => {
+          let scholarShare = data.scholarShare;
+          let managerShare = data.managerShare;
+          let projectedShare = data.projectedShare;
+          let day = data.day;
+          let timestamp = data.timestamp;
           if (managerShareDataRecord[day]) {
             scholarShare += managerShareDataRecord[day].scholarShare;
             managerShare += managerShareDataRecord[day].managerShare;
@@ -71,8 +105,8 @@ export class SlpChartComponent implements OnInit {
             managerShare,
             projectedShare,
             timestamp,
+            day,
           }
-        }
       });
 
       var sortedValues = Object.values(managerShareDataRecord)
@@ -104,12 +138,12 @@ export class SlpChartComponent implements OnInit {
 
   }
 
-  getAverageSLP(scholar: Scholar, dateNow: Date = new Date()): number {
-    if (isNaN(scholar?.slp?.inProgress)) {
+  getAverageSLP(slp: SLP, dateNow: Date = new Date()): number {
+    if (isNaN(slp?.inProgress)) {
       return 0;
     }
-    const inProgressSLP = scholar.slp.inProgress;
-    const dateClaimed: Date = new Date(scholar.slp.lastClaimed * 1000);
+    const inProgressSLP = slp.inProgress;
+    const dateClaimed: Date = new Date(slp.lastClaimed * 1000);
 
     const seconds = Math.floor((dateNow.getTime() - dateClaimed.getTime()) / 1000);
     const secondsInDay = 86400;
@@ -119,11 +153,11 @@ export class SlpChartComponent implements OnInit {
     return (inProgressSLP / seconds * secondsInDay);
   }
 
-  getDays(element: Scholar): number {
-    if (!element?.slp?.lastClaimed) {
+  getDays(slp: SLP): number {
+    if (!slp?.lastClaimed) {
       return 0;
     }
-    const dateFuture: any = new Date(((element.slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000));
+    const dateFuture: any = new Date(((slp.lastClaimed + (60 * 60 * 24 * 14)) * 1000));
     const dateNow: any = new Date();
     if (dateFuture < dateNow) {
       return 0;

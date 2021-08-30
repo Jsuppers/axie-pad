@@ -1,9 +1,9 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Apollo } from 'apollo-angular';
 import { DialogService } from 'src/app/services/dialog.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { FirestoreScholar, PaymentMethods } from 'src/app/_models/scholar';
+import { SLP } from 'src/app/_models/slp';
 
 @Component({
   selector: 'app-pay-dialog',
@@ -14,6 +14,7 @@ export class PayDialogComponent {
   readonly paymentMethods = PaymentMethods;
   roninName: string;
   scholarRoninName: string;
+  slp: SLP;
 
   constructor(
     public dialogRef: MatDialogRef<PayDialogComponent>,
@@ -21,6 +22,8 @@ export class PayDialogComponent {
     private user: UserService,
     @Inject(MAT_DIALOG_DATA) public data: FirestoreScholar) {
       const roninName = this.user.getRoninName(this.data.roninAddress);
+
+    this.user.getScholarsSLP(data.id).subscribe((slp) => this.slp = slp);
     if (!roninName || roninName === 'unknown') {
       this.user.updateRoninName(this.data).then((roninName) => this.roninName = roninName);
     }

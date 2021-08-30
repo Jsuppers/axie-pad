@@ -162,7 +162,6 @@ export class EarningsTableComponent implements OnInit {
                       ...tableData
                     };
                   }
-
                 } else {
                   this.allData.push(tableData);
                 }
@@ -173,7 +172,6 @@ export class EarningsTableComponent implements OnInit {
                     ...tableData,
                     expanded
                   };
-
 
                   // a hack to force the data to refresh
                   this.dataSource.data = this.dataSource.data;
