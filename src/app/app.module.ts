@@ -55,7 +55,7 @@ import { EditDialogComponent } from './components/dialogs/edit-dialog/edit-dialo
 import { DeleteDialogComponent } from './components/dialogs/delete-dialog/delete-dialog.component';
 import { BreedProfitTableComponent } from './components/dashboard/tables/breed-profit-table/breed-profit-table.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { EarningsMoreInfoComponent } from './components/dashboard/tables/earnings-more-info/earnings-more-info.component';
+import { ScholarMoreInfoComponent } from './components/dashboard/tables/scholar-more-info/scholar-more-info.component';
 import { ChartsModule } from 'ng2-charts';
 import { SlpChartComponent } from './slp-chart/slp-chart.component';
 import { TitleDialogComponent } from './components/dialogs/title-dialog/title-dialog.component';
@@ -124,7 +124,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     ShortenNamePipe,
     PayDialogComponent,
     BreedProfitTableComponent,
-    EarningsMoreInfoComponent,
+    ScholarMoreInfoComponent,
     SlpChartComponent,
     TitleDialogComponent,
     AverageColorDialogComponent,

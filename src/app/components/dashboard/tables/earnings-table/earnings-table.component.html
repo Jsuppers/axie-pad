@@ -126,7 +126,7 @@
   <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
     <div class="example-element-detail"
          [@detailExpand]="element.expanded ? 'expanded' : 'collapsed'">
-      <app-earnings-more-info *ngIf="element.expanded" [scholar]="element"></app-earnings-more-info>
+      <app-scholar-more-info *ngIf="element.expanded" [scholarId]="element.scholar.id"></app-scholar-more-info>
     </div>
   </td>
 </ng-container>
