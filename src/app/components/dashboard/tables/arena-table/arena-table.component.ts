@@ -240,10 +240,10 @@ export class ArenaTableComponent implements OnInit {
       );
       group.totalCounts = rowsInGroup.length;
       group.rank = round(group.rank / group.totalCounts);
-      group.elo /= group.totalCounts;
-      group.wins /= group.totalCounts;
-      group.draws /= group.totalCounts;
-      group.loses /= group.totalCounts;
+      group.elo = round(group.elo / group.totalCounts);
+      group.wins = round(group.wins / group.totalCounts);
+      group.draws = round(group.draws / group.totalCounts);
+      group.loses = round(group.loses / group.totalCounts);
       this.expandedSubCar = [];
     });
 

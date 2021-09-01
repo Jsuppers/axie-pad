@@ -35,7 +35,8 @@
   <ng-container matColumnDef="name">
     <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
     <td mat-cell *matCellDef="let element" style="width: 200px">
-      <div *ngIf="isGroup(element)" (click)="groupHeaderClick(element)">
+      <div *ngIf="isGroup(element)" (click)="groupHeaderClick(element)"
+      style="text-align: start !important">
         <span>
           {{ hideAddresses ? "🧑‍🤝‍🧑 Group" : getGroupName(element) }} ({{
             element.totalCounts
@@ -43,7 +44,8 @@
         >
       </div>
 
-      <div *ngIf="isNotGroup(element)" (click)="navigateToScholar(element)">
+      <div *ngIf="isNotGroup(element)" (click)="navigateToScholar(element)"
+      style="text-align: start !important">
         <span>{{ hideAddresses ? "Scholar" : element.name }} </span><br />
         <span style="font-size: 12px">(⚔️ {{ element?.elo }})</span>
       </div>
