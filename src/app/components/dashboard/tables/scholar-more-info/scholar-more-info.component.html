@@ -1,4 +1,4 @@
-<table style="text-align: start;padding-left: 10px;">
+<table style="text-align: start;padding-left: 10px;" *ngIf="scholar">
   <tr>
     <td class="title-row">Ronin Name</td>
     <td class="item-row">{{roninName | shortenName: false}}</td>
@@ -49,6 +49,26 @@
   <tr>
     <td class="title-row">Next Claimable Date</td>
     <td class="item-row">{{getNextClaimDate()}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">Rank</td>
+    <td class="item-row">{{scholar.rank}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">Elo</td>
+    <td class="item-row">{{scholar.elo}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">Wins</td>
+    <td class="item-row">{{scholar.wins}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">Draws</td>
+    <td class="item-row">{{scholar.draws}}</td>
+  </tr>
+  <tr>
+    <td class="title-row">Loses</td>
+    <td class="item-row">{{scholar.loses}}</td>
   </tr>
   <tr *ngIf="scholar.scholar.preferredPaymentMethod === paymentMethods.ronin">
     <td class="title-row">Ronin Name</td>

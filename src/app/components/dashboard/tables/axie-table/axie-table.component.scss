@@ -24,15 +24,31 @@ td {
   padding-left: 15px;
 }
 
-.mat-column-elo {
+.pointer-mouse {
+  cursor: pointer;
 }
 
-.mat-column-wins {
+tr.example-element-row:not(.example-expanded-row):hover {
+  background: whitesmoke;
 }
 
-.mat-column-draws {
+tr.example-element-row:not(.example-expanded-row):active {
+  background: #efefef;
 }
 
+.example-element-row td {
+  border-bottom-width: 0;
+}
 
+tr.example-detail-row {
+  height: 0;
+}
 
+.example-element-detail {
+  overflow: hidden;
+  display: flex;
+}
 
+.mat-column-position {
+  width: 10%;
+}

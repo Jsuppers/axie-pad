@@ -1,41 +1,99 @@
-<table mat-table matSort matSortActive="rank" matSortDirection="asc" [dataSource]="dataSource"
-       class="mat-elevation-z8">
+<table
+  mat-table
+  matSort
+  (matSortChange)="onSortData($event)"
+  [dataSource]="dataSource"
+  class="mat-elevation-z8"
+  multiTemplateDataRows
+>
+  <ng-container matColumnDef="position">
+    <th mat-header-cell *matHeaderCellDef></th>
+    <td mat-cell *matCellDef="let element">
+      <div *ngIf="isGroup(element)" (click)="groupHeaderClick(element)">
+        <mat-icon *ngIf="!element.expanded" class="pointer-mouse"
+          >chevron_right</mat-icon
+        >
+        <mat-icon *ngIf="element.expanded" class="pointer-mouse"
+          >expand_more</mat-icon
+        >
+      </div>
+      <div
+        *ngIf="isNotGroup(element)"
+        style="text-align: start !important; padding-left: 10px"
+        (click)="expandScholar(element)"
+      >
+        <mat-icon *ngIf="!element.expanded" class="pointer-mouse"
+          >chevron_right</mat-icon
+        >
+        <mat-icon *ngIf="element.expanded" class="pointer-mouse"
+          >expand_more</mat-icon
+        >
+      </div>
+    </td>
+  </ng-container>
+
   <ng-container matColumnDef="name">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Name</th>
-    <td mat-cell *matCellDef="let element" (click)="navigateToScholar(element)"> {{hideAddresses ? 'Scholar' : element.name}} </td>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+    <td mat-cell *matCellDef="let element">
+      <div
+        *ngIf="isGroup(element)"
+        (click)="groupHeaderClick(element)"
+        style="text-align: start !important"
+      >
+        <span>
+          {{ hideAddresses ? "🧑‍🤝‍🧑 Group" : getGroupName(element) }} ({{
+            element.totalCounts
+          }})</span
+        >
+      </div>
+      <div *ngIf="isNotGroup(element)" style="text-align: start !important">
+        {{ hideAddresses ? "Scholar" : element.name }}
+      </div>
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="rank">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Rank</th>
-    <td mat-cell *matCellDef="let element"> {{element.rank}} </td>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Rank</th>
+    <td mat-cell *matCellDef="let element">
+      {{ element.rank }}
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="elo">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Elo</th>
-    <td mat-cell *matCellDef="let element"> {{element.elo}} </td>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Elo</th>
+    <td mat-cell *matCellDef="let element">{{ element.elo }}</td>
   </ng-container>
 
   <ng-container matColumnDef="wins">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Wins</th>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Wins</th>
     <td mat-cell *matCellDef="let element">
-      {{element.wins}} </td>
+      {{ element.wins }}
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="draws">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Draws</th>
-    <td mat-cell *matCellDef="let element"> {{element.draws}} </td>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Draws</th>
+    <td mat-cell *matCellDef="let element">{{ element.draws }}</td>
   </ng-container>
 
   <ng-container matColumnDef="loses">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Loses</th>
-    <td mat-cell *matCellDef="let element"> {{element.loses}} </td>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Loses</th>
+    <td mat-cell *matCellDef="let element">{{ element.loses }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="expandedDetail">
+    <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+      <div class="example-element-detail"
+           [@detailExpand]="element.expanded ? 'expanded' : 'collapsed'">
+        <app-scholar-more-info *ngIf="element.expanded" [scholarId]="element.id"></app-scholar-more-info>
+      </div>
+    </td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  <tr mat-row *matRowDef="let element; columns: displayedColumns; when: isGroupCell" [style.background-color]="getGroupColor(element)" style=" border-radius: 25px;"></tr>
+  <tr mat-row *matRowDef="let element; columns: displayedColumns; when: isNotGroupCell"
+    class="example-element-row"
+    [class.example-expanded-row]="element.expanded"></tr>
+  <tr mat-row *matRowDef="let row; columns: ['expandedDetail'];  when: isNotGroupCell" class="example-detail-row"></tr>
 </table>
-
-<mat-paginator [pageSizeOptions]="[5, 10, 20]"
-              [length]="resultsLength">
-</mat-paginator>
-

@@ -277,8 +277,7 @@ export class EarningsTableComponent implements OnInit {
     });
 
     this._allGroup = Object.values(groups).sort((a: Group, b: Group) => {
-      const isAsc = 'asc';
-      return this.compare(a.group, b.group, isAsc);
+      return this.compare(a.group, b.group, true);
     });
     return this._allGroup;
   }
