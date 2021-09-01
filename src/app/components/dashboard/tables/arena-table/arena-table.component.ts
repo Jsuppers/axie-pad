@@ -12,7 +12,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { map, switchMap } from 'rxjs/operators';
 import { FirestoreScholar } from 'src/app/_models/scholar';
 import { LeaderboardDetails } from 'src/app/_models/leaderboard';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty, round } from 'lodash';
 import {
   animate,
   state,
@@ -86,8 +86,6 @@ export class ArenaTableComponent implements OnInit {
   resultsLength = 0;
 
   @ViewChild(MatSort) sort: MatSort;
-
-  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   expandedCar: any[] = [];
   expandedSubCar: TableArenaData[] = [];
@@ -185,7 +183,6 @@ export class ArenaTableComponent implements OnInit {
 
         this.dataSource.data = this.dataSource.data;
         this.resultsLength = newGroups.length;
-        this.dataSource.paginator = this.paginator;
       });
 
     this.hideAddress$.subscribe((hideAddresses) => {
@@ -242,7 +239,7 @@ export class ArenaTableComponent implements OnInit {
           (row[currentColumn] ? row[currentColumn] : noGroupText)
       );
       group.totalCounts = rowsInGroup.length;
-      group.rank /= group.totalCounts;
+      group.rank = round(group.rank / group.totalCounts);
       group.elo /= group.totalCounts;
       group.wins /= group.totalCounts;
       group.draws /= group.totalCounts;

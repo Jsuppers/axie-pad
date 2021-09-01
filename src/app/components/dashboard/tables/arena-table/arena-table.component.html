@@ -97,6 +97,3 @@
     [class.example-expanded-row]="element.expanded"></tr>
   <tr mat-row *matRowDef="let row; columns: ['expandedDetail'];  when: isNotGroupCell" class="example-detail-row"></tr>
 </table>
-
-<mat-paginator [pageSizeOptions]="[5, 10, 20]" [length]="resultsLength">
-</mat-paginator>

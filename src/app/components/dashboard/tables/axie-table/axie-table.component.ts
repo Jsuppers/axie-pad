@@ -70,8 +70,6 @@ export class AxieTableComponent implements OnInit {
 
   @ViewChild(MatSort) sort: MatSort;
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-
   expandedCar: any[] = [];
   expandedSubCar: TableData[] = [];
   scholarTableData: Record<string, BehaviorSubject<TableData>> = {};
@@ -171,7 +169,6 @@ export class AxieTableComponent implements OnInit {
 
         this.dataSource.data = this.dataSource.data;
         this.resultsLength = newGroups.length;
-        this.dataSource.paginator = this.paginator;
       });
   }
 
