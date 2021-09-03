@@ -56,3 +56,14 @@ tr.example-detail-row {
 .mat-column-position {
   width: 50px;
 }
+
+.mat-column-name {
+  position: relative;
+}
+
+.group-name {
+  text-align: start !important;
+  position: absolute;
+  top: 48%;
+  transform: translateY(-50%);
+}
