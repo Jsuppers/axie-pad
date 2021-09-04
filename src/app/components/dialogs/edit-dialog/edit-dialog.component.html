@@ -19,30 +19,34 @@
     <mat-label>Account Ronin Address</mat-label>
     <input matInput [(ngModel)]="data.roninAddress">
   </mat-form-field>
-  <mat-form-field>
-    <mat-label>Manager's Share</mat-label>
-    <input type="number" matInput [(ngModel)]="data.managerShare">
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>Paid Times</mat-label>
-    <input type="number" matInput [(ngModel)]="data.paidTimes">
-  </mat-form-field>
-  <h2> Scholar Details </h2>
-  <mat-form-field appearance="fill">
-    <mat-label>Preferred Payment Method</mat-label>
-    <mat-select [(ngModel)]="data.preferredPaymentMethod">
-      <mat-option [value]="paymentMethods.ronin">Ronin Wallet</mat-option>
-      <mat-option [value]="paymentMethods.eth">Ethereum Wallet</mat-option>
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>Scholar Ronin Address</mat-label>
-    <input matInput [(ngModel)]="data.scholarRoninAddress">
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>Scholar Eth Address</mat-label>
-    <input matInput [(ngModel)]="data.scholarEthAddress">
-  </mat-form-field>
+  <mat-checkbox [(ngModel)]="data.useOwnPayShare">Use own pay scale</mat-checkbox>
+  <div style="margin-top: 10px;">
+    <mat-form-field *ngIf="data.useOwnPayShare">
+      <mat-label>Manager's Share</mat-label>
+      <input type="number" matInput [(ngModel)]="data.managerShare">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Paid Times</mat-label>
+      <input type="number" matInput [(ngModel)]="data.paidTimes">
+    </mat-form-field>
+    <h2> Scholar Details </h2>
+    <mat-form-field appearance="fill">
+      <mat-label>Preferred Payment Method</mat-label>
+      <mat-select [(ngModel)]="data.preferredPaymentMethod">
+        <mat-option [value]="paymentMethods.ronin">Ronin Wallet</mat-option>
+        <mat-option [value]="paymentMethods.eth">Ethereum Wallet</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Scholar Ronin Address</mat-label>
+      <input matInput [(ngModel)]="data.scholarRoninAddress">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Scholar Eth Address</mat-label>
+      <input matInput [(ngModel)]="data.scholarEthAddress">
+    </mat-form-field>
+  </div>
+
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onNoClick()">Cancel</button>

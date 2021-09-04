@@ -64,7 +64,7 @@ export class SlpChartComponent implements OnInit {
           this.userService.getScholarsSLP(scholar.id).pipe(map((slp) => {
             const timestamp = (slp?.lastClaimed  + (60 * 60 * 24 * 14)) * 1000;
             const day = new Date(timestamp).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
-            const managerSharePercentage = (scholar?.managerShare ? scholar.managerShare : 100) / 100;
+            const managerSharePercentage = (this.userService.getManagerShare(scholar)) / 100;
             let scholarShare = 0;
             let managerShare = 0;
             let projectedShare = 0;

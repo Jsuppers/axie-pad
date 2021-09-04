@@ -14,8 +14,7 @@
   </tr>
   <tr>
     <td class="title-row">Scholar Share (To Pay) </td>
-    <td *ngIf="data.managerShare" class="item-row">{{slp.inProgress * ((100 - data.managerShare) / 100)}} <span class="small-text">({{100 - data.managerShare}}%)</span></td>
-    <td *ngIf="!data.managerShare" class="item-row">{{slp.inProgress}}</td>
+    <td class="item-row">{{slp.inProgress * ((100 - getManagerShare(data)) / 100)}} <span class="small-text">({{100 - getManagerShare(data)}}%)</span></td>
   </tr>
   <tr>
     <td class="title-row">Payment Method</td>

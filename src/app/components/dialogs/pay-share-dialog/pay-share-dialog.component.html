@@ -1,0 +1,22 @@
+<div mat-dialog-actions  style="padding-bottom: 30px;">
+  <h1 >Default Share</h1>
+  <div style="margin-left: 10px; margin-bottom: 10px;">
+    <button mat-button (click)="reset()">Reset</button>
+    <button mat-button (click)="addPoint()">Add</button>
+  </div>
+</div>
+<span >
+  The percentage of the manager and scholar at specific paid times.
+</span>
+<br>
+<div *ngFor="let payShare of payShares; let i = index" style="padding-top: 8px;">
+  <span>
+    <strong>>={{i}} </strong>
+    Manager: <input matInput type="number" max="100" min="0" [(ngModel)]="payShare.manager" (change)="updateScholarShare(payShare)">
+    Scholar: {{payShare.scholar}}
+  </span>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Close</button>
+  <button mat-button [mat-dialog-close]="payShares" cdkFocusInitial>Save</button>
+</div>

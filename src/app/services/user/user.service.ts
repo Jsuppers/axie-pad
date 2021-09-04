@@ -13,7 +13,7 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import { fromPromise } from 'rxjs/internal-compatibility';
-import { User } from '../../_models/user';
+import { DefaultUser, User } from '../../_models/user';
 import _, { isEmpty, isEqual } from 'lodash';
 import { DefaultSLP, SLP } from '../../_models/slp';
 import { DefaultLeaderboardDetails, LeaderboardDetails } from '../../_models/leaderboard';
@@ -23,7 +23,7 @@ import { AccountAxies } from './helpers/account-axies';
 import { SLPStats } from './helpers/slp-stats';
 import { CoinGecko } from './helpers/coin-gecko';
 import { Apollo } from 'apollo-angular';
-import { defaultColors } from 'src/app/constants';
+import { defaultColors, defaultManagerShare, defaultScholarShare } from 'src/app/constants';
 import { Axie } from 'src/app/_models/axie';
 
 export interface TotalValues {
@@ -72,6 +72,7 @@ export class UserService {
         })
       )
       .subscribe(async (user: User) => {
+        this.setDefaults(user);
         const scholars = Object.values(
           user.scholars ?? {}
         ) as FirestoreScholar[];
@@ -194,11 +195,9 @@ export class UserService {
       .toPromise();
 
     if (!userDocument || !userDocument.exists) {
+      const user: User = DefaultUser();
       await userDocument.ref.set(
-        {
-          scholars: {},
-          currency: 'usd',
-        },
+        user,
         { merge: true }
       );
     }
@@ -279,7 +278,7 @@ export class UserService {
         let output: Observable<{slp: SLP, managerShare: number}>[] = [];
         scholars.forEach((scholar) => {
           output.push(this.getScholarsSLP(scholar.id).pipe(map((slp) => (
-            {slp: slp, managerShare: scholar.managerShare}))));
+            {slp: slp, managerShare: this.getManagerShare(scholar)}))));
         });
 
         return combineLatest(output)}),
@@ -305,7 +304,7 @@ export class UserService {
         let output: Observable<{slp: SLP, managerShare: number}>[] = [];
         scholars.forEach((scholar) => {
           output.push(this.getScholarsSLP(scholar.id).pipe(map((slp) => (
-            {slp: slp, managerShare: scholar.managerShare}))));
+            {slp: slp, managerShare: this.getManagerShare(scholar)}))));
         });
 
         return combineLatest(output)}),
@@ -326,7 +325,36 @@ export class UserService {
     );
   }
 
+  getManagerShare(scholar: FirestoreScholar): number {
+    if (!scholar) {
+      return 100;
+    }
+    if (scholar.useOwnPayShare) {
+      return scholar.managerShare;
+    }
+    const payShare = this.currentUser.getValue().defaults.payshare;
+    const paidTimes = scholar.paidTimes;
+    if (paidTimes > (payShare.length - 1)) {
+      return payShare[payShare.length - 1].manager;
+    }
+    return payShare[paidTimes].manager;
+  }
+
   getFiatCurrency(): Observable<string> {
     return this.fiatCurrency$.asObservable();
   }
+
+  setDefaults(user: User) {
+    if (_.isEmpty(user.defaults?.payshare)) {
+      if (!user.defaults) {
+        user.defaults = {};
+      }
+      user.defaults.payshare = [{
+        manager: defaultManagerShare,
+        scholar: defaultScholarShare,
+      }];
+    }
+  }
 }
+
+

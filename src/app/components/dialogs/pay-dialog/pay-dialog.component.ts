@@ -42,4 +42,8 @@ export class PayDialogComponent {
   openSnackBar(message: string): void {
     this.scholarService.openSnackBar(message);
   }
+
+  getManagerShare(scholar: FirestoreScholar): number {
+    return this.user.getManagerShare(scholar)
+  }
 }

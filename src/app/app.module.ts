@@ -69,6 +69,9 @@ import { ColorDialogComponent } from './components/dialogs/color-dialog/color-di
 import { MAT_COLOR_FORMATS, NgxMatColorPickerModule, NGX_MAT_COLOR_FORMATS } from '@angular-material-components/color-picker';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { AxieTableComponent } from './components/dashboard/tables/axie-table/axie-table.component';
+import { PayShareDialogComponent } from './components/dialogs/pay-share-dialog/pay-share-dialog.component';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -131,12 +134,14 @@ const cookieConfig: NgcCookieConsentConfig = {
     TopEarnersComponent,
     ColorDialogComponent,
     AxieTableComponent,
+    PayShareDialogComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
     NgcCookieConsentModule.forRoot(cookieConfig),
     AngularFireAuthModule,
     AngularFirestoreModule,
+    MatCheckboxModule,
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,

@@ -15,6 +15,8 @@ export interface FirestoreScholar {
   preferredPaymentMethod: PaymentMethods;
   scholarEthAddress: string;
   managerShare: number;
+  // defaults to undefined which means use the default share
+  useOwnPayShare?: boolean;
 }
 
 export function DefaultFirestoreScholar(): FirestoreScholar {

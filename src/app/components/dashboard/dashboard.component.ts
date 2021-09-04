@@ -11,6 +11,9 @@ import { TopEarnersComponent } from '../dialogs/top-earners/top-earners.componen
 import { SLP } from 'src/app/_models/slp';
 import { map, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { PayShareDialogComponent } from '../dialogs/pay-share-dialog/pay-share-dialog.component';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { PayShare } from 'src/app/_models/pay-share';
 
 class TopEarningData {
   name: string;
@@ -44,6 +47,7 @@ export class DashboardComponent implements OnInit {
   hideAddress: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   constructor(private service: AuthService,
+              private db: AngularFirestore,
               private scholarService: DialogService,
               public dialog: MatDialog,
               private userService: UserService,
@@ -120,8 +124,25 @@ export class DashboardComponent implements OnInit {
   }
 
   openTopEarnerDialog(): void {
-    const dialogRef = this.dialog.open(TopEarnersComponent, {
+    this.dialog.open(TopEarnersComponent, {
       width: '400px',
+    });
+  }
+
+  shareDialog(): void {
+    const dialogRef = this.dialog.open(PayShareDialogComponent, {
+      width: '400px',
+      maxHeight: '90vh',
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: PayShare[]) => {
+      const user = this.authService.userState.getValue();
+      if (user && result) {
+        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
+        await userDocument.ref.update({
+          ['defaults.payshare']: result
+        });
+      }
     });
   }
 
