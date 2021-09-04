@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { FirestoreScholar } from '../../_models/scholar';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -25,6 +25,7 @@ import { CoinGecko } from './helpers/coin-gecko';
 import { Apollo } from 'apollo-angular';
 import { defaultColors, defaultManagerShare, defaultScholarShare } from 'src/app/constants';
 import { Axie } from 'src/app/_models/axie';
+import { Table } from 'src/app/_models/table';
 
 export interface TotalValues {
   managerTotal: number;
@@ -53,6 +54,10 @@ export class UserService {
   groups: string[] = [];
   private _roninNames: RoninNames;
   private _accountAxies: AccountAxies;
+  tableID: BehaviorSubject<string> = new BehaviorSubject(null);
+  private currentUserID: string;
+  ownTableName: BehaviorSubject<string> = new BehaviorSubject(null);
+  ownLinkedTables: BehaviorSubject<Record<string, Table>> = new BehaviorSubject(null);
 
   constructor(
     private service: AuthService,
@@ -62,14 +67,11 @@ export class UserService {
   ) {
     this._roninNames = new RoninNames(apollo);
     this._accountAxies = new AccountAxies(apollo);
-    this.service.userState
+    this.tableID
       .pipe(
         filter((user) => !!user),
-        switchMap((user) => {
-          return fromPromise(this.ensureDocumentCreated(user));
-        }),
-        switchMap((user) => {
-          return this.db.collection('users').doc(user.uid).valueChanges();
+        switchMap((tableID) => {
+          return this.db.collection('users').doc(tableID).valueChanges();
         })
       )
       .subscribe(async (user: User) => {
@@ -133,6 +135,33 @@ export class UserService {
 
         this.currentUser.next(user);
       });
+
+      this.service.userState.pipe(
+        filter((user) => !!user),
+        switchMap((user) => {
+          return fromPromise(this.ensureDocumentCreated(user));
+        })).subscribe((user) => {
+          this.currentUserID = user.uid;
+          this.tableID.next(user.uid);
+      });
+
+      this.service.userState.pipe(
+        filter((user) => !!user),
+        switchMap((user) => {
+          return this.db.collection('users').doc(user.uid).valueChanges();
+        })
+      ).subscribe((user: User) => {
+        this.ownLinkedTables.next(user.linkedTables ?? {});
+        this.ownTableName.next(user.title);
+      });
+  }
+
+  setOwnTable(): void {
+    this.tableID.next(this.currentUserID);
+  }
+
+  setTable(table: Table): void {
+    this.tableID.next(table.tableID);
   }
 
   async updateRoninName(scholar: FirestoreScholar): Promise<string> {
@@ -346,7 +375,7 @@ export class UserService {
   }
 
   setDefaults(user: User) {
-    if (_.isEmpty(user.defaults?.payshare)) {
+    if (_.isEmpty(user?.defaults?.payshare)) {
       if (!user.defaults) {
         user.defaults = {};
       }

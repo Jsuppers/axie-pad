@@ -1,6 +1,19 @@
 <div fxLayout="column" fxFlexFill>
-
   <mat-toolbar style="background: #F0F0F0; padding-bottom: 10px;">
+    <button mat-icon-button [matMenuTriggerFor]="menuTable" aria-label="Example icon-button with a menu">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #menuTable="matMenu">
+      <button mat-menu-item (click)="addTable()">
+        <mat-icon style="margin-left: 5px;">add</mat-icon>add Table
+      </button>
+      <button mat-menu-item (click)="setOwnTable()">
+        {{ownTableTitle}}
+      </button>
+      <button *ngFor="let table of linkedTables" mat-menu-item (click)="setTable(table)">
+        {{table.name}}
+      </button>
+    </mat-menu>
     <a mat-button class="companyName" routerLink="/dashboard" (click)="openTitleDialog()">
       <span>{{title}}</span>
     </a>
@@ -17,6 +30,9 @@
       <mat-icon>menu</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="openAddManagerDialog()">
+        <span style="margin-left: 5px; margin-right: 15px;">👨‍🏫</span>Managers
+      </button>
       <button mat-menu-item (click)="shareDialog()">
         <span style="margin-left: 5px; margin-right: 15px;">⚖️</span>Pay Percentage
       </button>

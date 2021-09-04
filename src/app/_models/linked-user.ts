@@ -1,13 +1,16 @@
+import firebase from "firebase";
 import { Role } from "./role";
 
 export interface LinkedUser {
-  uid: string;
+  id: string,
+  email: string;
   role: Role;
 }
 
-export function LinkedUser(uid: string, role: Role = Role.Viewer): LinkedUser {
+export function LinkedUser(email: string, role: Role = Role.viewer): LinkedUser {
   return {
-    uid,
+    id: btoa(email),
+    email,
     role,
   };
 }

@@ -10,6 +10,11 @@ import { TitleDialogComponent } from './components/dialogs/title-dialog/title-di
 import { BehaviorSubject } from 'rxjs';
 import { PayShareDialogComponent } from './components/dialogs/pay-share-dialog/pay-share-dialog.component';
 import { PayShare } from './_models/pay-share';
+import { LinkedUser } from './_models/linked-user';
+import { AddManagerDialogComponent } from './components/dialogs/add-manager-dialog/add-manager-dialog.component';
+import { LinkTableDialogComponent } from './components/dialogs/link-table-dialog/link-table-dialog.component';
+import { Table } from './_models/table';
+import _ from 'lodash';
 
 @Component({
   selector: 'app-root',
@@ -23,13 +28,21 @@ export class AppComponent implements OnInit {
   SLPPrice: number;
   AXSPrice: number;
   hideAddress: BehaviorSubject<boolean>;
+  linkedTables: Table[];
+  ownTableTitle: string;
 
   constructor(private authService: AuthService,
               private userService: UserService,
               private dialog: MatDialog,
               private db: AngularFirestore,
               private ccService: NgcCookieConsentService) {
-                this.hideAddress = this.userService.hideAddress;
+      this.hideAddress = this.userService.hideAddress;
+      this.userService.ownLinkedTables.subscribe((tables) => {
+        this.linkedTables = Object.values(tables ?? {});
+      });
+      this.userService.ownTableName.subscribe((name) => {
+        this.ownTableTitle = name;
+      });
   }
 
   hideAddresses(): void {
@@ -52,6 +65,14 @@ export class AppComponent implements OnInit {
     });
   }
 
+  setOwnTable(): void {
+    this.userService.setOwnTable();
+  }
+
+  setTable(table: Table): void {
+    this.userService.setTable(table);
+  }
+
   signOut(): void {
     this.authService.SignOut();
   }
@@ -67,11 +88,36 @@ export class AppComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(async (result: string) => {
-      const user = this.authService.userState.getValue();
-      if (user && result) {
-        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
+      const uid = this.userService.tableID.getValue();
+      if (uid && result) {
+        const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
         await userDocument.ref.update({
           ['title']: result
+        });
+      }
+    });
+  }
+
+  openAddManagerDialog(): void {
+    const dialogRef = this.dialog.open(AddManagerDialogComponent, {
+      width: '400px',
+      maxHeight: '90vh',
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: Record<string, LinkedUser>) => {
+      const uid = this.userService.tableID.getValue();
+      if (uid && result) {
+        const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
+        const newLinkedUsers: Record<string, LinkedUser> = {};
+        Object.values(result ?? {}).forEach((user) => {
+          if (!_.isEmpty(user.email)) {
+            user.id = btoa(user.email);
+            newLinkedUsers[user.id] = user;
+          }
+        });
+
+        await userDocument.ref.update({
+          ['linkedUsers']: newLinkedUsers
         });
       }
     });
@@ -110,11 +156,28 @@ export class AppComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(async (result: PayShare[]) => {
+      const uid = this.userService.tableID.getValue();
+      if (uid && result) {
+        const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
+        await userDocument.ref.update({
+          ['defaults.payshare']: result
+        });
+      }
+    });
+  }
+
+  addTable(): void {
+    const dialogRef = this.dialog.open(LinkTableDialogComponent, {
+      width: '400px',
+      maxHeight: '90vh',
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: Record<string, Table>) => {
       const user = this.authService.userState.getValue();
       if (user && result) {
         const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
         await userDocument.ref.update({
-          ['defaults.payshare']: result
+          ['linkedTables']: result
         });
       }
     });

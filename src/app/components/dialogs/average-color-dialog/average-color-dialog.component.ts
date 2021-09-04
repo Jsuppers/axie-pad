@@ -31,9 +31,9 @@ export class AverageColorDialogComponent implements OnInit {
   }
 
   async save(): Promise<void> {
-    const user = this.authService.userState.getValue();
-    if (user) {
-      const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
+    const uid = this.userService.tableID.getValue();
+    if (uid) {
+      const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
       await userDocument.ref.update({
         ['colors']: this.colors,
       });

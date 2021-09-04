@@ -71,6 +71,8 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { AxieTableComponent } from './components/dashboard/tables/axie-table/axie-table.component';
 import { PayShareDialogComponent } from './components/dialogs/pay-share-dialog/pay-share-dialog.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { AddManagerDialogComponent } from './components/dialogs/add-manager-dialog/add-manager-dialog.component';
+import { LinkTableDialogComponent } from './components/dialogs/link-table-dialog/link-table-dialog.component';
 
 
 const cookieConfig: NgcCookieConsentConfig = {
@@ -135,6 +137,8 @@ const cookieConfig: NgcCookieConsentConfig = {
     ColorDialogComponent,
     AxieTableComponent,
     PayShareDialogComponent,
+    AddManagerDialogComponent,
+    LinkTableDialogComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),

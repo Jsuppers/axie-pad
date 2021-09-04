@@ -1,0 +1,26 @@
+<div mat-dialog-actions  style="padding-bottom: 30px;">
+  <h1>Linked Tables</h1>
+  <div style="margin-left: 10px; margin-bottom: 10px;">
+    <button mat-button (click)="reset()">Reset</button>
+    <button mat-button (click)="addTable()">Add</button>
+  </div>
+</div>
+<span >
+  You can add other tables from other users
+</span>
+<br>
+<div *ngFor="let tables of linkedTables | keyvalue" style="padding-top: 8px;">
+  <mat-form-field>
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="tables.value.name">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Table ID</mat-label>
+    <input matInput [(ngModel)]="tables.value.tableID">
+  </mat-form-field>
+  <mat-divider></mat-divider>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Close</button>
+  <button mat-button [mat-dialog-close]="linkedTables" cdkFocusInitial>Save</button>
+</div>

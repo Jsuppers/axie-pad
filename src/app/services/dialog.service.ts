@@ -10,6 +10,7 @@ import { EditDialogComponent } from '../components/dialogs/edit-dialog/edit-dial
 import { PayDialogComponent } from '../components/dialogs/pay-dialog/pay-dialog.component';
 import { FirestoreScholar } from '../_models/scholar';
 import { AuthService } from './auth.service';
+import { UserService } from './user/user.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +20,7 @@ export class DialogService {
   constructor(
     public dialog: MatDialog,
     private db: AngularFirestore,
+    private userService: UserService,
     private authService: AuthService,
     private snackBar: MatSnackBar,) { }
 
@@ -29,10 +31,10 @@ export class DialogService {
     });
 
     dialogRef.afterClosed().subscribe(async (result: FirestoreScholar) => {
-      const user = this.authService.userState.getValue();
-      if (user && result) {
+      const uid = this.userService.tableID.getValue();
+      if (uid && result) {
         result.paidTimes = (result?.paidTimes ?? 0) + 1;
-        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
+        const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
         await userDocument.ref.update({
           ['scholars.' + result.id + '.paidTimes']: result.paidTimes
         });
@@ -47,12 +49,12 @@ export class DialogService {
     });
 
     dialogRef.afterClosed().subscribe(async (result: FirestoreScholar) => {
-      const user = this.authService.userState.getValue();
-      if (user && result) {
+      const uid = this.userService.tableID.getValue();
+      if (uid && result) {
         result.managerShare = result?.managerShare ?? 30;
         result.scholarRoninAddress = result?.scholarRoninAddress?.trim() ?? '';
         result.roninAddress = result?.roninAddress?.trim() ?? '';
-        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
+        const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
         await userDocument.ref.update({
           ['scholars.' + result.id]: result
         });
@@ -67,9 +69,9 @@ export class DialogService {
     });
 
     dialogRef.afterClosed().subscribe(async (result: string) => {
-      const user = this.authService.userState.getValue();
-      if (user && result) {
-        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
+      const uid = this.userService.tableID.getValue();
+      if (uid && result) {
+        const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
         await userDocument.ref.update({
           ['groupColors.' + group]: result
         });
@@ -86,9 +88,9 @@ export class DialogService {
       width: '200px',
     });
     dialogRef.afterClosed().subscribe(async (result) => {
-      const user = this.authService.userState.getValue();
-      if (user && result) {
-        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
+      const uid = this.userService.tableID.getValue();
+      if (uid && result) {
+        const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
         await userDocument.ref.update({
           ['scholars.' + scholarId]: firebase.firestore.FieldValue.delete(),
         });
