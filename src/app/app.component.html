@@ -13,8 +13,22 @@
     <button mat-raised-button (click)="navigateAXSChart()" class="crypto-button">
       <img src="assets/axs.webp" style="width: 20px"><span style="padding-left: 5px;">{{ fiatCurrency }}{{AXSPrice | number : '1.2-2'}}</span>
     </button>
-      <a mat-button (click)="openCurrencyDialog()">{{fiatCurrencyTitle?.toUpperCase()}}</a>
-      <a mat-button (click)="signOut()"><mat-icon>exit_to_app</mat-icon> Sign out</a>
+    <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="shareDialog()">
+        <span style="margin-left: 5px; margin-right: 15px;">⚖️</span>Pay Percentage
+      </button>
+      <button mat-menu-item (click)="hideAddresses()">
+        <mat-icon style="margin-left: 5px">{{ hideAddress.getValue() ?  "visibility_off" : "visibility" }}</mat-icon>{{ hideAddress.getValue() ?  "hide info" : "show info" }}
+      </button>
+      <button mat-menu-item (click)="openCurrencyDialog()">
+        <mat-icon style="margin-left: 5px; color: #058630">paid</mat-icon>{{fiatCurrencyTitle?.toUpperCase()}}
+      </button>
+      <button mat-menu-item (click)="signOut()">
+        <mat-icon style="margin-left: 5px; color: #f2738c">logout</mat-icon>Sign out</button>
+    </mat-menu>
     </div>
   </mat-toolbar>
   <div fxFlex>

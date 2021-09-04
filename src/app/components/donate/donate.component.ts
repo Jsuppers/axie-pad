@@ -7,10 +7,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./donate.component.scss']
 })
 export class DonateComponent implements OnInit {
-  ethAddress = '0x509eFF672dd32215Fed920499302BBaFCc2E1513';
-  roninAddress = 'ronin:509eff672dd32215fed920499302bbafcc2e1513';
+  ethAddress = '0x1d4C3D2A27D77Ab6C2Cf0DEf4b5d9be551272424';
+  roninAddress = 'ronin:1d4c3d2a27d77ab6c2cf0def4b5d9be551272424';
+  totalDonations: number;
 
   constructor(private snackBar: MatSnackBar) {
+    this.totalDonations = 0;
+    // todo automate this
   }
 
   ngOnInit(): void {

@@ -90,21 +90,9 @@
       <app-breed-profit-table></app-breed-profit-table>
     </mat-tab>
     <mat-tab disabled class="last-tab">
-        <ng-template mat-tab-label >
-          <button mat-raised-button (click)="shareDialog()"
-            class="add-scholar-button">
-            <mat-icon style="font-size: 16px;">⚖️</mat-icon>
-          </button>
+        <ng-template mat-tab-label>
           <button mat-raised-button (click)="refresh()" class="add-scholar-button">
             <mat-icon>refresh</mat-icon>
-          </button>
-          <button
-            mat-raised-button
-            (click)="hideAddresses()"
-            class="add-scholar-button"
-          >
-          <mat-icon>{{ hideAddress.getValue() ?  "visibility_off" : "visibility" }}</mat-icon>
-
           </button>
           <button
           mat-raised-button

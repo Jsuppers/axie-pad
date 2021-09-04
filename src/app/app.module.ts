@@ -70,7 +70,7 @@ import { MAT_COLOR_FORMATS, NgxMatColorPickerModule, NGX_MAT_COLOR_FORMATS } fro
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { AxieTableComponent } from './components/dashboard/tables/axie-table/axie-table.component';
 import { PayShareDialogComponent } from './components/dialogs/pay-share-dialog/pay-share-dialog.component';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 
 const cookieConfig: NgcCookieConsentConfig = {

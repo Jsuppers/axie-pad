@@ -7,7 +7,9 @@ import { CurrencyDialogComponent } from './components/dialogs/currency-dialog/cu
 import { AngularFirestore } from '@angular/fire/firestore';
 import getSymbolFromCurrency from 'currency-symbol-map'
 import { TitleDialogComponent } from './components/dialogs/title-dialog/title-dialog.component';
-import { filter } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
+import { PayShareDialogComponent } from './components/dialogs/pay-share-dialog/pay-share-dialog.component';
+import { PayShare } from './_models/pay-share';
 
 @Component({
   selector: 'app-root',
@@ -20,12 +22,18 @@ export class AppComponent implements OnInit {
   fiatCurrencyTitle: string;
   SLPPrice: number;
   AXSPrice: number;
+  hideAddress: BehaviorSubject<boolean>;
 
   constructor(private authService: AuthService,
               private userService: UserService,
               private dialog: MatDialog,
               private db: AngularFirestore,
               private ccService: NgcCookieConsentService) {
+                this.hideAddress = this.userService.hideAddress;
+  }
+
+  hideAddresses(): void {
+    this.hideAddress.next(!this.hideAddress.getValue());
   }
 
   ngOnInit(): void {
@@ -92,5 +100,23 @@ export class AppComponent implements OnInit {
 
   navigateAXSChart(): void {
     window.open('https://www.coingecko.com/en/coins/axie-infinity', '_blank');
+  }
+
+
+  shareDialog(): void {
+    const dialogRef = this.dialog.open(PayShareDialogComponent, {
+      width: '400px',
+      maxHeight: '90vh',
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: PayShare[]) => {
+      const user = this.authService.userState.getValue();
+      if (user && result) {
+        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
+        await userDocument.ref.update({
+          ['defaults.payshare']: result
+        });
+      }
+    });
   }
 }

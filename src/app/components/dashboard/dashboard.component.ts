@@ -44,7 +44,7 @@ export class DashboardComponent implements OnInit {
   SLPPrice: number;
   AXSPrice: number;
   fiatCurrency: string;
-  hideAddress: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  hideAddress: BehaviorSubject<boolean>;
 
   constructor(private service: AuthService,
               private db: AngularFirestore,
@@ -53,6 +53,7 @@ export class DashboardComponent implements OnInit {
               private userService: UserService,
   ) {
     this.authService = service;
+    this.hideAddress = this.userService.hideAddress;
   }
 
   async ngOnInit(): Promise<void> {
@@ -128,22 +129,4 @@ export class DashboardComponent implements OnInit {
       width: '400px',
     });
   }
-
-  shareDialog(): void {
-    const dialogRef = this.dialog.open(PayShareDialogComponent, {
-      width: '400px',
-      maxHeight: '90vh',
-    });
-
-    dialogRef.afterClosed().subscribe(async (result: PayShare[]) => {
-      const user = this.authService.userState.getValue();
-      if (user && result) {
-        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
-        await userDocument.ref.update({
-          ['defaults.payshare']: result
-        });
-      }
-    });
-  }
-
 }

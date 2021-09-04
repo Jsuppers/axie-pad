@@ -39,6 +39,7 @@ export class UserService {
   private scholarSLP$: Record<string, BehaviorSubject<SLP>> = {};
   private scholarLeaderBoardDetails$: Record<string, BehaviorSubject<LeaderboardDetails>> = {};
   private scholarAxies$: Record<string, BehaviorSubject<Axie[]>> = {};
+  hideAddress: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
 
   private fiatSLPPrice$: BehaviorSubject<number>
