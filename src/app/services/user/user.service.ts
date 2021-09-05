@@ -69,12 +69,13 @@ export class UserService {
     this._accountAxies = new AccountAxies(apollo);
     this.tableID
       .pipe(
-        filter((user) => !!user),
+        filter((tableID) => !!tableID),
         switchMap((tableID) => {
           return this.db.collection('users').doc(tableID).valueChanges();
         })
       )
       .subscribe(async (user: User) => {
+        debugger;
         this.setDefaults(user);
         const scholars = Object.values(
           user.scholars ?? {}

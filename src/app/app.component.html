@@ -1,12 +1,10 @@
 <div fxLayout="column" fxFlexFill>
   <mat-toolbar style="background: #F0F0F0; padding-bottom: 10px;">
-    <button mat-icon-button [matMenuTriggerFor]="menuTable" aria-label="Example icon-button with a menu">
+    <button *ngIf="linkedTables && linkedTables?.length > 0"
+       mat-icon-button [matMenuTriggerFor]="menuTable" aria-label="Example icon-button with a menu">
       <mat-icon>more_vert</mat-icon>
     </button>
-    <mat-menu #menuTable="matMenu">
-      <button mat-menu-item (click)="addTable()">
-        <mat-icon style="margin-left: 5px;">add</mat-icon>add Table
-      </button>
+    <mat-menu #menuTable="matMenu" >
       <button mat-menu-item (click)="setOwnTable()">
         {{ownTableTitle}}
       </button>
@@ -30,6 +28,9 @@
       <mat-icon>menu</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="addTable()">
+        <span style="margin-left: 5px; margin-right: 15px;">📋</span>Other Tables
+      </button>
       <button mat-menu-item (click)="openAddManagerDialog()">
         <span style="margin-left: 5px; margin-right: 15px;">👨‍🏫</span>Managers
       </button>

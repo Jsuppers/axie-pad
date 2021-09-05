@@ -69,17 +69,18 @@ export class SlpChartComponent implements OnInit {
             let managerShare = 0;
             let projectedShare = 0;
 
+            var chartData: ChartData;
             if (slp?.lastClaimed) {
               scholarShare = slp?.total * (1 - managerSharePercentage);
               managerShare = slp?.total - scholarShare;
               projectedShare = this.getAverageSLP(slp) * this.getDays(slp);
-            }
-            const chartData: ChartData = {
-              scholarShare,
-              managerShare,
-              projectedShare,
-              timestamp,
-              day,
+              chartData = {
+                scholarShare,
+                managerShare,
+                projectedShare,
+                timestamp,
+                day,
+              }
             }
             return chartData;
         })))
@@ -90,22 +91,24 @@ export class SlpChartComponent implements OnInit {
     })).subscribe((chartdata) => {
       const managerShareDataRecord: Record<number, ChartData> = {};
       chartdata.forEach((data) => {
-          let scholarShare = data.scholarShare;
-          let managerShare = data.managerShare;
-          let projectedShare = data.projectedShare;
-          let day = data.day;
-          let timestamp = data.timestamp;
-          if (managerShareDataRecord[day]) {
-            scholarShare += managerShareDataRecord[day].scholarShare;
-            managerShare += managerShareDataRecord[day].managerShare;
-            projectedShare += managerShareDataRecord[day].projectedShare;
-          }
-          managerShareDataRecord[day] = {
-            scholarShare,
-            managerShare,
-            projectedShare,
-            timestamp,
-            day,
+          if(data) {
+            let scholarShare = data.scholarShare;
+            let managerShare = data.managerShare;
+            let projectedShare = data.projectedShare;
+            let day = data.day;
+            let timestamp = data.timestamp;
+            if (managerShareDataRecord[day]) {
+              scholarShare += managerShareDataRecord[day].scholarShare;
+              managerShare += managerShareDataRecord[day].managerShare;
+              projectedShare += managerShareDataRecord[day].projectedShare;
+            }
+            managerShareDataRecord[day] = {
+              scholarShare,
+              managerShare,
+              projectedShare,
+              timestamp,
+              day,
+            }
           }
       });
 
