@@ -67,3 +67,8 @@ tr.example-detail-row {
   top: 48%;
   transform: translateY(-50%);
 }
+
+.axies-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
+}

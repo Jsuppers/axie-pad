@@ -170,6 +170,10 @@ export class AxieTableComponent implements OnInit {
         this.dataSource.data = this.dataSource.data;
         this.resultsLength = newGroups.length;
       });
+
+    this.hideAddress$.subscribe((hideAddresses) => {
+      this.hideAddresses = hideAddresses;
+    });
   }
 
   navigateToScholar(element: TableData): void {
