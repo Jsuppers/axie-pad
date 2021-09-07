@@ -1,6 +1,7 @@
 
 import { Axie } from '../../../_models/axie';
 import { Apollo, gql } from 'apollo-angular';
+import { retry } from 'rxjs/operators';
 
 // Get the ronin name from a gql query
 const GET_PROFILE_AXIES_BY_RONIN_ADDRESS = gql`
@@ -97,7 +98,7 @@ export class AccountAxies {
         const queryOutput: any = await this._apollo.query({
           query: GET_PROFILE_AXIES_BY_RONIN_ADDRESS,
           variables: variables,
-        }).toPromise();
+        }).pipe(retry(3)).toPromise();
 
         if (queryOutput?.data?.axies &&
           queryOutput?.data?.axies?.results &&

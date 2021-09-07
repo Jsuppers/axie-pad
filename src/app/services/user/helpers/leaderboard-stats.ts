@@ -1,4 +1,5 @@
 import { HttpClient } from '@angular/common/http';
+import { retry } from 'rxjs/operators';
 import { DefaultLeaderboardDetails, LeaderboardDetails } from '../../../_models/leaderboard';
 
 export class LeaderboardStats {
@@ -13,7 +14,7 @@ export class LeaderboardStats {
           roninAddress.replace('ronin:', '0x');
 
         // send and wait for the request
-        const output = await http.get<any>(url).toPromise();
+        const output: any = await http.get<any>(url).pipe(retry(3)).toPromise();
 
         // update leaderboard details
         leaderboardDetails.wins = output?.stats?.win_total ?? 0;
