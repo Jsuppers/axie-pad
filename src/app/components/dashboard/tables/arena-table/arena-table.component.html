@@ -81,6 +81,30 @@
     <td mat-cell *matCellDef="let element">{{ element.loses }}</td>
   </ng-container>
 
+  <ng-container matColumnDef="menu">
+    <th mat-header-cell *matHeaderCellDef class="center-items" style="width: 10%;">Menu</th>
+    <td mat-cell *matCellDef="let element" class="center-items" style="width: 10%;">
+      <div *ngIf="isNotGroup(element)">
+        <button mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="navigateToScholar(element)">
+            <mat-icon style="margin-left: 5px; color: dodgerblue">person</mat-icon>Profile</button>
+          <button mat-menu-item (click)="openEditDialog(element)">
+            <mat-icon style="margin-left: 5px;" color="primary">edit</mat-icon>Edit</button>
+          <button mat-menu-item (click)="deleteScholar(element)">
+            <mat-icon style="margin-left: 5px; color: #f2738c">delete</mat-icon>Delete</button>
+        </mat-menu>
+      </div>
+      <div *ngIf="isGroup(element)">
+        <button mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="openColorDialog(element)">
+            <mat-icon style="margin-left: 5px;" color="primary">palette</mat-icon>Color</button>
+        </mat-menu>
+      </div>
+    </td>
+  </ng-container>
+
   <ng-container matColumnDef="expandedDetail">
     <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
       <div class="example-element-detail"

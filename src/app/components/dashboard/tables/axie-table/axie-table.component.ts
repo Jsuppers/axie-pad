@@ -18,6 +18,7 @@ import {
 import { FirestoreScholar } from 'src/app/_models/scholar';
 import { LeaderboardDetails } from 'src/app/_models/leaderboard';
 import { isEqual, isEmpty } from 'lodash';
+import { DialogService } from 'src/app/services/dialog.service';
 
 interface TableData {
   id: string;
@@ -27,6 +28,7 @@ interface TableData {
   axies: Axie[];
   expanded: boolean;
   group: string;
+  scholar: FirestoreScholar;
 }
 
 const noGroupText = '😥 no group';
@@ -57,7 +59,7 @@ class Group {
   ],
 })
 export class AxieTableComponent implements OnInit {
-  displayedColumns: string[] = ['position', 'name', 'axies'];
+  displayedColumns: string[] = ['position', 'name', 'axies', 'menu'];
   dataSource = new MatTableDataSource<any | TableData>([]);
   groupByColumns: string[] = [];
   @Input()
@@ -74,7 +76,11 @@ export class AxieTableComponent implements OnInit {
   expandedSubCar: TableData[] = [];
   scholarTableData: Record<string, BehaviorSubject<TableData>> = {};
 
-  constructor(public dialog: MatDialog, private user: UserService) {
+  constructor(
+    public dialog: MatDialog,
+    private user: UserService,
+    private dialogService: DialogService
+  ) {
     this.groupByColumns = ['group'];
   }
 
@@ -222,6 +228,7 @@ export class AxieTableComponent implements OnInit {
       elo: leaderboardDetails?.elo ?? 0,
       expanded: false,
       group: scholar?.group ? scholar?.group : noGroupText,
+      scholar,
     };
   }
 
@@ -410,5 +417,17 @@ export class AxieTableComponent implements OnInit {
     if (color) {
       return '#' + color;
     }
+  }
+
+  openEditDialog(data: TableData): void {
+    this.dialogService.openEditDialog(data.scholar);
+  }
+
+  deleteScholar(data: TableData): void {
+    this.dialogService.deleteScholar(data.scholar.id);
+  }
+
+  openColorDialog(data: TableData): void {
+    this.dialogService.openColorDialog(data.group);
   }
 }

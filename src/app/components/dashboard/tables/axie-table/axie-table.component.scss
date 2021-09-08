@@ -72,3 +72,8 @@ tr.example-detail-row {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
 }
+
+.center-items {
+  justify-content: center !important;
+  text-align:center;
+}
