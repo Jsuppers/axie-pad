@@ -95,6 +95,8 @@
       <div *ngIf="isNotGroup(element)">
         <button mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
         <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="onRefresh(element.scholar)">
+            <mat-icon style="margin-left: 5px;">refresh</mat-icon>Refresh</button>
           <button mat-menu-item (click)="navigateToScholar(element)">
             <mat-icon style="margin-left: 5px; color: dodgerblue">person</mat-icon>Profile</button>
           <button mat-menu-item (click)="openEditDialog(element)">

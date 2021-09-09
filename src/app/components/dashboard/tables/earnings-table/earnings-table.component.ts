@@ -575,4 +575,8 @@ export class EarningsTableComponent implements OnInit {
       width: '400px',
     });
   }
+
+  onRefresh(scholar: FirestoreScholar) {
+    this.user.updateSLP(scholar);
+  }
 }

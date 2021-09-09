@@ -427,4 +427,8 @@ export class ArenaTableComponent implements OnInit {
   openColorDialog(data: TableArenaData): void {
     this.dialogService.openColorDialog(data.group);
   }
+
+  onRefresh(scholar: FirestoreScholar) {
+    this.user.updateLeaderBoardDetails(scholar);
+  }
 }
