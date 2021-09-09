@@ -430,4 +430,8 @@ export class AxieTableComponent implements OnInit {
   openColorDialog(data: TableData): void {
     this.dialogService.openColorDialog(data.group);
   }
+
+  onRefresh(scholar: FirestoreScholar) {
+    this.user.updateAxies(scholar);
+  }
 }
