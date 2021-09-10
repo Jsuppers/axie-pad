@@ -26,11 +26,11 @@
     <th mat-header-cell *matHeaderCellDef mat-sort-header style="
     justify-content: start !important; text-align: start !important;">Name</th>
     <td mat-cell *matCellDef="let element;" >
-      <div *ngIf="isGroup(element)" (click)="groupHeaderClick(element)" style="text-align: start !important;">
-        <span> {{  hideAddresses ? '🧑‍🤝‍🧑 Group' : getGroupName(element)}} ({{element.totalCounts}})</span>
+      <div *ngIf="isGroup(element)" (click)="groupHeaderClick(element)" style="text-align: start !important;" >
+        <span matBadge="!" matBadgeOverlap="false" matBadgeColor="warn" [matBadgeHidden]="!element.hasError"> {{  hideAddresses ? '🧑‍🤝‍🧑 Group' : getGroupName(element)}} ({{element.totalCounts}})</span>
       </div>
       <div *ngIf="isNotGroup(element)" style="text-align: start !important;">
-        {{ hideAddresses ? "Scholar" : element.name }}
+        <span matBadge="!" matBadgeOverlap="false" matBadgeColor="warn" [matBadgeHidden]="!errors[element.scholar.id]">{{ hideAddresses ? "Scholar" : element.name }}</span>
       </div>
     </td>
   </ng-container>

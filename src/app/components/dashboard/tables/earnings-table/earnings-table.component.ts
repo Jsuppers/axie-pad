@@ -2,12 +2,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, throwError } from 'rxjs';
 import { FirestoreScholar } from '../../../../_models/scholar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../../../services/user/user.service';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { DialogService } from 'src/app/services/dialog.service';
 import {
   animate,
@@ -38,6 +38,7 @@ export class Group {
   group: string = noGroupText;
   expanded = false;
   totalCounts = 0;
+  hasError = false;
 }
 export interface TableEarningsData {
   name: string;
@@ -101,6 +102,8 @@ export class EarningsTableComponent implements OnInit {
   expandedSubCar: TableEarningsData[] = [];
   scholarTableData: Record<string, BehaviorSubject<TableEarningsData>> = {};
 
+  errors: Record<string, boolean> = {};
+
   @ViewChild(MatSort) sort: MatSort;
 
   constructor(
@@ -154,6 +157,8 @@ export class EarningsTableComponent implements OnInit {
           scholars.forEach((scholar) => {
             output.push(
                this.user.getScholarsSLP(scholar.id).pipe(map((slp) => {
+                this.errors[scholar.id] = slp.adventureSLP === 0 && slp.inProgress === 0 && slp.inWallet === 0 && slp.lastClaimed === 0 && slp.total === 0;
+
                 const index = this.allData.findIndex((value) => value?.scholar?.id === scholar.id);
                 const tableData = this.getTableData(scholar, slp);
                 if (index >= 0) {
@@ -177,6 +182,10 @@ export class EarningsTableComponent implements OnInit {
                   this.dataSource.data = this.dataSource.data;
                 }
                 return tableData;
+              }), catchError((error) => {
+                this.errors[scholar.id] = true;
+
+                return throwError(error);
               }))
             );
           });
@@ -259,6 +268,7 @@ export class EarningsTableComponent implements OnInit {
       groups[group].totalSLP += row?.totalSLP ?? 0;
       groups[group].inProgressSLP += row?.inProgressSLP ?? 0;
       groups[group].managersShareSLP += row?.managersShareSLP ?? 0;
+      groups[group].hasError = groups[group].hasError || this.errors[row.scholar.id];
     });
 
     Object.values(groups).forEach((group) => {
