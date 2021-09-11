@@ -153,8 +153,8 @@ export class UserService {
           return this.db.collection('users').doc(user.uid).valueChanges();
         })
       ).subscribe((user: User) => {
-        this.ownLinkedTables.next(user.linkedTables ?? {});
-        this.ownTableName.next(user.title);
+        this.ownLinkedTables.next(user?.linkedTables ?? {});
+        this.ownTableName.next(user?.title);
       });
   }
 

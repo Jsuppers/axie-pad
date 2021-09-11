@@ -77,6 +77,8 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { OwnAxiePipe } from './pipes/own-axie.pipe';
 import { EnemyAxiePipe } from './pipes/enemy-axie.pipe';
+import { NotificationRulesComponent } from './components/dialogs/notification-rules/notification-rules.component';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -144,6 +146,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     LinkTableDialogComponent,
     OwnAxiePipe,
     EnemyAxiePipe,
+    NotificationRulesComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -154,6 +157,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatExpansionModule,
     MatCheckboxModule,
     BrowserModule,
+    ColorPickerModule,
     AppRoutingModule,
     HttpClientModule,
     BrowserAnimationsModule,

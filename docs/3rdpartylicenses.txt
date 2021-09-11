@@ -757,6 +757,9 @@ OTHER DEALINGS IN THE SOFTWARE.
 ng2-charts
 ISC
 
+ngx-color-picker
+MIT
+
 ngx-cookieconsent
 MIT
 The MIT License (MIT)
