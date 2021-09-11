@@ -73,7 +73,10 @@ import { PayShareDialogComponent } from './components/dialogs/pay-share-dialog/p
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AddManagerDialogComponent } from './components/dialogs/add-manager-dialog/add-manager-dialog.component';
 import { LinkTableDialogComponent } from './components/dialogs/link-table-dialog/link-table-dialog.component';
-
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { OwnAxiePipe } from './pipes/own-axie.pipe';
+import { EnemyAxiePipe } from './pipes/enemy-axie.pipe';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -139,12 +142,16 @@ const cookieConfig: NgcCookieConsentConfig = {
     PayShareDialogComponent,
     AddManagerDialogComponent,
     LinkTableDialogComponent,
+    OwnAxiePipe,
+    EnemyAxiePipe,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
     NgcCookieConsentModule.forRoot(cookieConfig),
     AngularFireAuthModule,
+    MatProgressSpinnerModule,
     AngularFirestoreModule,
+    MatExpansionModule,
     MatCheckboxModule,
     BrowserModule,
     AppRoutingModule,

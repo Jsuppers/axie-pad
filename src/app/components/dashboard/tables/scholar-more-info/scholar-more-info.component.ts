@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { DialogService } from 'src/app/services/dialog.service';
 import { UserService } from 'src/app/services/user/user.service';
+import { Battle, BattleLogs } from 'src/app/_models/battle';
 import { PaymentMethods } from 'src/app/_models/scholar';
 import { TableArenaData } from '../arena-table/arena-table.component';
 import { TableEarningsData } from '../earnings-table/earnings-table.component';
@@ -18,6 +19,8 @@ export class ScholarMoreInfoComponent implements OnInit {
   paymentMethods = PaymentMethods;
   roninName: string;
   scholarRoninName: string;
+  battleLogs: BattleLogs;
+  loading = false;
 
   constructor(
     private user: UserService,
@@ -84,5 +87,31 @@ export class ScholarMoreInfoComponent implements OnInit {
     return new Date(
       (this.scholar.slp.lastClaimed + 60 * 60 * 24 * 14) * 1000
     ).toLocaleString();
+  }
+
+  getBattleInfo(): void {
+    if (this.loading) {
+      return;
+    }
+    this.loading = true;
+    this.user.getScholarBattleLogs(this.scholar.roninAddress).then((battleLogs) => {
+      this.battleLogs = battleLogs;
+      this.loading = false;
+    });
+  }
+
+  getPlayedTime(element: Battle): string {
+    var currentTime = Date.now();
+    var playedTime = new Date(element.timestamp)?.getTime();
+    var hours = Math.abs(currentTime - playedTime) / 36e5;
+    return hours.toPrecision(2) + ' hours ago';
+  }
+
+  navigateToScholarReplay(element: Battle): void {
+    window.open(
+      'axie://?f=rpl&q=' +
+        element.battleUuid,
+      '_blank'
+    );
   }
 }

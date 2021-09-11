@@ -3,6 +3,7 @@ import { AuthService } from '../auth.service';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { FirestoreScholar } from '../../_models/scholar';
+import { BattleLogs } from '../../_models/battle';
 import { HttpClient } from '@angular/common/http';
 import {
   filter,
@@ -19,6 +20,7 @@ import { DefaultSLP, SLP } from '../../_models/slp';
 import { DefaultLeaderboardDetails, LeaderboardDetails } from '../../_models/leaderboard';
 import { RoninNames } from '../user/helpers/ronin-names';
 import { LeaderboardStats } from '../user/helpers/leaderboard-stats';
+import { BattleInfo } from '../user/helpers/battle-logs';
 import { AccountAxies } from './helpers/account-axies';
 import { SLPStats } from './helpers/slp-stats';
 import { CoinGecko } from './helpers/coin-gecko';
@@ -182,6 +184,10 @@ export class UserService {
 
   getScholarsSLP(scholarID: string): Observable<SLP> {
     return this.scholarSLP$[scholarID];
+  }
+
+  getScholarBattleLogs(roninAddress: string): Promise<BattleLogs> {
+    return BattleInfo.getBattleLogs(this.http, roninAddress);
   }
 
   getScholarsLeaderboardDetails(scholarID: string): Observable<LeaderboardDetails> {
