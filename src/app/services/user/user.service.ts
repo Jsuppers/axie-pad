@@ -75,7 +75,6 @@ export class UserService {
         })
       )
       .subscribe(async (user: User) => {
-        debugger;
         this.setDefaults(user);
         const scholars = Object.values(
           user.scholars ?? {}
