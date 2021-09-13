@@ -19,12 +19,14 @@ import { FirestoreScholar } from 'src/app/_models/scholar';
 import { LeaderboardDetails } from 'src/app/_models/leaderboard';
 import { isEqual, isEmpty } from 'lodash';
 import { DialogService } from 'src/app/services/dialog.service';
+import { AxieCountRule, RuleType } from 'src/app/_models/rule';
 
 interface TableData {
   id: string;
   name: string;
   elo: number;
   roninAddress: string;
+  failedRules: AxieCountRule[];
   axies: Axie[];
   expanded: boolean;
   group: string;
@@ -37,6 +39,7 @@ class Group {
   totalAxies = 0;
   level = 0;
   isGroup = true;
+  hasFailedSAxieCountRules: boolean = false;
   group: string = noGroupText;
   expanded = false;
   totalCounts = 0;
@@ -85,10 +88,9 @@ export class AxieTableComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.user
-      .getScholars()
+    combineLatest([this.user.getScholars(), this.user.currentUser$()])
       .pipe(
-        switchMap((scholars) => {
+        switchMap(([scholars, user]) => {
           this.allData = [];
           this.scholarTableData = {};
 
@@ -103,12 +105,21 @@ export class AxieTableComponent implements OnInit {
                   const index = this.allData.findIndex(
                     (value) => value.id === scholar.id
                   );
+                  const failedRules: AxieCountRule[] = [];
+                  Object.values(user?.notificationRules ?? {}).forEach((rule) => {
+                    if (rule.type === RuleType.axieCount) {
+                      if (axies.length < (rule as AxieCountRule).lessThan &&
+                          axies.length > (rule as AxieCountRule).greaterThan) {
+                        failedRules.push(rule as AxieCountRule);
+                      }
+                    }
+                  });
                   const tableData = this.getTableData(
                     scholar,
                     axies,
-                    leaderboardDetails
+                    leaderboardDetails,
+                    failedRules
                   );
-
                   if (index >= 0) {
                     if (!isEqual(this.allData[index], tableData)) {
                       this.allData[index] = {
@@ -218,12 +229,14 @@ export class AxieTableComponent implements OnInit {
   getTableData(
     scholar: FirestoreScholar,
     axies: Axie[],
-    leaderboardDetails: LeaderboardDetails
+    leaderboardDetails: LeaderboardDetails,
+    failedRules: AxieCountRule[],
   ): TableData {
     return {
       id: scholar.id,
       name: scholar?.name ?? 'unknown',
       roninAddress: scholar?.roninAddress,
+      failedRules,
       axies: axies,
       elo: leaderboardDetails?.elo ?? 0,
       expanded: false,
@@ -250,7 +263,6 @@ export class AxieTableComponent implements OnInit {
 
     let groups: Record<string, Group> = {};
     const currentColumn = groupByColumns[level];
-
     data.forEach((row) => {
       const group = row?.group ? row.group : noGroupText;
 
@@ -259,6 +271,9 @@ export class AxieTableComponent implements OnInit {
         result.level = level + 1;
         result.group = group;
         groups[group] = result;
+      }
+      if (row.failedRules.length > 0) {
+        groups[group].hasFailedSAxieCountRules = true;
       }
 
       groups[group].totalAxies += row.axies.length;

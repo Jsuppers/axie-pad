@@ -15,6 +15,8 @@ import { AddManagerDialogComponent } from './components/dialogs/add-manager-dial
 import { LinkTableDialogComponent } from './components/dialogs/link-table-dialog/link-table-dialog.component';
 import { Table } from './_models/table';
 import _ from 'lodash';
+import { NotificationRulesComponent } from './components/dialogs/notification-rules/notification-rules.component';
+import { Rule, RuleType } from './_models/rule';
 
 @Component({
   selector: 'app-root',
@@ -178,6 +180,23 @@ export class AppComponent implements OnInit {
         const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
         await userDocument.ref.update({
           ['linkedTables']: result
+        });
+      }
+    });
+  }
+
+  showNotificationDialog(): void {
+    const dialogRef = this.dialog.open(NotificationRulesComponent, {
+      width: '400px',
+      maxHeight: '90vh',
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: Record<string, Rule>) => {
+      const uid = this.userService.tableID.getValue();
+      if (uid && result) {
+        const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
+        await userDocument.ref.update({
+          ['notificationRules']: result
         });
       }
     });

@@ -3,6 +3,7 @@ import { Defaults } from './defaults';
 import { defaultColors } from '../constants';
 import { LinkedUser } from './linked-user';
 import { Table } from './table';
+import { Rule } from './rule';
 
 export interface User {
   scholars: Record<string, FirestoreScholar>;
@@ -14,6 +15,7 @@ export interface User {
   defaults?: Defaults;
   linkedUsers?: Record<string, LinkedUser>;
   linkedTables?: Record<string, Table>;
+  notificationRules?:  Record<string, Rule>,
 }
 
 export function DefaultUser(): User {
@@ -25,6 +27,7 @@ export function DefaultUser(): User {
     groupColors: {},
     linkedUsers: {},
     linkedTables: {},
+    notificationRules: {},
     defaults: {
       payshare: [{
         manager: 50,

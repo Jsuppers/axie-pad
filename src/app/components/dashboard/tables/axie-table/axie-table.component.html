@@ -41,21 +41,25 @@
         style="text-align: start !important"
         class="group-name"
       >
-        <span>
-          {{ hideAddresses ? "🧑‍🤝‍🧑 Group" : getGroupName(element) }} ({{
-            element.totalCounts
-          }})</span
-        >
+      <span matBadge="!"
+              matBadgeOverlap="false"
+              matBadgeColor="warn"
+              [matBadgeHidden]="!element.hasFailedSAxieCountRules">
+              {{  hideAddresses ? '🧑‍🤝‍🧑 Group' : getGroupName(element)}} ({{element.totalCounts}})
+        </span>
       </div>
 
-      <div
-        *ngIf="isNotGroup(element)"
-        (click)="navigateToScholar(element)"
-        style="text-align: start !important"
-        class="group-name"
-      >
-        <span>{{ hideAddresses ? "Scholar" : element.name }} </span><br />
+      <div *ngIf="isNotGroup(element)"
+      (click)="navigateToScholar(element)"
+      style="text-align: start !important"
+      class="group-name">
+        <span matBadge="!"
+        matBadgeOverlap="false"
+        matBadgeColor="warn"
+        [matBadgeHidden]="element.failedRules.length === 0">
+        {{ hideAddresses ? "Scholar" : element.name }}</span>
         <span style="font-size: 12px">(⚔️ {{ element?.elo }})</span>
+        <span style="font-size: 12px">(Count: {{ element?.axies?.length }})</span>
       </div>
       <br />
     </td>
@@ -95,10 +99,10 @@
       <div *ngIf="isNotGroup(element)">
         <button mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="onRefresh(element.scholar)">
-            <mat-icon style="margin-left: 5px;">refresh</mat-icon>Refresh</button>
           <button mat-menu-item (click)="navigateToScholar(element)">
             <mat-icon style="margin-left: 5px; color: dodgerblue">person</mat-icon>Profile</button>
+          <button mat-menu-item (click)="onRefresh(element.scholar)">
+            <mat-icon style="margin-left: 5px;">refresh</mat-icon>Refresh</button>
           <button mat-menu-item (click)="openEditDialog(element)">
             <mat-icon style="margin-left: 5px;" color="primary">edit</mat-icon>Edit</button>
           <button mat-menu-item (click)="deleteScholar(element)">
