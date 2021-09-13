@@ -46,6 +46,10 @@ export class DashboardComponent implements OnInit {
   fiatCurrency: string;
   hideAddress: BehaviorSubject<boolean>;
 
+  tableSlpError = false;
+  tableArenaError = false;
+  tableAxiesError = false;
+
   constructor(private service: AuthService,
               private db: AngularFirestore,
               private scholarService: DialogService,

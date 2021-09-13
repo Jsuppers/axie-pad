@@ -30,7 +30,9 @@
         <span matBadge="!"
               matBadgeOverlap="false"
               matBadgeColor="warn"
-              [matBadgeHidden]="!element.hasFailedSLPRules">
+              [matBadgeHidden]="!element.hasFailedSLPRules && !element.hasError"
+              matTooltip="There was a error retreiving data please refresh or check ronin address"
+              [matTooltipDisabled]="!element.hasFailedSLPRules && !element.hasError">
               {{  hideAddresses ? '🧑‍🤝‍🧑 Group' : getGroupName(element)}} ({{element.totalCounts}})
         </span>
       </div>
@@ -38,7 +40,9 @@
         <span matBadge="!"
         matBadgeOverlap="false"
         matBadgeColor="warn"
-        [matBadgeHidden]="element.failedRules.length === 0">
+        [matBadgeHidden]="element.failedRules.length === 0 && !element.hasError"
+        matTooltip="There was a error retreiving data please refresh or check ronin address"
+        [matTooltipDisabled]="element.failedRules.length === 0 && !element.hasError">
         {{ hideAddresses ? "Scholar" : element.name }}</span>
       </div>
     </td>

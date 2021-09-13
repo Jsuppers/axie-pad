@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -62,6 +62,7 @@ export interface TableEarningsData {
   paidTimes: number;
   scholar: FirestoreScholar;
   slp: SLP;
+  hasError: boolean;
 }
 @Component({
   selector: 'app-earnings-table',
@@ -105,7 +106,10 @@ export class EarningsTableComponent implements OnInit {
   expandedSubCar: TableEarningsData[] = [];
   scholarTableData: Record<string, BehaviorSubject<TableEarningsData>> = {};
 
-  errors: Record<string, boolean> = {};
+  @Input('error')
+  tableError = false;
+  @Output('errorChange')
+  tableErrorChange = new EventEmitter<boolean>();
 
   @ViewChild(MatSort) sort: MatSort;
 
@@ -128,6 +132,10 @@ export class EarningsTableComponent implements OnInit {
     const inProgress = slp?.inProgress ?? 0;
     const averageSLP = this.getAverageSLP(slp);
     const claimableDate = this.getClaimableDateString(slp);
+
+    this.tableError = this.tableError || slp.hasError;
+    this.tableErrorChange.emit(this.tableError);
+
     return {
       expanded: false,
       scholar: scholar,
@@ -148,6 +156,7 @@ export class EarningsTableComponent implements OnInit {
       totalSLP: slp?.total ?? 0,
       name: scholar?.name ?? 'unknown',
       slp: slp,
+      hasError: slp.hasError
     };
   }
 
@@ -193,10 +202,6 @@ export class EarningsTableComponent implements OnInit {
                   this.dataSource.data = this.dataSource.data;
                 }
                 return tableData;
-              }), catchError((error) => {
-                this.errors[scholar.id] = true;
-
-                return throwError(error);
               }))
             );
           });
@@ -281,7 +286,7 @@ export class EarningsTableComponent implements OnInit {
       groups[group].totalSLP += row?.totalSLP ?? 0;
       groups[group].inProgressSLP += row?.inProgressSLP ?? 0;
       groups[group].managersShareSLP += row?.managersShareSLP ?? 0;
-      groups[group].hasError = groups[group].hasError || this.errors[row.scholar.id];
+      groups[group].hasError = groups[group].hasError || row.hasError;
     });
 
     Object.values(groups).forEach((group) => {

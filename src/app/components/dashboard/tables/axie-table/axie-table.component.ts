@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -31,6 +31,7 @@ interface TableData {
   expanded: boolean;
   group: string;
   scholar: FirestoreScholar;
+  hasError: boolean;
 }
 
 const noGroupText = '😥 no group';
@@ -43,6 +44,7 @@ class Group {
   group: string = noGroupText;
   expanded = false;
   totalCounts = 0;
+  hasError = false;
 }
 
 @Component({
@@ -78,6 +80,11 @@ export class AxieTableComponent implements OnInit {
   expandedCar: any[] = [];
   expandedSubCar: TableData[] = [];
   scholarTableData: Record<string, BehaviorSubject<TableData>> = {};
+
+  @Input('error')
+  tableError = false;
+  @Output('errorChange')
+  tableErrorChange = new EventEmitter<boolean>();
 
   constructor(
     public dialog: MatDialog,
@@ -232,6 +239,9 @@ export class AxieTableComponent implements OnInit {
     leaderboardDetails: LeaderboardDetails,
     failedRules: AxieCountRule[],
   ): TableData {
+    this.tableError = this.tableError || (axies.length === 0 || leaderboardDetails.hasError);
+    this.tableErrorChange.emit(this.tableError);
+
     return {
       id: scholar.id,
       name: scholar?.name ?? 'unknown',
@@ -242,6 +252,7 @@ export class AxieTableComponent implements OnInit {
       expanded: false,
       group: scholar?.group ? scholar?.group : noGroupText,
       scholar,
+      hasError: axies.length === 0 || leaderboardDetails.hasError,
     };
   }
 
@@ -277,6 +288,7 @@ export class AxieTableComponent implements OnInit {
       }
 
       groups[group].totalAxies += row.axies.length;
+      groups[group].hasError = groups[group].hasError || row.hasError;
     });
 
     Object.values(groups).forEach((group) => {

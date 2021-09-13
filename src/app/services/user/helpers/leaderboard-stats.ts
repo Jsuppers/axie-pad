@@ -27,6 +27,7 @@ export class LeaderboardStats {
         leaderboardDetails.elo = output?.stats?.elo ?? 0;
         leaderboardDetails.rank = output?.stats?.rank ?? 0;
       } catch (e) {
+        leaderboardDetails.hasError = true;
         console.log(e);
       }
     }

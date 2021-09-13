@@ -50,6 +50,7 @@ export class SLPStats {
         slp.lastClaimed = output.last_claimed_item_at;
 
       } catch (e) {
+        slp.hasError = true;
         console.log(e);
       }
     }
