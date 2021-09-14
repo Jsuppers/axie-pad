@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { retry } from 'rxjs/operators';
 import { DefaultLeaderboardDetails, LeaderboardDetails } from '../../../_models/leaderboard';
 
+const maxInt = '2147483647';
 export class LeaderboardStats {
   static async getLeaderBoardStats(http: HttpClient, roninAddress: string): Promise<LeaderboardDetails> {
     var leaderboardDetails = DefaultLeaderboardDetails();
@@ -10,12 +11,16 @@ export class LeaderboardStats {
       try {
         // create the leaderboard url
         // TODO change to official api when they release it
-        const url = 'https://axie-proxy.secret-shop.buzz/_basicStats/' +
+        const url = 'https://api.lunaciaproxy.cloud/_stats/' +
           roninAddress.replace('ronin:', '0x');
 
         // send and wait for the request
         const output: any = await http.get<any>(url).pipe(retry(3)).toPromise();
 
+        // if the rank is set as the max Int the address is invalid
+        if (output?.stats?.rank === maxInt) {
+          throw 'unknown address';
+        }
         // update leaderboard details
         leaderboardDetails.wins = output?.stats?.win_total ?? 0;
         leaderboardDetails.loses = output?.stats?.lose_total ?? 0;

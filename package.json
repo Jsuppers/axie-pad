@@ -34,6 +34,7 @@
     "graphql": "^15.0.0",
     "lodash": "^4.17.21",
     "ng2-charts": "^2.2.3",
+    "ngx-color-picker": "^11.0.0",
     "ngx-cookieconsent": "^2.2.3",
     "rxjs": "~6.5.5",
     "tslib": "^2.0.0",

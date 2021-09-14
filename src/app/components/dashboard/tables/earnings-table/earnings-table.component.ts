@@ -19,6 +19,7 @@ import {
 import _, { isEqual } from 'lodash';
 import { AverageColorDialogComponent } from 'src/app/components/dialogs/average-color-dialog/average-color-dialog.component';
 import { SLP } from 'src/app/_models/slp';
+import { RuleType, SLPRule } from 'src/app/_models/rule';
 
 const noGroupText = '😥 no group';
 const claimableNow = 'now';
@@ -32,6 +33,7 @@ export class Group {
   managersShareSLP: number = 0;
   inProgressSLP: number = 0;
   claimableSLP: number = 0;
+  hasFailedSLPRules: boolean = false;
   totalSLP: number = 0;
   level = 0;
   isGroup = true;
@@ -43,6 +45,7 @@ export interface TableEarningsData {
   name: string;
   group: string;
   roninName: string;
+  failedRules: SLPRule[];
   expanded: boolean;
   roninAddress: string;
   averageSLPSinceLastClaimed: number;
@@ -116,6 +119,7 @@ export class EarningsTableComponent implements OnInit {
   getTableData(
       scholar: FirestoreScholar,
       slp: SLP,
+      failedRules: SLPRule[],
       ): TableEarningsData {
 
     const inProgress = slp?.inProgress ?? 0;
@@ -124,6 +128,7 @@ export class EarningsTableComponent implements OnInit {
     return {
       expanded: false,
       scholar: scholar,
+      failedRules: failedRules,
       group: scholar?.group ? scholar?.group : noGroupText,
       roninName: this.user.getRoninName(scholar.roninAddress),
       paidTimes: scholar?.paidTimes ?? 0,
@@ -144,18 +149,26 @@ export class EarningsTableComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.user
-      .getScholars()
-      .pipe(
-        switchMap((scholars) => {
+    combineLatest([this.user.getScholars(), this.user.currentUser$()]).pipe(
+        switchMap(([scholars, user]) => {
           this.allData = [];
           this.scholarTableData = {};
           const output: Observable<TableEarningsData>[] = [];
           scholars.forEach((scholar) => {
             output.push(
                this.user.getScholarsSLP(scholar.id).pipe(map((slp) => {
+                const failedRules: SLPRule[] = [];
+                const averageSLP = this.getAverageSLP(slp);
+                Object.values(user?.notificationRules ?? {}).forEach((rule) => {
+                  if (rule.type === RuleType.slpCount) {
+                    if (averageSLP < (rule as SLPRule).lessThan) {
+                      failedRules.push(rule as SLPRule);
+                    }
+                  }
+                });
+
                 const index = this.allData.findIndex((value) => value?.scholar?.id === scholar.id);
-                const tableData = this.getTableData(scholar, slp);
+                const tableData = this.getTableData(scholar, slp, failedRules);
                 if (index >= 0) {
                   if (!isEqual(this.allData[index], tableData)) {
                     this.allData[index] = {
@@ -217,22 +230,20 @@ export class EarningsTableComponent implements OnInit {
   }
 
   getGroups(data: TableEarningsData[], groupByColumns: string[]): any[] {
-    const rootGroup = new Group();
-    rootGroup.expanded = false;
-    return this.getGroupList(data, 0, groupByColumns, rootGroup);
+    return this.getGroupList(data, 0, groupByColumns);
   }
 
   getGroupList(
     data: TableEarningsData[],
     level: number = 0,
     groupByColumns: string[],
-    parent: Group
   ): any[] {
     if (level >= groupByColumns.length) {
       return data;
     }
     let groups: Record<string, Group> = {};
     const currentColumn = groupByColumns[level];
+    var hasFailedSLPRules = false;
     data.forEach((row) => {
       const group = row?.group ? row.group : noGroupText;
       if (!groups[group]) {
@@ -240,6 +251,10 @@ export class EarningsTableComponent implements OnInit {
         result.level = level + 1;
         result.group = group;
         groups[group] = result;
+      }
+      if (row.failedRules.length > 0) {
+        hasFailedSLPRules = true;
+        groups[group].hasFailedSLPRules = hasFailedSLPRules;
       }
 
       const scholarLastClaimed = row?.slp?.lastClaimed;
@@ -574,5 +589,9 @@ export class EarningsTableComponent implements OnInit {
     const dialogRef = this.dialog.open(AverageColorDialogComponent, {
       width: '400px',
     });
+  }
+
+  onRefresh(scholar: FirestoreScholar) {
+    this.user.updateSLP(scholar);
   }
 }

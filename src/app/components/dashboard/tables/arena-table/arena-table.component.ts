@@ -20,6 +20,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
+import { DialogService } from 'src/app/services/dialog.service';
 
 export interface TableArenaData {
   id: string;
@@ -32,6 +33,7 @@ export interface TableArenaData {
   roninAddress: string;
   expanded: boolean;
   group: string;
+  scholar: FirestoreScholar;
 }
 
 const noGroupText = '😥 no group';
@@ -74,6 +76,7 @@ export class ArenaTableComponent implements OnInit {
     'wins',
     'draws',
     'loses',
+    'menu',
   ];
   dataSource = new MatTableDataSource<any | TableArenaData>([]);
   groupByColumns: string[] = [];
@@ -93,10 +96,8 @@ export class ArenaTableComponent implements OnInit {
 
   constructor(
     public dialog: MatDialog,
-    private db: AngularFirestore,
-    private authService: AuthService,
     private user: UserService,
-    private snackBar: MatSnackBar
+    private dialogService: DialogService,
   ) {
     this.groupByColumns = ['group'];
   }
@@ -272,6 +273,7 @@ export class ArenaTableComponent implements OnInit {
       roninAddress: scholar?.roninAddress,
       expanded: false,
       group: scholar?.group ? scholar?.group : noGroupText,
+      scholar,
     };
   }
 
@@ -412,5 +414,21 @@ export class ArenaTableComponent implements OnInit {
     if (color) {
       return '#' + color;
     }
+  }
+
+  openEditDialog(data: TableArenaData): void {
+    this.dialogService.openEditDialog(data.scholar);
+  }
+
+  deleteScholar(data: TableArenaData): void {
+    this.dialogService.deleteScholar(data.scholar.id);
+  }
+
+  openColorDialog(data: TableArenaData): void {
+    this.dialogService.openColorDialog(data.group);
+  }
+
+  onRefresh(scholar: FirestoreScholar) {
+    this.user.updateLeaderBoardDetails(scholar);
   }
 }
