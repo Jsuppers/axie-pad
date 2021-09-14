@@ -1,7 +1,8 @@
 
 import { SLP, DefaultSLP } from '../../../_models/slp';
 import { HttpClient } from '@angular/common/http';
-import { retry } from 'rxjs/operators';
+import { retryWhen } from 'rxjs/operators';
+import { retryStrategy } from './retry-strategy';
 
 export class SLPStats {
 
@@ -43,7 +44,7 @@ export class SLPStats {
           roninAddress.replace('ronin:', '0x') +
           '/items/1';
 
-        const output = await http.get<any>(url).pipe(retry(3)).toPromise();
+        const output = await http.get<any>(url).pipe(retryWhen(retryStrategy())).toPromise();
 
         slp.total = output.total;
         slp.inWallet = output?.blockchain_related?.balance ?? 0;

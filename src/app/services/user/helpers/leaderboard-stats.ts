@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { retry } from 'rxjs/operators';
+import { retryWhen } from 'rxjs/operators';
 import { DefaultLeaderboardDetails, LeaderboardDetails } from '../../../_models/leaderboard';
+import { retryStrategy } from './retry-strategy';
 
 const maxInt = '2147483647';
 export class LeaderboardStats {
@@ -15,7 +16,7 @@ export class LeaderboardStats {
           roninAddress.replace('ronin:', '0x');
 
         // send and wait for the request
-        const output: any = await http.get<any>(url).pipe(retry(3)).toPromise();
+        const output: any = await http.get<any>(url).pipe(retryWhen(retryStrategy())).toPromise();
 
         // if the rank is set as the max Int the address is invalid
         if (output?.stats?.rank === maxInt) {
