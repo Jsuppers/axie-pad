@@ -5,6 +5,7 @@ export class LeaderboardDetails {
   wins: number;
   loses: number;
   draws: number;
+  hasError: boolean;
 }
 
 export function DefaultLeaderboardDetails(): LeaderboardDetails {
@@ -15,5 +16,6 @@ export function DefaultLeaderboardDetails(): LeaderboardDetails {
     loses: 0,
     rank: 0,
     wins: 0,
+    hasError: false,
   };
 }

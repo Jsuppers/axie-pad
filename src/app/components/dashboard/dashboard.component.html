@@ -66,22 +66,31 @@
     <mat-tab>
       <ng-template mat-tab-label>
         <img src="assets/slp.webp" style="width: 20px; margin-right: 10px" />
-        <span>SLP Earnings</span>
+        <span matBadge="!"
+        matBadgeOverlap="false"
+        matBadgeColor="warn"
+        [matBadgeHidden]="!tableSlpError">SLP Earnings</span>
       </ng-template>
-      <app-earnings-table [hideAddress$]="hideAddress"></app-earnings-table>
+      <app-earnings-table [hideAddress$]="hideAddress" [(error)]="tableSlpError"></app-earnings-table>
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>
-        <span><span style="font-size: 18px;">⚔️ </span>Arena</span>
+        <span matBadge="!"
+        matBadgeOverlap="false"
+        matBadgeColor="warn"
+        [matBadgeHidden]="!tableArenaError"><span style="font-size: 18px;">⚔️ </span>Arena</span>
       </ng-template>
-      <app-arena-table [hideAddress$]="hideAddress"></app-arena-table>
+      <app-arena-table [hideAddress$]="hideAddress" [(error)]="tableArenaError"></app-arena-table>
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>
         <img src="assets/axie.png" style="height: 20px; margin-right: 10px" />
-        <span>Axies</span>
+        <span matBadge="!"
+        matBadgeOverlap="false"
+        matBadgeColor="warn"
+        [matBadgeHidden]="!tableAxiesError">Axies</span>
       </ng-template>
-      <app-axie-table [hideAddress$]="hideAddress"></app-axie-table>
+      <app-axie-table [hideAddress$]="hideAddress" [(error)]="tableAxiesError"></app-axie-table>
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>

@@ -79,6 +79,7 @@ import { OwnAxiePipe } from './pipes/own-axie.pipe';
 import { EnemyAxiePipe } from './pipes/enemy-axie.pipe';
 import { NotificationRulesComponent } from './components/dialogs/notification-rules/notification-rules.component';
 import { ColorPickerModule } from 'ngx-color-picker';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -190,6 +191,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     FlexLayoutModule,
     ChartsModule,
     ScrollingModule,
+    MatTooltipModule
   ],
   providers: [
     AuthService,

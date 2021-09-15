@@ -1,11 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService } from 'src/app/services/user/user.service';
-import { Axie } from '../../../../_models/axie';
+import { Axie, AxieResult } from '../../../../_models/axie';
 import { MatPaginator } from '@angular/material/paginator';
 import { map, switchMap } from 'rxjs/operators';
 import {
@@ -31,6 +31,7 @@ interface TableData {
   expanded: boolean;
   group: string;
   scholar: FirestoreScholar;
+  hasError: boolean;
 }
 
 const noGroupText = '😥 no group';
@@ -43,6 +44,7 @@ class Group {
   group: string = noGroupText;
   expanded = false;
   totalCounts = 0;
+  hasError = false;
 }
 
 @Component({
@@ -79,6 +81,11 @@ export class AxieTableComponent implements OnInit {
   expandedSubCar: TableData[] = [];
   scholarTableData: Record<string, BehaviorSubject<TableData>> = {};
 
+  @Input('error')
+  tableError = false;
+  @Output('errorChange')
+  tableErrorChange = new EventEmitter<boolean>();
+
   constructor(
     public dialog: MatDialog,
     private user: UserService,
@@ -101,10 +108,11 @@ export class AxieTableComponent implements OnInit {
                 this.user.getScholarsAxies(scholar.id),
                 this.user.getScholarsLeaderboardDetails(scholar.id),
               ]).pipe(
-                map(([axies, leaderboardDetails]) => {
+                map(([axiesResult, leaderboardDetails]) => {
                   const index = this.allData.findIndex(
                     (value) => value.id === scholar.id
                   );
+                  const axies = axiesResult.axies;
                   const failedRules: AxieCountRule[] = [];
                   Object.values(user?.notificationRules ?? {}).forEach((rule) => {
                     if (rule.type === RuleType.axieCount) {
@@ -116,7 +124,7 @@ export class AxieTableComponent implements OnInit {
                   });
                   const tableData = this.getTableData(
                     scholar,
-                    axies,
+                    axiesResult,
                     leaderboardDetails,
                     failedRules
                   );
@@ -228,10 +236,14 @@ export class AxieTableComponent implements OnInit {
 
   getTableData(
     scholar: FirestoreScholar,
-    axies: Axie[],
+    axieResult: AxieResult,
     leaderboardDetails: LeaderboardDetails,
     failedRules: AxieCountRule[],
   ): TableData {
+    const axies = axieResult.axies;
+    this.tableError = this.tableError || (axieResult.hasError || leaderboardDetails.hasError);
+    this.tableErrorChange.emit(this.tableError);
+
     return {
       id: scholar.id,
       name: scholar?.name ?? 'unknown',
@@ -242,6 +254,7 @@ export class AxieTableComponent implements OnInit {
       expanded: false,
       group: scholar?.group ? scholar?.group : noGroupText,
       scholar,
+      hasError: axieResult.hasError || leaderboardDetails.hasError,
     };
   }
 
@@ -277,6 +290,7 @@ export class AxieTableComponent implements OnInit {
       }
 
       groups[group].totalAxies += row.axies.length;
+      groups[group].hasError = groups[group].hasError || row.hasError;
     });
 
     Object.values(groups).forEach((group) => {

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -34,6 +34,7 @@ export interface TableArenaData {
   expanded: boolean;
   group: string;
   scholar: FirestoreScholar;
+  hasError: boolean;
 }
 
 const noGroupText = '😥 no group';
@@ -49,6 +50,7 @@ class Group {
   group: string = noGroupText;
   expanded = false;
   totalCounts = 0;
+  hasError = false;
 }
 
 @Component({
@@ -94,10 +96,15 @@ export class ArenaTableComponent implements OnInit {
   expandedSubCar: TableArenaData[] = [];
   scholarTableData: Record<string, BehaviorSubject<TableArenaData>> = {};
 
+  @Input('error')
+  tableError = false;
+  @Output('errorChange')
+  tableErrorChange = new EventEmitter<boolean>();
+
   constructor(
     public dialog: MatDialog,
     private user: UserService,
-    private dialogService: DialogService,
+    private dialogService: DialogService
   ) {
     this.groupByColumns = ['group'];
   }
@@ -231,6 +238,7 @@ export class ArenaTableComponent implements OnInit {
       groups[group].wins += row.wins;
       groups[group].draws += row.draws;
       groups[group].loses += row.loses;
+      groups[group].hasError = groups[group].hasError || row.hasError;
     });
 
     Object.values(groups).forEach((group) => {
@@ -262,6 +270,9 @@ export class ArenaTableComponent implements OnInit {
     scholar: FirestoreScholar,
     leaderboardDetails: LeaderboardDetails
   ): TableArenaData {
+    this.tableError = this.tableError || leaderboardDetails.hasError;
+    this.tableErrorChange.emit(this.tableError);
+
     return {
       id: scholar.id,
       name: scholar?.name ?? 'unknown',
@@ -274,6 +285,7 @@ export class ArenaTableComponent implements OnInit {
       expanded: false,
       group: scholar?.group ? scholar?.group : noGroupText,
       scholar,
+      hasError: leaderboardDetails.hasError,
     };
   }
 

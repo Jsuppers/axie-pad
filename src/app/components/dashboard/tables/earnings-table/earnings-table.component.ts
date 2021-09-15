@@ -1,13 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, throwError } from 'rxjs';
 import { FirestoreScholar } from '../../../../_models/scholar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserService } from '../../../../services/user/user.service';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { DialogService } from 'src/app/services/dialog.service';
 import {
   animate,
@@ -40,6 +40,7 @@ export class Group {
   group: string = noGroupText;
   expanded = false;
   totalCounts = 0;
+  hasError = false;
 }
 export interface TableEarningsData {
   name: string;
@@ -61,6 +62,7 @@ export interface TableEarningsData {
   paidTimes: number;
   scholar: FirestoreScholar;
   slp: SLP;
+  hasError: boolean;
 }
 @Component({
   selector: 'app-earnings-table',
@@ -104,6 +106,11 @@ export class EarningsTableComponent implements OnInit {
   expandedSubCar: TableEarningsData[] = [];
   scholarTableData: Record<string, BehaviorSubject<TableEarningsData>> = {};
 
+  @Input('error')
+  tableError = false;
+  @Output('errorChange')
+  tableErrorChange = new EventEmitter<boolean>();
+
   @ViewChild(MatSort) sort: MatSort;
 
   constructor(
@@ -125,6 +132,10 @@ export class EarningsTableComponent implements OnInit {
     const inProgress = slp?.inProgress ?? 0;
     const averageSLP = this.getAverageSLP(slp);
     const claimableDate = this.getClaimableDateString(slp);
+
+    this.tableError = this.tableError || slp.hasError;
+    this.tableErrorChange.emit(this.tableError);
+
     return {
       expanded: false,
       scholar: scholar,
@@ -145,6 +156,7 @@ export class EarningsTableComponent implements OnInit {
       totalSLP: slp?.total ?? 0,
       name: scholar?.name ?? 'unknown',
       slp: slp,
+      hasError: slp.hasError
     };
   }
 
@@ -274,6 +286,7 @@ export class EarningsTableComponent implements OnInit {
       groups[group].totalSLP += row?.totalSLP ?? 0;
       groups[group].inProgressSLP += row?.inProgressSLP ?? 0;
       groups[group].managersShareSLP += row?.managersShareSLP ?? 0;
+      groups[group].hasError = groups[group].hasError || row.hasError;
     });
 
     Object.values(groups).forEach((group) => {

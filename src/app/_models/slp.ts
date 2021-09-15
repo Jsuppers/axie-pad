@@ -4,6 +4,7 @@ export interface SLP {
   inWallet: number;
   lastClaimed: number;
   total: number;
+  hasError: boolean;
 }
 
 export function DefaultSLP(): SLP {
@@ -13,5 +14,6 @@ export function DefaultSLP(): SLP {
     inWallet: 0,
     lastClaimed: 0,
     total: 0,
+    hasError: false,
   };
 }

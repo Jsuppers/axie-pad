@@ -26,7 +26,7 @@ import { SLPStats } from './helpers/slp-stats';
 import { CoinGecko } from './helpers/coin-gecko';
 import { Apollo } from 'apollo-angular';
 import { defaultColors, defaultManagerShare, defaultScholarShare } from 'src/app/constants';
-import { Axie } from 'src/app/_models/axie';
+import { Axie, AxieResult } from 'src/app/_models/axie';
 import { Table } from 'src/app/_models/table';
 
 export interface TotalValues {
@@ -41,7 +41,7 @@ export class UserService {
   private firestoreScholars$: Record<string, BehaviorSubject<FirestoreScholar>> = {};
   private scholarSLP$: Record<string, BehaviorSubject<SLP>> = {};
   private scholarLeaderBoardDetails$: Record<string, BehaviorSubject<LeaderboardDetails>> = {};
-  private scholarAxies$: Record<string, BehaviorSubject<Axie[]>> = {};
+  private scholarAxies$: Record<string, BehaviorSubject<AxieResult>> = {};
   hideAddress: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
 
@@ -108,7 +108,10 @@ export class UserService {
             this.updateLeaderBoardDetails(scholar);
 
             // update axies
-            this.scholarAxies$[scholar.id] = new BehaviorSubject([]);
+            this.scholarAxies$[scholar.id] = new BehaviorSubject({
+              hasError: false,
+              axies: []
+            });
             this.updateAxies(scholar);
           } else {
             const currentValue = this.firestoreScholars$[scholar.id].getValue();
@@ -194,7 +197,7 @@ export class UserService {
     return this.scholarLeaderBoardDetails$[scholarID];
   }
 
-  getScholarsAxies(scholarID: string): Observable<Axie[]> {
+  getScholarsAxies(scholarID: string): Observable<AxieResult> {
     return this.scholarAxies$[scholarID];
   }
 
@@ -213,8 +216,8 @@ export class UserService {
 
   async updateAxies(scholar: FirestoreScholar): Promise<void> {
     // account axies
-    const axies = await this._accountAxies.getAxies(scholar.roninAddress);
-    this.scholarAxies$[scholar.id].next(axies);
+    const result = await this._accountAxies.getAxies(scholar.roninAddress);
+    this.scholarAxies$[scholar.id].next(result);
   }
 
   private async updateAllStats(scholar: FirestoreScholar): Promise<void> {
