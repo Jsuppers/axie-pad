@@ -1,6 +1,9 @@
 
 import { Axie } from '../../../_models/axie';
 import { Apollo, gql } from 'apollo-angular';
+import { retryWhen } from 'rxjs/operators';
+
+import { retryStrategy } from './retry-strategy';
 
 // Get the ronin name from a gql query
 const GET_PROFILE_AXIES_BY_RONIN_ADDRESS = gql`
@@ -97,7 +100,7 @@ export class AccountAxies {
         const queryOutput: any = await this._apollo.query({
           query: GET_PROFILE_AXIES_BY_RONIN_ADDRESS,
           variables: variables,
-        }).toPromise();
+        }).pipe(retryWhen(retryStrategy())).toPromise();
 
         if (queryOutput?.data?.axies &&
           queryOutput?.data?.axies?.results &&
