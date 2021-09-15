@@ -5,7 +5,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService } from 'src/app/services/user/user.service';
-import { Axie } from '../../../../_models/axie';
+import { Axie, AxieResult } from '../../../../_models/axie';
 import { MatPaginator } from '@angular/material/paginator';
 import { map, switchMap } from 'rxjs/operators';
 import {
@@ -108,10 +108,11 @@ export class AxieTableComponent implements OnInit {
                 this.user.getScholarsAxies(scholar.id),
                 this.user.getScholarsLeaderboardDetails(scholar.id),
               ]).pipe(
-                map(([axies, leaderboardDetails]) => {
+                map(([axiesResult, leaderboardDetails]) => {
                   const index = this.allData.findIndex(
                     (value) => value.id === scholar.id
                   );
+                  const axies = axiesResult.axies;
                   const failedRules: AxieCountRule[] = [];
                   Object.values(user?.notificationRules ?? {}).forEach((rule) => {
                     if (rule.type === RuleType.axieCount) {
@@ -123,7 +124,7 @@ export class AxieTableComponent implements OnInit {
                   });
                   const tableData = this.getTableData(
                     scholar,
-                    axies,
+                    axiesResult,
                     leaderboardDetails,
                     failedRules
                   );
@@ -235,11 +236,12 @@ export class AxieTableComponent implements OnInit {
 
   getTableData(
     scholar: FirestoreScholar,
-    axies: Axie[],
+    axieResult: AxieResult,
     leaderboardDetails: LeaderboardDetails,
     failedRules: AxieCountRule[],
   ): TableData {
-    this.tableError = this.tableError || (axies.length === 0 || leaderboardDetails.hasError);
+    const axies = axieResult.axies;
+    this.tableError = this.tableError || (axieResult.hasError || leaderboardDetails.hasError);
     this.tableErrorChange.emit(this.tableError);
 
     return {
@@ -252,7 +254,7 @@ export class AxieTableComponent implements OnInit {
       expanded: false,
       group: scholar?.group ? scholar?.group : noGroupText,
       scholar,
-      hasError: axies.length === 0 || leaderboardDetails.hasError,
+      hasError: axieResult.hasError || leaderboardDetails.hasError,
     };
   }
 

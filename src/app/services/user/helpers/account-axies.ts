@@ -1,5 +1,5 @@
 
-import { Axie } from '../../../_models/axie';
+import { Axie, AxieResult } from '../../../_models/axie';
 import { Apollo, gql } from 'apollo-angular';
 import { retryWhen } from 'rxjs/operators';
 
@@ -62,14 +62,18 @@ export class AccountAxies {
   }
 
 
-  async getAxies(roninAddress: string): Promise<Axie[]> {
-    var axies: Axie[] = [];
+  async getAxies(roninAddress: string): Promise<AxieResult> {
+    var result: AxieResult = {
+      hasError: false,
+      axies: []
+    };
 
     if (!roninAddress) {
-      return axies;
+      return result;
     }
     if (this._axiesList.has(roninAddress)) {
-      return this._axiesList.get(roninAddress);
+      result.axies = this._axiesList.get(roninAddress)
+      return result;
     }
       try {
         var none = undefined;
@@ -107,7 +111,7 @@ export class AccountAxies {
           queryOutput?.data?.axies?.results?.length > 0) {
 
           (queryOutput?.data?.axies?.results as any[]).forEach((axie) => {
-            axies.push({
+            result.axies.push({
               name: axie?.name,
               id: axie?.id,
               image: axie?.image,
@@ -118,8 +122,9 @@ export class AccountAxies {
         }
 
       } catch (e) {
+        result.hasError = true;
         console.log(e);
       }
-    return axies;
+    return result;
   }
 }

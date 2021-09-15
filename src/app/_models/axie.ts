@@ -5,3 +5,8 @@ export interface Axie {
   breedCount: number;
   class: string;
 }
+
+export interface AxieResult {
+  hasError: boolean;
+  axies: Axie[];
+}
