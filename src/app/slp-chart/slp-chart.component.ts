@@ -37,6 +37,9 @@ export class SlpChartComponent implements OnInit {
             zeroLineColor: '#FFFFFF'
         }, stacked: true }],
       yAxes: [{
+        ticks: {
+          callback: (value, index) => index % 2 ? null : value
+        },
         gridLines: {
             display:false
         }, stacked: true }]
@@ -63,7 +66,7 @@ export class SlpChartComponent implements OnInit {
         output.push(
           this.userService.getScholarsSLP(scholar.id).pipe(map((slp) => {
             const timestamp = (slp?.lastClaimed  + (60 * 60 * 24 * 14)) * 1000;
-            const day = new Date(timestamp).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
+            const day = new Date(timestamp).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
             const managerSharePercentage = (this.userService.getManagerShare(scholar)) / 100;
             let scholarShare = 0;
             let managerShare = 0;
@@ -120,7 +123,7 @@ export class SlpChartComponent implements OnInit {
       this.projectedData    = [];
       for (let value of sortedValues) {
         const day = new Date(value.timestamp)
-          .toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
+          .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
 
         this.barChartLabels.push(day);
         this.scholarData.push(value.scholarShare);
