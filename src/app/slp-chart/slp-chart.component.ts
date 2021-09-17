@@ -3,17 +3,18 @@ import Chart from 'chart.js';
 import { ChartDataSets, ChartOptions, ChartType } from 'chart.js';
 import { Label } from 'ng2-charts';
 import { UserService } from '../services/user/user.service';
-import { combineLatest } from 'rxjs';
+import { combineLatest, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { SLP } from '../_models/slp';
-
+import { round } from 'lodash';
 
 class ChartData {
   timestamp: number;
   scholarShare: number;
   managerShare: number;
-  projectedShare: number;
+  projectedScholarShare: number;
+  projectedManagerShare: number;
   day: string;
 }
 
@@ -37,6 +38,9 @@ export class SlpChartComponent implements OnInit {
             zeroLineColor: '#FFFFFF'
         }, stacked: true }],
       yAxes: [{
+        ticks: {
+          callback: (value, index) => index % 2 ? null : value
+        },
         gridLines: {
             display:false
         }, stacked: true }]
@@ -44,9 +48,10 @@ export class SlpChartComponent implements OnInit {
   };
   private managerShareData = [];
   private scholarData = [];
-  private projectedData = [];
+  private projectedScholarData = [];
+  private projectedManagerData = [];
 
-  public barChartLabels: Label[] = [];
+  public barChartLabels: Label[][] = [];
   public barChartType: ChartType = 'bar';
   public barChartLegend = true;
   public barChartPlugins = [];
@@ -57,28 +62,34 @@ export class SlpChartComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.userService.getScholars().pipe(switchMap((scholars) => {
+    combineLatest([this.userService.getSLPPrice(), this.userService.getScholars()])
+      .pipe(switchMap(([slpPrice, scholars]) => {
       const output: Observable<ChartData>[] = [];
       scholars.forEach((scholar) => {
         output.push(
           this.userService.getScholarsSLP(scholar.id).pipe(map((slp) => {
             const timestamp = (slp?.lastClaimed  + (60 * 60 * 24 * 14)) * 1000;
-            const day = new Date(timestamp).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
+            const day = new Date(timestamp).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
             const managerSharePercentage = (this.userService.getManagerShare(scholar)) / 100;
             let scholarShare = 0;
             let managerShare = 0;
             let projectedShare = 0;
+            let projectedScholarShare = 0;
+            let projectedManagerShare = 0;
 
             var chartData: ChartData;
             if (slp?.lastClaimed) {
               scholarShare = slp?.total * (1 - managerSharePercentage);
               managerShare = slp?.total - scholarShare;
               projectedShare = this.getAverageSLP(slp) * this.getDays(slp);
+              projectedScholarShare = projectedShare * (1 - managerSharePercentage);
+              projectedManagerShare = projectedShare - projectedScholarShare;
               chartData = {
                 scholarShare,
                 managerShare,
-                projectedShare,
                 timestamp,
+                projectedScholarShare,
+                projectedManagerShare,
                 day,
               }
             }
@@ -87,25 +98,29 @@ export class SlpChartComponent implements OnInit {
 
       });
 
-      return combineLatest(output);
-    })).subscribe((chartdata) => {
+      return combineLatest([of(slpPrice), combineLatest(output)]);
+    }),
+    ).subscribe(([slpPrice, chartdata]) => {
       const managerShareDataRecord: Record<number, ChartData> = {};
       chartdata.forEach((data) => {
           if(data) {
             let scholarShare = data.scholarShare;
             let managerShare = data.managerShare;
-            let projectedShare = data.projectedShare;
+            let projectedScholarShare = data.projectedScholarShare;
+            let projectedManagerShare = data.projectedManagerShare;
             let day = data.day;
             let timestamp = data.timestamp;
             if (managerShareDataRecord[day]) {
               scholarShare += managerShareDataRecord[day].scholarShare;
               managerShare += managerShareDataRecord[day].managerShare;
-              projectedShare += managerShareDataRecord[day].projectedShare;
+              projectedScholarShare += managerShareDataRecord[day].projectedScholarShare;
+              projectedManagerShare += managerShareDataRecord[day].projectedManagerShare;
             }
             managerShareDataRecord[day] = {
               scholarShare,
               managerShare,
-              projectedShare,
+              projectedScholarShare,
+              projectedManagerShare,
               timestamp,
               day,
             }
@@ -117,15 +132,22 @@ export class SlpChartComponent implements OnInit {
       this.barChartLabels   = [];
       this.managerShareData = [];
       this.scholarData      = [];
-      this.projectedData    = [];
+      this.projectedScholarData    = [];
+      this.projectedManagerData    = [];
       for (let value of sortedValues) {
         const day = new Date(value.timestamp)
-          .toLocaleDateString(undefined, { weekday: 'long', day: 'numeric' });
+          .toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
 
-        this.barChartLabels.push(day);
+        this.barChartLabels.push([
+          day,
+          '',
+          'Manager',
+          `$${String(round((value.managerShare + value.projectedManagerShare) * slpPrice))}`,
+        ]);
         this.scholarData.push(value.scholarShare);
         this.managerShareData.push(value.managerShare);
-        this.projectedData.push(value.projectedShare);
+        this.projectedScholarData.push(round(value.projectedScholarShare, 4));
+        this.projectedManagerData.push(round(value.projectedManagerShare, 4));
       };
 
       this.updateChart();
@@ -136,7 +158,8 @@ export class SlpChartComponent implements OnInit {
     this.barChartData = [
       { data: this.managerShareData, label: "Manager's Share" },
       { data: this.scholarData, label: "Scholars Share" },
-      { data: this.projectedData, label: "Projected" },
+      { data: this.projectedScholarData, label: "Scholar Projected" },
+      { data: this.projectedManagerData, label: "Manager Projected" },
     ];
 
   }
