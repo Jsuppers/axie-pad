@@ -3,7 +3,7 @@ import Chart from 'chart.js';
 import { ChartDataSets, ChartOptions, ChartType } from 'chart.js';
 import { Label } from 'ng2-charts';
 import { UserService } from '../services/user/user.service';
-import { combineLatest } from 'rxjs';
+import { combineLatest, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { SLP } from '../_models/slp';
@@ -62,7 +62,8 @@ export class SlpChartComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.userService.getScholars().pipe(switchMap((scholars) => {
+    combineLatest([this.userService.getSLPPrice(), this.userService.getScholars()])
+      .pipe(switchMap(([slpPrice, scholars]) => {
       const output: Observable<ChartData>[] = [];
       scholars.forEach((scholar) => {
         output.push(
@@ -97,8 +98,9 @@ export class SlpChartComponent implements OnInit {
 
       });
 
-      return combineLatest(output);
-    })).subscribe((chartdata) => {
+      return combineLatest([of(slpPrice), combineLatest(output)]);
+    }),
+    ).subscribe(([slpPrice, chartdata]) => {
       const managerShareDataRecord: Record<number, ChartData> = {};
       chartdata.forEach((data) => {
           if(data) {
@@ -139,10 +141,8 @@ export class SlpChartComponent implements OnInit {
         this.barChartLabels.push([
           day,
           '',
-          `$${String(value.managerShare)}`,
-          `$${String(value.scholarShare)}`,
-          `$${String(round(value.projectedScholarShare, 4))}`,
-          `$${String(round(value.projectedManagerShare, 4))}`
+          'Manager',
+          `$${String(round((value.managerShare + value.projectedManagerShare) * slpPrice))}`,
         ]);
         this.scholarData.push(value.scholarShare);
         this.managerShareData.push(value.managerShare);
