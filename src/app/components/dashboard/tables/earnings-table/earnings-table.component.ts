@@ -232,7 +232,9 @@ export class EarningsTableComponent implements OnInit {
 
           });
 
-          this.dataSource.data = this.dataSource.data;
+          this.sort.active = 'averageSLPSinceLastClaimed';
+          this.sort.start = 'desc';
+          this.onSortData(this.sort);
         }
       });
 
