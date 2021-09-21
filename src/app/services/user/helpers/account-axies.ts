@@ -48,7 +48,6 @@ const GET_PROFILE_AXIES_BY_RONIN_ADDRESS = gql`
 `;
 
 // https://www.notion.so/axie/Axie-Ronin-Developer-Information-623c6756391249b5a64d08cffd25ea02
-// TODO we should batch these requests to 20-40 records / request
 export class AccountAxies {
 
   // we store the addresses locally because if we have already seen it no need
