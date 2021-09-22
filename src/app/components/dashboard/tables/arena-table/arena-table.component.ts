@@ -189,7 +189,9 @@ export class ArenaTableComponent implements OnInit {
           });
         }
 
-        this.dataSource.data = this.dataSource.data;
+        this.sort.active = 'elo';
+        this.sort.start = 'desc';
+        this.onSortData(this.sort);
         this.resultsLength = newGroups.length;
       });
 
