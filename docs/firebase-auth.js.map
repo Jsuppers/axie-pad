@@ -1,0 +1,1 @@
+{"version":3,"sources":["./node_modules/firebase/auth/dist/index.esm.js"],"names":[],"mappings":";;;;;;;;;;AAAA;AAAA;AAAwB;AACxB","file":"firebase-auth.js","sourcesContent":["import '@firebase/auth';\n//# sourceMappingURL=index.esm.js.map\n"],"sourceRoot":"webpack:///"}
