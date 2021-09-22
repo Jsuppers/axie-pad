@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { combineLatest } from 'rxjs';
 import { DialogService } from 'src/app/services/dialog.service';
 import { UserService } from 'src/app/services/user/user.service';
@@ -15,7 +16,7 @@ import { TableEarningsData } from '../earnings-table/earnings-table.component';
 export class ScholarMoreInfoComponent implements OnInit {
   @Input()
   scholarId: string;
-  scholar: Partial<TableEarningsData & TableArenaData>;
+  scholar: Partial<TableEarningsData & TableArenaData & {email: string}>;
   paymentMethods = PaymentMethods;
   roninName: string;
   scholarRoninName: string;
@@ -24,7 +25,8 @@ export class ScholarMoreInfoComponent implements OnInit {
 
   constructor(
     private user: UserService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private db: AngularFirestore,
   ) {}
 
   ngOnInit(): void {
@@ -38,6 +40,7 @@ export class ScholarMoreInfoComponent implements OnInit {
       this.scholar = {
         id: scholar.id,
         scholar: scholar,
+        email: scholar?.email,
         roninName: this.user.getRoninName(scholar.roninAddress),
         paidTimes: scholar?.paidTimes ?? 0,
         roninAddress: scholar?.roninAddress,
@@ -115,7 +118,15 @@ export class ScholarMoreInfoComponent implements OnInit {
     );
   }
 
-  onNoteSave() {
-    // TODO: Backend logic for saving note
+  async onNoteSave() {
+    const uid = this.user.tableID.getValue();
+    const scholarID = this.scholar.scholar?.id;
+      if (uid && scholarID) {
+        const note = this.scholar.scholar.note ?? '';
+        const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
+        await userDocument.ref.update({
+          ['scholars.' + scholarID + '.note']: note,
+        });
+      }
   }
 }
