@@ -8,6 +8,7 @@ export enum PaymentMethods {
 export interface FirestoreScholar {
   id: string;
   name: string;
+  email: string;
   group: string;
   roninAddress: string;
   paidTimes: number;
@@ -17,11 +18,13 @@ export interface FirestoreScholar {
   managerShare: number;
   // defaults to undefined which means use the default share
   useOwnPayShare?: boolean;
+  note: string;
 }
 
 export function DefaultFirestoreScholar(): FirestoreScholar {
   return {
     name: 'no name',
+    email: '',
     group: '',
     id: firebase.firestore().collection('tmp').doc().id,
     roninAddress: '',
@@ -30,5 +33,6 @@ export function DefaultFirestoreScholar(): FirestoreScholar {
     scholarEthAddress: '',
     preferredPaymentMethod: PaymentMethods.ronin,
     managerShare: 50,
+    note: '',
   };
 }

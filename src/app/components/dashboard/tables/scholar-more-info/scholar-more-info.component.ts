@@ -114,4 +114,8 @@ export class ScholarMoreInfoComponent implements OnInit {
       '_blank'
     );
   }
+
+  onNoteSave() {
+    // TODO: Backend logic for saving note
+  }
 }
