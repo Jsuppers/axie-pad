@@ -50,7 +50,7 @@
       <button mat-menu-item (click)="openCurrencyDialog()">
         <mat-icon style="margin-left: 5px; color: #058630">paid</mat-icon>{{fiatCurrencyTitle?.toUpperCase()}}
       </button>
-      <button mat-menu-item>
+      <button mat-menu-item (click)="onImport()">
         <mat-icon>file_upload</mat-icon>Import
       </button>
       <button mat-menu-item (click)="onExport()">

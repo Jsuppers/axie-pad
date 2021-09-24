@@ -18,6 +18,7 @@ import _ from 'lodash';
 import { NotificationRulesComponent } from './components/dialogs/notification-rules/notification-rules.component';
 import { Rule, RuleType } from './_models/rule';
 import { CsvService } from './services/csv.service';
+import { ImportDialogComponent } from './components/dialogs/import-dialog/import-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -206,5 +207,12 @@ export class AppComponent implements OnInit {
 
   onExport() {
     this.csvService.export();
+  }
+
+  onImport() {
+    this.dialog.open(ImportDialogComponent, {
+      width: '90vw',
+      height: '90vh'
+    });
   }
 }

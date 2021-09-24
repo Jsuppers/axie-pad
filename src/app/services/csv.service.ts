@@ -18,7 +18,6 @@ export class CsvService {
   constructor(private userService: UserService) {
     this.userService.getScholars().subscribe((scholars) => {
       this._scholars = scholars;
-      console.log(this._scholars);
     });
   }
 
