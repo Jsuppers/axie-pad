@@ -3385,15 +3385,15 @@ class BreedProfitTableComponent {
         this.formulaCost = new Array(7);
         this.totalCost = new Array(7);
         this.breedingCostSLP = [
-            300,
             600,
             900,
             1500,
             2400,
             3900,
-            6300
+            6300,
+            10200
         ];
-        this.breedingCostAXS = 2;
+        this.breedingCostAXS = 1;
         this.highestProfit = -1;
         Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["combineLatest"])([
             userService.getSLPPrice(),
@@ -3411,7 +3411,7 @@ class BreedProfitTableComponent {
                 const totalBreedingCostSLP = totalBreedingtSLP * slpPrice;
                 const totalBreedingCostAXS = axsPrice * (this.breedingCostAXS * breedCount);
                 const totalBreedingCost = totalBreedingCostSLP + totalBreedingCostAXS;
-                this.formulaCost[i] = 'y = ' + (i ? breedCount : '') + 'x - ' + totalBreedingCost.toFixed(2);
+                this.formulaCost[i] = 'y = ' + (i ? breedCount : '') + 'x - ' + totalBreedingCostSLP.toFixed(2) + ' ( ' + totalBreedingtSLP + ' SLP) - ' + totalBreedingCostAXS.toFixed(2) + ' ( ' + this.breedingCostAXS + ' AXS)';
                 this.totalCost[i] = (breedCount * averagePrice) - totalBreedingCost;
                 if (this.totalCost[i] > this.highestProfit) {
                     this.highestProfit = this.totalCost[i];

@@ -14,15 +14,15 @@ export class BreedProfitTableComponent {
   formulaCost: string[] = new Array<string>(7);
   totalCost: number[] = new Array<number>(7);
   breedingCostSLP: number[] = [
-    300,
     600,
     900,
     1500,
     2400,
     3900,
-    6300
+    6300,
+    10200
   ];
-  breedingCostAXS = 2;
+  breedingCostAXS = 1;
   highestProfit = -1;
 
   constructor(private userService: UserService) {
@@ -42,7 +42,7 @@ export class BreedProfitTableComponent {
           const totalBreedingCostSLP = totalBreedingtSLP * slpPrice;
           const totalBreedingCostAXS = axsPrice * (this.breedingCostAXS * breedCount);
           const totalBreedingCost = totalBreedingCostSLP + totalBreedingCostAXS;
-          this.formulaCost[i] = 'y = ' + (i ? breedCount : '') + 'x - ' + totalBreedingCost.toFixed(2);
+          this.formulaCost[i] = 'y = ' + (i ? breedCount : '') + 'x - ' + totalBreedingCostSLP.toFixed(2) + ' ( ' + totalBreedingtSLP + ' SLP) - ' + totalBreedingCostAXS.toFixed(2) + ' ( ' + this.breedingCostAXS +' AXS)';
           this.totalCost[i] = (breedCount * averagePrice) - totalBreedingCost;
           if (this.totalCost[i] > this.highestProfit) {
             this.highestProfit = this.totalCost[i];
