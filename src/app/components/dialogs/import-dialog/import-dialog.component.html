@@ -24,8 +24,18 @@
         matTextareaAutosize
         [matAutosizeMinRows]="4"
         placeholder="Content"
+        [(ngModel)]="content"
       ></textarea>
     </mat-form-field>
+
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="onUpdate()"
+      [ngStyle]="{ width: 'max-width', 'align-self': 'end' }"
+    >
+      Update
+    </button>
 
     <h3>Scholar accounts being imported</h3>
 
@@ -110,5 +120,5 @@
   </div>
 </div>
 <div mat-dialog-actions align="end">
-  <button mat-flat-button color="primary" (click)="onImport()">Import</button>
+  <button mat-flat-button color="primary" (click)="onImport()" [disabled]="numberOfUploaded === 0 || importing">Import</button>
 </div>
