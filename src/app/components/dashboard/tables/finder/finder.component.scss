@@ -1,0 +1,21 @@
+.main {
+  max-height: 600px;
+}
+
+.left-panel {
+  padding: 10px;
+}
+
+.right-panel {
+  padding: 20px;
+}
+
+.axie-card {
+  width: 200px;
+}
+
+.axie-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-gap: 10px;
+}
