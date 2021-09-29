@@ -114,6 +114,7 @@ export class AccountAxies {
               name: axie?.name,
               id: axie?.id,
               image: axie?.image,
+              parts: axie?.parts,
               breedCount: axie?.breedCount,
               class: axie?.class,
             });
