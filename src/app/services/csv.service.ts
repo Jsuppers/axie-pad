@@ -51,7 +51,7 @@ export class CsvService {
       {
         title: "Manager's share",
         fieldName: 'managerShare',
-        replacer: (key, value) => value.toString(),
+        replacer: (key, value) => value,
       },
       {
         title: 'Preferred payment',
