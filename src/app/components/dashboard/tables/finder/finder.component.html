@@ -2,7 +2,7 @@
   <div fxLayout="column" fxFlex="300px" class="left-panel">
     <mat-form-field appearance="outline">
       <mat-label>Search</mat-label>
-      <input matInput placeholder="Axie name" />
+      <input matInput placeholder="Axie name" [(ngModel)]="searchQuery" (ngModelChange)="onSearchAxies()" />
     </mat-form-field>
 
     <div fxLayout="row" fxLayoutAlign="space-between baseline">
@@ -14,14 +14,22 @@
   <mat-divider vertical></mat-divider>
   <div fxLayout="column" [ngStyle]="{ width: '100%' }" class="right-panel">
     <div fxLayout="row">
-      <h2>{{ scholars.length }} Axies</h2>
+      <h2>{{ axies.length }} Axies</h2>
     </div>
 
     <div class="axie-container">
-      <mat-card *ngFor="let scholar of scholars" class="axie-card">
+      <mat-card *ngFor="let axie of axies" class="axie-card">
+        <span [style.background]="getAxieClassColor(axie.class)">{{
+          hideAddresses ? "#AxieId" : "#" + axie.id
+        }}</span
+        ><br />
         <span style="font-size: 12px">{{
-          hideAddresses ? "AxieName" : scholar.name
-        }}</span>
+          hideAddresses ? "AxieName" : axie.name
+        }}</span
+        ><br />
+        <span style="font-size: 12px">Breed Count: {{ axie.breedCount }}</span
+        ><br />
+        <img [src]="axie.image" style="height: 120px" />
       </mat-card>
     </div>
   </div>
