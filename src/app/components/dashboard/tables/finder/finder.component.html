@@ -2,23 +2,38 @@
   <div fxLayout="column" fxFlex="300px" class="left-panel">
     <mat-form-field appearance="outline">
       <mat-label>Search</mat-label>
-      <input matInput placeholder="Axie name" [(ngModel)]="searchQuery" (ngModelChange)="onSearchAxies()" />
+      <input matInput placeholder="Axie name" [(ngModel)]="searchQuery" />
     </mat-form-field>
 
     <div fxLayout="row" fxLayoutAlign="space-between baseline">
       <h3>Filter</h3>
 
-      <button mat-button>Clear filter</button>
+      <button mat-button (click)="onClearFilter()">Clear filter</button>
     </div>
+
+    <mat-form-field appearance="outline" [ngStyle]="{ width: '100%' }">
+      <mat-label>Parts</mat-label>
+      <input
+        type="text"
+        matInput
+        [(ngModel)]="partQuery"
+        [matAutocomplete]="auto"
+      />
+      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onSelectPart($event)">
+        <mat-option *ngFor="let option of filteredParts" [value]="option">
+          {{ option.name }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
   </div>
   <mat-divider vertical></mat-divider>
   <div fxLayout="column" [ngStyle]="{ width: '100%' }" class="right-panel">
     <div fxLayout="row">
-      <h2>{{ axies.length }} Axies</h2>
+      <h2>{{ _axies.length }} Axies</h2>
     </div>
 
     <div class="axie-container">
-      <mat-card *ngFor="let axie of axies" class="axie-card">
+      <mat-card *ngFor="let axie of filteredAxies" class="axie-card">
         <span [style.background]="getAxieClassColor(axie.class)">{{
           hideAddresses ? "#AxieId" : "#" + axie.id
         }}</span
