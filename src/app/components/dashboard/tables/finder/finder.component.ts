@@ -1,13 +1,17 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { combineLatest, Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { combineLatest, merge, Observable } from 'rxjs';
+import { map, startWith, switchMap, tap } from 'rxjs/operators';
 import { lowerCase } from 'lodash';
-import { FormBuilder } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl } from '@angular/forms';
 
 import { UserService } from 'src/app/services/user/user.service';
 import { Axie } from 'src/app/_models/axie';
 import { AxiePart } from 'src/app/_models/part';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+
+type PartTypes = {
+  name: string;
+  parts: AxiePart[];
+};
 
 @Component({
   selector: 'app-finder',
@@ -16,11 +20,17 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 })
 export class FinderComponent implements OnInit {
   _axies: Axie[] = [];
+  _types: PartTypes[] = [];
   _parts: AxiePart[] = [];
 
-  searchQuery: string = '';
-  partQuery: string = '';
-  partSelected: AxiePart;
+  types: Observable<PartTypes[]>;
+  axies: Observable<Axie[]>;
+
+  form = this.fb.group({
+    searchQuery: [''],
+    partQuery: [''],
+    selectedParts: this.fb.array([]),
+  });
 
   @Input()
   hideAddress$: Observable<boolean>;
@@ -56,7 +66,8 @@ export class FinderComponent implements OnInit {
       )
       .subscribe((axies) => {
         this._axies = axies;
-        this._parts = axies.reduce((parts, currentAxie) => {
+
+        this._parts = axies.reduce<AxiePart[]>((parts, currentAxie) => {
           currentAxie.parts.forEach((part) => {
             const alreadyAdded = Boolean(
               parts.find((_part) => _part.name === part.name)
@@ -69,34 +80,95 @@ export class FinderComponent implements OnInit {
 
           return parts;
         }, []);
+
+        this._types = this._parts.reduce<PartTypes[]>((result, currentPart) => {
+          const typeIndex = result.findIndex(
+            (type) => type.name === currentPart.type
+          );
+
+          if (typeIndex !== -1) {
+            result[typeIndex].parts.push(currentPart);
+          } else {
+            result.push({ name: currentPart.type, parts: [currentPart] });
+          }
+
+          return result;
+        }, []);
+
         this.onClearFilter();
       });
 
     this.hideAddress$.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
     });
-  }
 
-  get filteredParts(): AxiePart[] {
-    return this._parts.filter((part) =>
-      lowerCase(part.name).includes(lowerCase(this.partQuery))
+    this.types = merge<string, string[]>(
+      this.partQueryControl.valueChanges.pipe(startWith('')),
+      this.selectedPartsControl.valueChanges.pipe(startWith([]))
+    ).pipe(
+      map(() => {
+        const partQuery = this.partQueryControl.value as string;
+        const selectedParts = this.selectedPartsControl.value as string[];
+
+        return this._types
+          .map((type) => ({
+            ...type,
+            parts: type.parts.filter((part) => {
+              const isSelected = Boolean(
+                selectedParts.find((selectedPart) => selectedPart === part.name)
+              );
+
+              return (
+                lowerCase(part.name).includes(lowerCase(partQuery)) &&
+                !isSelected
+              );
+            }),
+          }))
+          .filter((type) => type.parts.length);
+      })
+    );
+
+    this.axies = merge<string, string[]>(
+      this.searchQueryControl.valueChanges.pipe(startWith('')),
+      this.selectedPartsControl.valueChanges.pipe(startWith([]))
+    ).pipe(
+      map(() => {
+        const searchQuery = this.searchQueryControl.value as string;
+        const selectedParts = this.selectedPartsControl.value as string[];
+
+        return this._axies
+          .filter((axie) =>
+            lowerCase(axie.name).includes(lowerCase(searchQuery))
+          )
+          .filter((axie) => {
+            if (selectedParts.length) {
+              let count = 0;
+
+              for (let part of selectedParts) {
+                if (axie.parts.find((_part) => _part.name === part)) {
+                  count++;
+                }
+              }
+
+              return count === selectedParts.length;
+            }
+
+            return true;
+          });
+      })
     );
   }
 
-  get filteredAxies(): Axie[] {
-    return this._axies
-      .filter((axie) =>
-        lowerCase(axie.name).includes(lowerCase(this.searchQuery))
-      )
-      .filter((axie) => {
-        if (!this.partSelected) {
-          return true;
-        }
+  get searchQueryControl() {
+    return this.form.get('searchQuery') as FormControl;
+  }
 
-        return Boolean(
-          axie.parts.find((part) => part.name === this.partSelected.name)
-        );
-      });
+  get partQueryControl() {
+    return this.form.get('partQuery') as FormControl;
+  }
+
+  get selectedPartsControl(): FormArray {
+    return this.form.get('selectedParts') as FormArray;
   }
 
   getAxieClassColor(axieClass: string) {
@@ -119,17 +191,21 @@ export class FinderComponent implements OnInit {
     }
   }
 
-  displayFn(part: AxiePart): string {
-    return part && part.name ? part.name : '';
-  }
-
-  onSelectPart(event: MatAutocompleteSelectedEvent) {
-    this.partSelected = event.option.value;
+  onSelectPart(partName: string) {
+    this.selectedPartsControl.push(this.fb.control(partName));
+    this.partQueryControl.setValue('');
   }
 
   onClearFilter() {
-    this.partSelected = undefined;
-    this.searchQuery = '';
-    this.partQuery = '';
+    this.form.patchValue({
+      searchQuery: '',
+      partQuery: '',
+    });
+
+    this.selectedPartsControl.clear();
+  }
+
+  onRemovePart(index: number) {
+    this.selectedPartsControl.removeAt(index);
   }
 }
