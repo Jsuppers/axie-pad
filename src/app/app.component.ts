@@ -17,6 +17,8 @@ import { Table } from './_models/table';
 import _ from 'lodash';
 import { NotificationRulesComponent } from './components/dialogs/notification-rules/notification-rules.component';
 import { Rule, RuleType } from './_models/rule';
+import { CsvService } from './services/csv.service';
+import { ImportDialogComponent } from './components/dialogs/import-dialog/import-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -37,7 +39,8 @@ export class AppComponent implements OnInit {
               private userService: UserService,
               private dialog: MatDialog,
               private db: AngularFirestore,
-              private ccService: NgcCookieConsentService) {
+              private ccService: NgcCookieConsentService,
+              private csvService: CsvService) {
       this.hideAddress = this.userService.hideAddress;
       this.userService.ownLinkedTables.subscribe((tables) => {
         this.linkedTables = Object.values(tables ?? {});
@@ -199,6 +202,17 @@ export class AppComponent implements OnInit {
           ['notificationRules']: result
         });
       }
+    });
+  }
+
+  onExport() {
+    this.csvService.export();
+  }
+
+  onImport() {
+    this.dialog.open(ImportDialogComponent, {
+      width: '90vw',
+      height: '90vh'
     });
   }
 }

@@ -80,6 +80,7 @@ import { EnemyAxiePipe } from './pipes/enemy-axie.pipe';
 import { NotificationRulesComponent } from './components/dialogs/notification-rules/notification-rules.component';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ImportDialogComponent } from 'src/app/components/dialogs/import-dialog/import-dialog.component';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -148,6 +149,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     OwnAxiePipe,
     EnemyAxiePipe,
     NotificationRulesComponent,
+    ImportDialogComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
