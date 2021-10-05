@@ -101,7 +101,8 @@ export class DashboardComponent implements OnInit {
   }
 
   addNewScholar(): void {
-    const newScholar = DefaultFirestoreScholar();
+    const currentUserID = this.userService.getCurrentUserID();
+    const newScholar = DefaultFirestoreScholar(currentUserID);
     this.scholarService.openEditDialog(newScholar);
   }
 

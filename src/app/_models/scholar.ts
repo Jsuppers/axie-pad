@@ -5,6 +5,15 @@ export enum PaymentMethods {
   eth,
 }
 
+export interface ScholarEditPermissions {
+  editAll: boolean;
+}
+
+export interface ScholarMetaData {
+  // a list of allowed editors
+  allowedEditors: Record<string, ScholarEditPermissions>;
+}
+
 export interface FirestoreScholar {
   id: string;
   name: string;
@@ -16,16 +25,24 @@ export interface FirestoreScholar {
   preferredPaymentMethod: PaymentMethods;
   scholarEthAddress: string;
   managerShare: number;
+  metaData?: ScholarMetaData;
   // defaults to undefined which means use the default share
   useOwnPayShare?: boolean;
   note: string;
 }
 
-export function DefaultFirestoreScholar(): FirestoreScholar {
+export function DefaultFirestoreScholar(creatorUid: string): FirestoreScholar {
+  const editors: Record<string, ScholarEditPermissions> = {};
+  editors[creatorUid] = {
+    editAll: true,
+  }
   return {
     name: 'no name',
     email: '',
     group: '',
+    metaData: {
+      allowedEditors: editors,
+    },
     id: firebase.firestore().collection('tmp').doc().id,
     roninAddress: '',
     scholarRoninAddress: '',

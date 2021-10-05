@@ -165,6 +165,10 @@ export class UserService {
     this.tableID.next(this.currentUserID);
   }
 
+  getCurrentUserID(): string {
+    return this.currentUserID;
+  }
+
   setTable(table: Table): void {
     this.tableID.next(table.tableID);
   }
