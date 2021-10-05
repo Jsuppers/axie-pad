@@ -1,6 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatTable } from '@angular/material/table';
+import { UserService } from 'src/app/services/user/user.service';
 import {
   DefaultFirestoreScholar,
   FirestoreScholar,
@@ -31,7 +33,11 @@ export class ImportDialogComponent {
 
   @ViewChild(MatTable) table: MatTable<FirestoreScholar>;
 
-  constructor(public dialogRef: MatDialogRef<ImportDialogComponent>) {}
+  constructor(
+    public dialogRef: MatDialogRef<ImportDialogComponent>,
+    private db: AngularFirestore,
+    private userService: UserService,
+  ) {}
 
   get numberOfUploaded() {
     return this._uploadedScholars.length;
@@ -103,10 +109,20 @@ export class ImportDialogComponent {
     this.dataSource = this._uploadedScholars;
   }
 
-  onImport() {
+  async onImport() {
     this.importing = true;
 
-    // TODO: Backend importing logic using _uploadedScholars as scholars list
+    const uid = this.userService.tableID.getValue();
+    if (uid) {
+      const batch = this.db.firestore.batch();
+      for (const scholar of this._uploadedScholars) {
+        const insert = this.db.collection('users').doc(uid).ref;
+        batch.update(insert, {
+          ['scholars.' + scholar.id]: scholar
+        });
+      }
+      await batch.commit();
+    }
 
     this.importing = false;
     this.dialogRef.close();
