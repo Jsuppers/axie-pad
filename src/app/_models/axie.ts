@@ -5,6 +5,8 @@ export interface Axie {
   name: string;
   image: string;
   breedCount: number;
+  pureness: number;
+  quality: number;
   class: string;
   parts: AxiePart[];
 }

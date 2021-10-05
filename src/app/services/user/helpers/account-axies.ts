@@ -2,6 +2,7 @@
 import { Axie, AxieResult } from '../../../_models/axie';
 import { Apollo, gql } from 'apollo-angular';
 import { retryWhen } from 'rxjs/operators';
+import { AxieGene } from "agp-npm/dist/axie-gene"; // Defaults to HexType.Bit256
 
 import { retryStrategy } from './retry-strategy';
 
@@ -23,6 +24,8 @@ const GET_PROFILE_AXIES_BY_RONIN_ADDRESS = gql`
     name
     stage
     class
+    genes
+    pureness
     breedCount
     image
     title
@@ -115,6 +118,8 @@ export class AccountAxies {
               id: axie?.id,
               image: axie?.image,
               parts: axie?.parts,
+              pureness: axie?.pureness,
+              quality: this.getQuality(axie?.genes),
               breedCount: axie?.breedCount,
               class: axie?.class,
             });
@@ -126,5 +131,15 @@ export class AccountAxies {
         console.log(e);
       }
     return result;
+  }
+
+  private getQuality(gene: string): number {
+    try {
+      const axieGene = new AxieGene(gene);
+      return axieGene.getGeneQuality();
+    } catch(e) {
+      console.error(e);
+      return 0;
+    }
   }
 }
