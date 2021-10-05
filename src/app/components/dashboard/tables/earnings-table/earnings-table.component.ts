@@ -105,6 +105,7 @@ export class EarningsTableComponent implements OnInit {
   expandedCar: any[] = [];
   expandedSubCar: TableEarningsData[] = [];
   scholarTableData: Record<string, BehaviorSubject<TableEarningsData>> = {};
+  expandingScholar: TableEarningsData = undefined;
 
   @Input('error')
   tableError = false;
@@ -137,7 +138,7 @@ export class EarningsTableComponent implements OnInit {
     this.tableErrorChange.emit(this.tableError);
 
     return {
-      expanded: false,
+      expanded: this.expandingScholar ? scholar.id === this.expandingScholar.scholar.id : false,
       scholar: scholar,
       failedRules: failedRules,
       group: scholar?.group ? scholar?.group : noGroupText,
@@ -459,6 +460,7 @@ export class EarningsTableComponent implements OnInit {
 
   expandScholar(element): void {
     element.expanded = !element.expanded;
+    this.expandingScholar = element.expanded ? element : undefined;
   }
 
   getGroupName(element): string {
