@@ -51,8 +51,7 @@ export class ImportDialogComponent {
       reader.onload = () => {
         const csv = reader.result as string;
 
-        // Remove " and \r character and split each rows
-        const rows = csv.replace(/["\r]/g, '').split('\n');
+        const rows = csv.split('\n');
 
         // Remove the first header row
         rows.shift();
@@ -69,7 +68,8 @@ export class ImportDialogComponent {
     this._uploadedScholars = [];
 
     rows.forEach((row) => {
-      const columns = row.split(','); // Split between comma
+      // Remove " and \r character and split each rows
+      const columns = row.replace(/["\r]/g, '').split(','); // Split between comma
 
       if (columns.length !== 9) {
         return;
