@@ -245,7 +245,6 @@ export class AxieTableComponent implements OnInit {
     const axies = axieResult.axies;
     this.tableError = this.tableError || (axieResult.hasError || leaderboardDetails.hasError);
     this.tableErrorChange.emit(this.tableError);
-
     return {
       id: scholar.id,
       name: scholar?.name ?? 'unknown',

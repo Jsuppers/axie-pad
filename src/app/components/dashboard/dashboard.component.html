@@ -94,6 +94,13 @@
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>
+        <mat-icon>search</mat-icon>
+        <span>Finder</span>
+      </ng-template>
+      <app-finder [hideAddress$]="hideAddress"></app-finder>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
         <span><span style="font-size: 20px;">🧰 </span>Tools</span>
       </ng-template>
       <app-breed-profit-table></app-breed-profit-table>

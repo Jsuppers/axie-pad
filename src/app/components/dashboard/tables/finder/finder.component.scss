@@ -1,0 +1,33 @@
+.main {
+  max-height: 600px;
+}
+
+.left-panel {
+  padding: 10px;
+}
+
+.right-panel {
+  padding: 20px;
+}
+
+.axie-card {
+  width: 200px;
+  max-width: 200px;
+  box-sizing: border-box;
+  height: max-content;
+}
+
+.axie-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-gap: 10px;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+}
+
+a {
+  text-decoration: none;
+  color: unset;
+}
