@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { combineLatest, merge, Observable } from 'rxjs';
-import { map, startWith, switchMap, tap } from 'rxjs/operators';
+import { map, startWith, switchMap } from 'rxjs/operators';
 import { lowerCase } from 'lodash';
 import { FormArray, FormBuilder, FormControl } from '@angular/forms';
 
@@ -22,14 +22,21 @@ export class FinderComponent implements OnInit {
   _axies: Axie[] = [];
   _types: PartTypes[] = [];
   _parts: AxiePart[] = [];
+  _classes: string[] = [];
 
   types: Observable<PartTypes[]>;
   axies: Observable<Axie[]>;
+  classes: Observable<string[]>;
 
   form = this.fb.group({
     searchQuery: [''],
     partQuery: [''],
+    classQuery: [''],
+    purenessQuery: [undefined],
+    maxBreedCountQuery: [undefined],
+    qualityQuery: [100],
     selectedParts: this.fb.array([]),
+    selectedClasses: this.fb.array([]),
   });
 
   @Input()
@@ -95,6 +102,17 @@ export class FinderComponent implements OnInit {
           return result;
         }, []);
 
+        this._classes = axies.reduce<string[]>((classes, currentAxie) => {
+          if (
+            !classes.find((cl) => cl === currentAxie.class) &&
+            currentAxie.class
+          ) {
+            classes.push(currentAxie.class);
+          }
+
+          return classes;
+        }, []);
+
         this.onClearFilter();
       });
 
@@ -128,13 +146,41 @@ export class FinderComponent implements OnInit {
       })
     );
 
-    this.axies = merge<string, string[]>(
+    this.classes = merge<string, string[]>(
+      this.classQueryControl.valueChanges.pipe(startWith('')),
+      this.selectedClassesControl.valueChanges.pipe(startWith([]))
+    ).pipe(
+      map(() => {
+        const classQuery = this.classQueryControl.value as string;
+        const selectedClasses = this.selectedClassesControl.value as string[];
+
+        return this._classes.filter(
+          (cl) =>
+            !selectedClasses.includes(cl) &&
+            lowerCase(cl).includes(lowerCase(classQuery))
+        );
+      })
+    );
+
+    this.axies = merge(
       this.searchQueryControl.valueChanges.pipe(startWith('')),
-      this.selectedPartsControl.valueChanges.pipe(startWith([]))
+      this.selectedPartsControl.valueChanges.pipe(startWith([])),
+      this.selectedClassesControl.valueChanges.pipe(startWith([])),
+      this.purenessQueryControl.valueChanges,
+      this.maxBreedCountQueryControl.valueChanges,
+      this.qualityQueryControl.valueChanges.pipe(startWith(100))
     ).pipe(
       map(() => {
         const searchQuery = this.searchQueryControl.value as string;
         const selectedParts = this.selectedPartsControl.value as string[];
+        const selectedClasses = this.selectedClassesControl.value as string[];
+        const purenessQuery = this.purenessQueryControl.value as
+          | number
+          | undefined;
+        const maxBreedCountQuery = this.maxBreedCountQueryControl.value as
+          | number
+          | undefined;
+        const qualityQuery = (100 - this.qualityQueryControl.value) as number;
 
         return this._axies
           .filter((axie) =>
@@ -154,6 +200,30 @@ export class FinderComponent implements OnInit {
             }
 
             return true;
+          })
+          .filter((axie) => {
+            if (selectedClasses.length) {
+              return selectedClasses.includes(axie.class);
+            }
+
+            return true;
+          })
+          .filter((axie) => {
+            if (purenessQuery !== undefined) {
+              return axie.pureness === purenessQuery;
+            }
+
+            return true;
+          })
+          .filter((axie) => {
+            if (maxBreedCountQuery !== undefined) {
+              return axie.breedCount <= maxBreedCountQuery;
+            }
+
+            return true;
+          })
+          .filter((axie) => {
+            return axie.quality >= qualityQuery;
           });
       })
     );
@@ -169,6 +239,26 @@ export class FinderComponent implements OnInit {
 
   get selectedPartsControl(): FormArray {
     return this.form.get('selectedParts') as FormArray;
+  }
+
+  get classQueryControl() {
+    return this.form.get('classQuery') as FormControl;
+  }
+
+  get selectedClassesControl() {
+    return this.form.get('selectedClasses') as FormArray;
+  }
+
+  get purenessQueryControl() {
+    return this.form.get('purenessQuery') as FormControl;
+  }
+
+  get maxBreedCountQueryControl() {
+    return this.form.get('maxBreedCountQuery') as FormControl;
+  }
+
+  get qualityQueryControl() {
+    return this.form.get('qualityQuery') as FormControl;
   }
 
   getAxieClassColor(axieClass: string) {
@@ -196,16 +286,38 @@ export class FinderComponent implements OnInit {
     this.partQueryControl.setValue('');
   }
 
+  onSelectClass(className: string) {
+    this.selectedClassesControl.push(this.fb.control(className));
+    this.classQueryControl.setValue('');
+  }
+
   onClearFilter() {
     this.form.patchValue({
       searchQuery: '',
       partQuery: '',
+      classQuery: '',
+      purenessQuery: undefined,
+      maxBreedCountQuery: undefined,
+      qualityQuery: 100,
     });
 
     this.selectedPartsControl.clear();
+    this.selectedClassesControl.clear();
   }
 
   onRemovePart(index: number) {
     this.selectedPartsControl.removeAt(index);
+  }
+
+  onRemoveClass(index: number) {
+    this.selectedClassesControl.removeAt(index);
+  }
+
+  onRemovePureness() {
+    this.purenessQueryControl.setValue(undefined);
+  }
+
+  onRemoveBreedCount() {
+    this.maxBreedCountQueryControl.setValue(undefined);
   }
 }
