@@ -82,6 +82,7 @@ import { ColorPickerModule } from 'ngx-color-picker';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FinderComponent } from './components/dashboard/tables/finder/finder.component';
 import { MatSliderModule } from '@angular/material/slider';
+import { ImportDialogComponent } from 'src/app/components/dialogs/import-dialog/import-dialog.component';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -151,6 +152,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     EnemyAxiePipe,
     NotificationRulesComponent,
     FinderComponent,
+    ImportDialogComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),

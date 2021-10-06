@@ -1,0 +1,124 @@
+<h2 mat-dialog-title>Import scholars</h2>
+<div mat-dialog-content>
+  <div fxLayout="column">
+    <input
+      #fileUpload
+      type="file"
+      accept=".csv"
+      [ngStyle]="{ display: 'none' }"
+      (change)="handleFileUpload($event)"
+    />
+    <button
+      mat-flat-button
+      color="primary"
+      [ngStyle]="{ width: 'max-content' }"
+      (click)="onUploadFile(fileUpload)"
+    >
+      Upload File
+    </button>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Content</mat-label>
+      <textarea
+        matInput
+        matTextareaAutosize
+        [matAutosizeMinRows]="4"
+        placeholder="Content"
+        [(ngModel)]="content"
+      ></textarea>
+    </mat-form-field>
+
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="onUpdate()"
+      [ngStyle]="{ width: 'max-width', 'align-self': 'end' }"
+    >
+      Update
+    </button>
+
+    <h3>Scholar accounts being imported</h3>
+
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <!-- Ronin Address Column -->
+      <ng-container matColumnDef="roninAddress">
+        <th mat-header-cell *matHeaderCellDef>Ronin Address</th>
+        <td mat-cell *matCellDef="let element">
+          {{
+            element.roninAddress.length > 10
+              ? (element.roninAddress | slice: 0:10) + "..."
+              : element.roninAddress
+          }}
+        </td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+      </ng-container>
+
+      <!-- Group Column -->
+      <ng-container matColumnDef="group">
+        <th mat-header-cell *matHeaderCellDef>Group</th>
+        <td mat-cell *matCellDef="let element">{{ element.group }}</td>
+      </ng-container>
+
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>Email</th>
+        <td mat-cell *matCellDef="let element">{{ element.email }}</td>
+      </ng-container>
+
+      <!-- Use own payscale Column -->
+      <ng-container matColumnDef="useOwnPayShare">
+        <th mat-header-cell *matHeaderCellDef>Use own payscale</th>
+        <td mat-cell *matCellDef="let element">{{ element.useOwnPayShare }}</td>
+      </ng-container>
+
+      <!-- Manager's share Column -->
+      <ng-container matColumnDef="managerShare">
+        <th mat-header-cell *matHeaderCellDef>Manager's share</th>
+        <td mat-cell *matCellDef="let element">{{ element.managerShare }}</td>
+      </ng-container>
+
+      <!-- Preferred payment Column -->
+      <ng-container matColumnDef="preferredPaymentMethod">
+        <th mat-header-cell *matHeaderCellDef>Preferred payment</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.preferredPaymentMethod }}
+        </td>
+      </ng-container>
+
+      <!-- Scholar Ronin address Column -->
+      <ng-container matColumnDef="scholarRoninAddress">
+        <th mat-header-cell *matHeaderCellDef>Scholar Ronin address</th>
+        <td mat-cell *matCellDef="let element">
+          {{
+            element.scholarRoninAddress.length > 10
+              ? (element.scholarRoninAddress | slice: 0:10) + "..."
+              : element.scholarRoninAddress
+          }}
+        </td>
+      </ng-container>
+
+      <!-- Scholar ETH address Column -->
+      <ng-container matColumnDef="scholarEthAddress">
+        <th mat-header-cell *matHeaderCellDef>Scholar ETH address</th>
+        <td mat-cell *matCellDef="let element">
+          {{
+            element.scholarEthAddress.length > 10
+              ? (element.scholarEthAddress | slice: 0:10) + "..."
+              : element.scholarEthAddress
+          }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </div>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" (click)="onImport()" [disabled]="numberOfUploaded === 0 || importing">Import</button>
+</div>
