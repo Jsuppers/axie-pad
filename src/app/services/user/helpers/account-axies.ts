@@ -81,7 +81,7 @@ export class AccountAxies {
         var none = undefined;
         var variables = {
           "from": 0,
-          "size": none,
+          "size": 1000000,
           "sort": "IdDesc",
           "auctionType": "All",
           "owner": roninAddress.replace('ronin:', '0x'),
