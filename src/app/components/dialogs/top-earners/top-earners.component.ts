@@ -7,7 +7,8 @@ import { UserService } from 'src/app/services/user/user.service';
 import { LeaderboardDetails } from 'src/app/_models/leaderboard';
 import { FirestoreScholar } from 'src/app/_models/scholar';
 import { SLP } from 'src/app/_models/slp';
-
+import { chunk } from 'lodash';
+import { PageEvent } from '@angular/material/paginator';
 
 enum ViewMode {
   slp,
@@ -29,6 +30,8 @@ export class TopEarnersComponent implements OnInit {
   scholars: TableData[] = [];
   viewMode$ = new BehaviorSubject<ViewMode>(ViewMode.slp);
   viewMode = ViewMode;
+
+  pageEvent: PageEvent;
 
   constructor(
     public dialogRef: MatDialogRef<TopEarnersComponent>,
@@ -107,5 +110,13 @@ export class TopEarnersComponent implements OnInit {
 
   showSLP() {
     this.viewMode$.next(ViewMode.slp);
+  }
+
+  get scholarChunks() {
+    if (this.pageEvent) {
+      return chunk(this.scholars, this.pageEvent.pageSize)[this.pageEvent.pageIndex];
+    } else {
+      return chunk(this.scholars, 10)[0];
+    }
   }
 }
