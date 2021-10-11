@@ -86,6 +86,8 @@ export class AxieTableComponent implements OnInit {
   @Output('errorChange')
   tableErrorChange = new EventEmitter<boolean>();
 
+  @Input() searchQuery: BehaviorSubject<string>;
+
   constructor(
     public dialog: MatDialog,
     private user: UserService,
@@ -201,6 +203,33 @@ export class AxieTableComponent implements OnInit {
     this.hideAddress$.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
     });
+
+    this.searchQuery.subscribe((query) => {
+      if (this.allData && this._allGroup) {
+        this.dataSource.data = query.length ? this.allData : this._allGroup;
+
+        this.dataSource.filter = query.trim().toLowerCase();
+      }
+    });
+
+    this.dataSource.filterPredicate = (data: TableData | Group, query) => {
+      if (query.length) {
+        if ((data as Group).isGroup) {
+          return false;
+        }
+
+        return (
+          (data as TableData).scholar.name
+            .toLowerCase()
+            .includes(query) ||
+          (data as TableData).scholar.roninAddress
+            .toLowerCase()
+            .includes(query)
+        );
+      }
+
+      return true;
+    }
   }
 
   navigateToScholar(element: TableData): void {

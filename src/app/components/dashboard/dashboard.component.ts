@@ -51,7 +51,7 @@ export class DashboardComponent implements OnInit {
   tableArenaError = false;
   tableAxiesError = false;
 
-  searchQuery = '';
+  searchQuery = new BehaviorSubject<string>('');
 
   constructor(private service: AuthService,
               private db: AngularFirestore,
@@ -135,5 +135,9 @@ export class DashboardComponent implements OnInit {
     this.dialog.open(TopEarnersComponent, {
       width: '400px',
     });
+  }
+
+  onSearch(query: string) {
+    this.searchQuery.next(query);
   }
 }

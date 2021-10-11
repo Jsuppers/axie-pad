@@ -112,6 +112,8 @@ export class EarningsTableComponent implements OnInit {
   @Output('errorChange')
   tableErrorChange = new EventEmitter<boolean>();
 
+  @Input() searchQuery: BehaviorSubject<string>;
+
   @ViewChild(MatSort) sort: MatSort;
 
   constructor(
@@ -242,6 +244,33 @@ export class EarningsTableComponent implements OnInit {
     this.hideAddress$.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
     });
+
+    this.searchQuery.subscribe((query) => {
+      if (this.allData && this._allGroup) {
+        this.dataSource.data = query.length ? this.allData : this._allGroup;
+
+        this.dataSource.filter = query.trim().toLowerCase();
+      }
+    });
+
+    this.dataSource.filterPredicate = (data: TableEarningsData | Group, query) => {
+      if (query.length) {
+        if ((data as Group).isGroup) {
+          return false;
+        }
+
+        return (
+          (data as TableEarningsData).scholar.name
+            .toLowerCase()
+            .includes(query) ||
+          (data as TableEarningsData).scholar.roninAddress
+            .toLowerCase()
+            .includes(query)
+        );
+      }
+
+      return true;
+    }
   }
 
   getGroups(data: TableEarningsData[], groupByColumns: string[]): any[] {
