@@ -6,35 +6,6 @@
       <button mat-button (click)="onClearFilter()">Clear filter</button>
     </div>
 
-    <mat-chip-list [ngStyle]="{ 'margin-bottom': '15px' }">
-      <mat-chip
-        *ngFor="let part of selectedPartsControl.value; let index = index"
-        [removable]="true"
-        (removed)="onRemovePart(index)"
-        >{{ part }} <mat-icon matChipRemove>cancel</mat-icon></mat-chip
-      >
-      <mat-chip
-        *ngFor="let class of selectedClassesControl.value; let index = index"
-        [removable]="true"
-        (removed)="onRemoveClass(index)"
-        >{{ class }} <mat-icon matChipRemove>cancel</mat-icon></mat-chip
-      >
-      <mat-chip
-        *ngIf="purenessQueryControl.value !== undefined"
-        [removable]="true"
-        (removed)="onRemovePureness()"
-        >Pureness: {{ purenessQueryControl.value }}
-        <mat-icon matChipRemove>cancel</mat-icon></mat-chip
-      >
-      <mat-chip
-        *ngIf="maxBreedCountQueryControl.value !== undefined"
-        [removable]="true"
-        (removed)="onRemoveBreedCount()"
-        >Breed count: {{ maxBreedCountQueryControl.value }}
-        <mat-icon matChipRemove>cancel</mat-icon></mat-chip
-      >
-    </mat-chip-list>
-
     <mat-form-field appearance="outline">
       <mat-label>Search by name</mat-label>
       <input matInput placeholder="Axie name" formControlName="searchQuery" />
@@ -61,6 +32,15 @@
       </mat-autocomplete>
     </mat-form-field>
 
+    <mat-chip-list [ngStyle]="{ 'margin-bottom': selectedPartsControl.value.length ? '15px' : '0' }">
+      <mat-chip
+        *ngFor="let part of selectedPartsControl.value; let index = index"
+        [removable]="true"
+        (removed)="onRemovePart(index)"
+        >{{ part }} <mat-icon matChipRemove>cancel</mat-icon></mat-chip
+      >
+    </mat-chip-list>
+
     <mat-form-field appearance="outline" [ngStyle]="{ width: '100%' }">
       <mat-label>Classes</mat-label>
       <input
@@ -79,6 +59,15 @@
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>
+
+    <mat-chip-list [ngStyle]="{ 'margin-bottom': selectedClassesControl.value.length ? '15px' : '0' }">
+      <mat-chip
+        *ngFor="let class of selectedClassesControl.value; let index = index"
+        [removable]="true"
+        (removed)="onRemoveClass(index)"
+        >{{ class }} <mat-icon matChipRemove>cancel</mat-icon></mat-chip
+      >
+    </mat-chip-list>
 
     <mat-form-field appearance="outline" [ngStyle]="{ width: '100%' }">
       <mat-label>Max breed count</mat-label>
