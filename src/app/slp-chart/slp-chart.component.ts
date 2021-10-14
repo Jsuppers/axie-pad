@@ -57,6 +57,9 @@ export class SlpChartComponent implements OnInit {
   public barChartPlugins = [];
   public barChartData: ChartDataSets[] = [];
 
+  estimatedManagerMonthly: number = 0;
+  estimatedScholarMonthly: number = 0;
+
   constructor(private userService: UserService) {
     Chart.defaults.global.defaultFontColor = "#fff";
   }
@@ -92,6 +95,12 @@ export class SlpChartComponent implements OnInit {
                 projectedManagerShare,
                 day,
               }
+
+              const now = new Date();
+              const nbOfDaysInCurrentMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0)).getDate()
+
+              this.estimatedManagerMonthly += (projectedManagerShare * nbOfDaysInCurrentMonth);
+              this.estimatedScholarMonthly += (projectedScholarShare * nbOfDaysInCurrentMonth);
             }
             return chartData;
         })))
@@ -149,6 +158,9 @@ export class SlpChartComponent implements OnInit {
         this.projectedScholarData.push(round(value.projectedScholarShare, 4));
         this.projectedManagerData.push(round(value.projectedManagerShare, 4));
       };
+
+      this.estimatedManagerMonthly = round(this.estimatedManagerMonthly * slpPrice);
+      this.estimatedScholarMonthly = round(this.estimatedScholarMonthly * slpPrice);
 
       this.updateChart();
     });

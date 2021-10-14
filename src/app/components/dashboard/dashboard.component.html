@@ -6,40 +6,6 @@
     *ngIf="authService.userState.getValue() as user"
   >
     <app-slp-chart></app-slp-chart>
-    <!-- <table style="text-align: start">
-      <tr style="margin-bottom: 10px">
-        <td class="title-row">In Progress</td>
-        <td class="title-row">Total Earnings</td>
-      </tr>
-      <tr>
-        <td class="item-row">
-          {{ progressManagerSLP | number: "1.2-2" }} SLP
-          <span class="small-text">
-            ({{ progressSLP | number: "1.2-2" }} Total)</span
-          >
-        </td>
-        <td class="item-row">
-          {{ totalManagerSLP | number: "1.2-2" }} SLP
-          <span class="small-text">
-            ({{ totalSLP | number: "1.2-2" }} Total)</span
-          >
-        </td>
-      </tr>
-      <tr>
-        <td class="item-row">
-          {{ fiatCurrency + (progressManagerFiat | number: "1.2-2") }}
-          <span class="small-text">
-            ({{ progressFiat | number: "1.2-2" }} Total)</span
-          >
-        </td>
-        <td class="item-row">
-          {{ fiatCurrency + (totalManagerFiat | number: "1.2-2") }}
-          <span class="small-text">
-            ({{ totalFiat | number: "1.2-2" }} Total)</span
-          >
-        </td>
-      </tr>
-    </table> -->
   </mat-card>
   </div>
   <div fxFlex>
