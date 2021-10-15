@@ -1,0 +1,63 @@
+<h2 mat-dialog-title>Notes</h2>
+<div mat-dialog-content>
+  <mat-slide-toggle [checked]="isScholarWithNote" (toggleChange)="onToggle()"
+    >Show only scholar with note</mat-slide-toggle
+  >
+  <mat-accordion>
+    <mat-expansion-panel
+      hideToggle
+      *ngFor="let scholar of scholars; let index = index"
+      [expanded]="scholar.expanded"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ scholar.name }}
+        </mat-panel-title>
+        <mat-panel-description *ngIf="scholar.note">
+          {{
+            scholar.note.length >= 20
+              ? scholar.note.slice(0, 20) + "..."
+              : scholar.note
+          }}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <mat-form-field appearance="outline" [ngStyle]="{ width: '100%' }">
+        <mat-label>Note</mat-label>
+
+        <textarea
+          matInput
+          mat-autosize
+          [minRows]="2"
+          [readonly]="!scholar.editing"
+          [(ngModel)]="scholar.note"
+        ></textarea>
+      </mat-form-field>
+      <div [ngStyle]="{ 'text-align': 'right' }">
+        <button
+          mat-flat-button
+          color="primary"
+          *ngIf="!scholar.editing"
+          (click)="onEdit(index)"
+        >
+          Edit
+        </button>
+        <button
+          mat-flat-button
+          color="warn"
+          *ngIf="scholar.editing"
+          (click)="onDiscard(index)"
+        >
+          Cancel
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          *ngIf="scholar.editing"
+          (click)="onSave(index)"
+        >
+          Save
+        </button>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

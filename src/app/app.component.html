@@ -17,6 +17,9 @@
     </a>
     <span class="example-spacer"></span>
     <div fxShow="true" fxHide.lt-md="true" *ngIf="signedIn()">
+      <a mat-button (click)="showNotes()">
+        <mat-icon style="padding-bottom: 3px;">sticky_note_2</mat-icon>
+      </a>
       <a mat-button (click)="showNotificationDialog()">
         <mat-icon style="padding-bottom: 3px;">notifications</mat-icon>
       </a>
