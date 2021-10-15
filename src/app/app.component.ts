@@ -19,6 +19,7 @@ import { NotificationRulesComponent } from './components/dialogs/notification-ru
 import { Rule, RuleType } from './_models/rule';
 import { CsvService } from './services/csv.service';
 import { ImportDialogComponent } from './components/dialogs/import-dialog/import-dialog.component';
+import { NotesDialogComponent } from './components/dialogs/notes-dialog/notes-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -213,6 +214,14 @@ export class AppComponent implements OnInit {
     this.dialog.open(ImportDialogComponent, {
       width: '90vw',
       height: '90vh'
+    });
+  }
+
+  showNotes() {
+    this.dialog.open(NotesDialogComponent, {
+      width: '90vw',
+      maxWidth: '600px',
+      height: '90vh',
     });
   }
 }

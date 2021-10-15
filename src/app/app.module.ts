@@ -83,6 +83,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FinderComponent } from './components/dashboard/tables/finder/finder.component';
 import { MatSliderModule } from '@angular/material/slider';
 import { ImportDialogComponent } from 'src/app/components/dialogs/import-dialog/import-dialog.component';
+import { NotesDialogComponent } from 'src/app/components/dialogs/notes-dialog/notes-dialog.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -153,6 +155,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     NotificationRulesComponent,
     FinderComponent,
     ImportDialogComponent,
+    NotesDialogComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),
@@ -197,7 +200,8 @@ const cookieConfig: NgcCookieConsentConfig = {
     ChartsModule,
     ScrollingModule,
     MatTooltipModule,
-    MatSliderModule
+    MatSliderModule,
+    MatSlideToggleModule,
   ],
   providers: [
     AuthService,
