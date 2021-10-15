@@ -9,3 +9,7 @@
     style="height: 200px">
   </canvas>
 </div>
+<div class="foot" fxLayout="column" fxLayoutAlign="center center" *ngIf="barChartData.length > 0">
+  <p>Estimated Manager Monthly: ${{ estimatedManagerMonthly }}</p>
+  <p>Estimated Scholar Monthly: ${{ estimatedScholarMonthly }}</p>
+</div>
