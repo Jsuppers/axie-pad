@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 import { PayShareDialogComponent } from '../dialogs/pay-share-dialog/pay-share-dialog.component';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { PayShare } from 'src/app/_models/pay-share';
+import { FormBuilder } from '@angular/forms';
 
 class TopEarningData {
   name: string;
@@ -49,6 +50,8 @@ export class DashboardComponent implements OnInit {
   tableSlpError = false;
   tableArenaError = false;
   tableAxiesError = false;
+
+  searchQuery = new BehaviorSubject<string>('');
 
   constructor(private service: AuthService,
               private db: AngularFirestore,
@@ -132,5 +135,9 @@ export class DashboardComponent implements OnInit {
     this.dialog.open(TopEarnersComponent, {
       width: '400px',
     });
+  }
+
+  onSearch(query: string) {
+    this.searchQuery.next(query);
   }
 }

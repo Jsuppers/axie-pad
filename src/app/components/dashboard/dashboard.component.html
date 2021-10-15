@@ -71,7 +71,15 @@
         matBadgeColor="warn"
         [matBadgeHidden]="!tableSlpError">SLP Earnings</span>
       </ng-template>
-      <app-earnings-table [hideAddress$]="hideAddress" [(error)]="tableSlpError"></app-earnings-table>
+      <mat-form-field appearance="outline" [ngStyle]="{ 'margin-top': '15px', width: '400px' }">
+        <mat-label>Search</mat-label>
+        <input type="text" matInput placeholder="Name or Ronin Address..." [value]="searchQuery | async" (keyup)="onSearch($event.target.value)" >
+        <button *ngIf="searchQuery.value.length" matSuffix mat-icon-button aria-label="Clear" (click)="searchQuery.next('')">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-icon *ngIf="!searchQuery.value.length" matSuffix>search</mat-icon>
+      </mat-form-field>
+      <app-earnings-table [hideAddress$]="hideAddress" [(error)]="tableSlpError" [searchQuery]="searchQuery"></app-earnings-table>
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>
@@ -80,7 +88,15 @@
         matBadgeColor="warn"
         [matBadgeHidden]="!tableArenaError"><span style="font-size: 18px;">⚔️ </span>Arena</span>
       </ng-template>
-      <app-arena-table [hideAddress$]="hideAddress" [(error)]="tableArenaError"></app-arena-table>
+      <mat-form-field appearance="outline" [ngStyle]="{ 'margin-top': '15px', width: '400px' }">
+        <mat-label>Search</mat-label>
+        <input type="text" matInput placeholder="Name or Ronin Address..." [value]="searchQuery | async" (keyup)="onSearch($event.target.value)" >
+        <button *ngIf="searchQuery.value.length" matSuffix mat-icon-button aria-label="Clear" (click)="searchQuery.next('')">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-icon *ngIf="!searchQuery.value.length" matSuffix>search</mat-icon>
+      </mat-form-field>
+      <app-arena-table [hideAddress$]="hideAddress" [(error)]="tableArenaError" [searchQuery]="searchQuery"></app-arena-table>
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>
@@ -90,7 +106,15 @@
         matBadgeColor="warn"
         [matBadgeHidden]="!tableAxiesError">Axies</span>
       </ng-template>
-      <app-axie-table [hideAddress$]="hideAddress" [(error)]="tableAxiesError"></app-axie-table>
+      <mat-form-field appearance="outline" [ngStyle]="{ 'margin-top': '15px', width: '400px' }">
+        <mat-label>Search</mat-label>
+        <input type="text" matInput placeholder="Name or Ronin Address..." [value]="searchQuery | async" (keyup)="onSearch($event.target.value)" >
+        <button *ngIf="searchQuery.value.length" matSuffix mat-icon-button aria-label="Clear" (click)="searchQuery.next('')">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-icon *ngIf="!searchQuery.value.length" matSuffix>search</mat-icon>
+      </mat-form-field>
+      <app-axie-table [hideAddress$]="hideAddress" [(error)]="tableAxiesError" [searchQuery]="searchQuery"></app-axie-table>
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>

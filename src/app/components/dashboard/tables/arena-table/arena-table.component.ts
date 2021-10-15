@@ -101,6 +101,8 @@ export class ArenaTableComponent implements OnInit {
   @Output('errorChange')
   tableErrorChange = new EventEmitter<boolean>();
 
+  @Input() searchQuery: BehaviorSubject<string>;
+
   constructor(
     public dialog: MatDialog,
     private user: UserService,
@@ -198,6 +200,33 @@ export class ArenaTableComponent implements OnInit {
     this.hideAddress$.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
     });
+
+    this.searchQuery.subscribe((query) => {
+      if (this.allData && this._allGroup) {
+        this.dataSource.data = query.length ? this.allData : this._allGroup;
+
+        this.dataSource.filter = query.trim().toLowerCase();
+      }
+    });
+
+    this.dataSource.filterPredicate = (data: TableArenaData | Group, query) => {
+      if (query.length) {
+        if ((data as Group).isGroup) {
+          return false;
+        }
+
+        return (
+          (data as TableArenaData).scholar.name
+            .toLowerCase()
+            .includes(query) ||
+          (data as TableArenaData).scholar.roninAddress
+            .toLowerCase()
+            .includes(query)
+        );
+      }
+
+      return true;
+    }
   }
 
   navigateToScholar(element: TableArenaData): void {
