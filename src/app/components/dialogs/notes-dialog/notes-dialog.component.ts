@@ -40,7 +40,7 @@ export class NotesDialogComponent implements OnInit {
 
   get scholars() {
     return this._scholars
-      .filter((scholar) => (this.isScholarWithNote ? scholar.note : true))
+      .filter((scholar) => (this.isScholarWithNote ? (scholar.note || scholar.editing) : true))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
