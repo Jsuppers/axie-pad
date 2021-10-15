@@ -13,6 +13,7 @@ class ChartData {
   timestamp: number;
   scholarShare: number;
   managerShare: number;
+  averageDaily: number;
   projectedScholarShare: number;
   projectedManagerShare: number;
   day: string;
@@ -67,6 +68,8 @@ export class SlpChartComponent implements OnInit {
   ngOnInit() {
     combineLatest([this.userService.getSLPPrice(), this.userService.getScholars()])
       .pipe(switchMap(([slpPrice, scholars]) => {
+        this.estimatedManagerMonthly = 0;
+        this.estimatedScholarMonthly = 0;
       const output: Observable<ChartData>[] = [];
       scholars.forEach((scholar) => {
         output.push(
@@ -84,9 +87,11 @@ export class SlpChartComponent implements OnInit {
             if (slp?.lastClaimed) {
               scholarShare = slp?.total * (1 - managerSharePercentage);
               managerShare = slp?.total - scholarShare;
-              projectedShare = this.getAverageSLP(slp) * this.getDays(slp);
+              const averageDailySLP = this.getAverageSLP(slp);
+              projectedShare = averageDailySLP * this.getDays(slp);
               projectedScholarShare = projectedShare * (1 - managerSharePercentage);
               projectedManagerShare = projectedShare - projectedScholarShare;
+              const averageDaily = averageDailySLP * slpPrice;
               chartData = {
                 scholarShare,
                 managerShare,
@@ -94,13 +99,14 @@ export class SlpChartComponent implements OnInit {
                 projectedScholarShare,
                 projectedManagerShare,
                 day,
+                averageDaily,
               }
 
               const now = new Date();
               const nbOfDaysInCurrentMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0)).getDate()
 
-              this.estimatedManagerMonthly += (projectedManagerShare * nbOfDaysInCurrentMonth);
-              this.estimatedScholarMonthly += (projectedScholarShare * nbOfDaysInCurrentMonth);
+              this.estimatedManagerMonthly += (averageDaily * nbOfDaysInCurrentMonth * managerSharePercentage);
+              this.estimatedScholarMonthly += (averageDaily * nbOfDaysInCurrentMonth * (1 - managerSharePercentage));
             }
             return chartData;
         })))
@@ -159,8 +165,8 @@ export class SlpChartComponent implements OnInit {
         this.projectedManagerData.push(round(value.projectedManagerShare, 4));
       };
 
-      this.estimatedManagerMonthly = round(this.estimatedManagerMonthly * slpPrice);
-      this.estimatedScholarMonthly = round(this.estimatedScholarMonthly * slpPrice);
+      this.estimatedManagerMonthly = round(this.estimatedManagerMonthly);
+      this.estimatedScholarMonthly = round(this.estimatedScholarMonthly);
 
       this.updateChart();
     });
