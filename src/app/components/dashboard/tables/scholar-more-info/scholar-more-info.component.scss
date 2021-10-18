@@ -16,3 +16,10 @@
 :host {
   width: 100%;
 }
+
+
+.battles-table {
+  td {
+    word-break: normal;
+  }
+}
