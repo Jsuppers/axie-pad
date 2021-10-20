@@ -47,4 +47,9 @@ export class NotificationRulesComponent {
     this.notificationRules = {};
     this.rules = [];
   }
+
+  removeRule(rule: Rule, index: number) {
+    delete this.notificationRules[rule.id];
+    this.rules.splice(index, 1);
+  }
 }

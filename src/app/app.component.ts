@@ -191,7 +191,8 @@ export class AppComponent implements OnInit {
 
   showNotificationDialog(): void {
     const dialogRef = this.dialog.open(NotificationRulesComponent, {
-      width: '400px',
+      width: '90%',
+      maxWidth: '600px',
       maxHeight: '90vh',
     });
 
