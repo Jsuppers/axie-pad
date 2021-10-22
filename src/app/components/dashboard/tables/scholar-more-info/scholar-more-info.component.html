@@ -1,8 +1,22 @@
 <div fxLayout="column" fxLayoutGap="20px" [ngStyle]="{ margin: '20px 10px' }">
   <div fxLayout="row" fxLayoutAlign="space-between start" fxLayoutGap="10px">
     <div fxLayout="row" fxFlex class="content-container">
-      <mat-card fxFlex="calc(50% - 20px)">
-        <mat-card-title>{{ scholar.scholar.name }}</mat-card-title>
+      <mat-card class="mat-elevation-z3" fxFlex="calc(50% - 20px)">
+        <mat-card-title fxLayout="row" fxLayoutAlign="space-between start">
+          <span class="mat-card-title">{{ scholar.scholar.name }}</span>
+
+          <a
+            mat-icon-button
+            [href]="
+              'https://marketplace.axieinfinity.com/profile/' +
+              scholar.roninAddress +
+              '/axie/'
+            "
+            target="_blank"
+          >
+            <mat-icon>launch</mat-icon>
+          </a>
+        </mat-card-title>
         <mat-card-content class="content-column">
           <mat-list>
             <mat-list-item>
@@ -12,7 +26,9 @@
             <mat-divider></mat-divider>
             <mat-list-item>
               <div mat-line class="label">Ronin Name</div>
-              <div mat-line class="content">{{ roninName | shortenName: false }}</div>
+              <div mat-line class="content">
+                {{ roninName | shortenName: false }}
+              </div>
             </mat-list-item>
             <mat-divider></mat-divider>
             <mat-list-item>
@@ -22,23 +38,159 @@
                   {{ scholar.roninAddress | shortenRoninAddress: false }}
                 </span>
 
-                <button mat-icon-button>
-                  <mat-icon
-                    [cdkCopyToClipboard]="scholar.roninAddress"
-                    (click)="openSnackBar(scholar.roninAddress)"
-                    >file_copy</mat-icon
-                  >
+                <button
+                  mat-icon-button
+                  [cdkCopyToClipboard]="scholar.roninAddress"
+                  (click)="openSnackBar(scholar.roninAddress)"
+                >
+                  <mat-icon>file_copy</mat-icon>
                 </button>
               </div>
             </mat-list-item>
           </mat-list>
         </mat-card-content>
       </mat-card>
-      <mat-card fxFlex="calc(50% - 20px)"> </mat-card>
-      <mat-card fxFlex="calc(50% - 20px)"> </mat-card>
-      <mat-card fxFlex="calc(50% - 20px)"> </mat-card>
+      <mat-card
+        class="mat-elevation-z3"
+        fxFlex="calc(50% - 20px)"
+        fxLayout="column"
+      >
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Elo</b>
+          </span>
+          <span>{{ scholar.elo }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Rank</b>
+          </span>
+          <span>{{ scholar.rank }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Win Rate</b>
+          </span>
+          <span>%{{ scholar.winRate | number: "1.0-0" }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <a
+            *ngFor="let axie of scholar.axies"
+            [ngStyle]="{ width: '30%' }"
+            [href]="'https://marketplace.axieinfinity.com/axie/' + axie.id"
+            target="_blank"
+          >
+            <img [src]="axie.image" width="100%" />
+          </a>
+        </div>
+      </mat-card>
+      <mat-card class="mat-elevation-z3" fxFlex="calc(50% - 20px)">
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Average Daily SLP</b>
+          </span>
+          <mat-chip
+            [style.background]="getAverageChipColor(scholar.averageSlp)"
+            selected
+            >{{ scholar.averageSlp | number: "1.0-0" }}</mat-chip
+          >
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Average Daily USD</b>
+          </span>
+          <span
+            >{{ fiatCurrency }} {{ scholar.averageUsd | number: "1.2-2" }}</span
+          >
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>SLP In Progress</b>
+          </span>
+          <span>{{ scholar.slp.inProgress }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Manager's Share</b>
+          </span>
+          <span
+            >{{ scholar.managersShareSLP }} ({{
+              scholar.managersSharePercentage
+            }}%)</span
+          >
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Scholar's Share</b>
+          </span>
+          <span
+            >{{ scholar.scholarShareSLP }} ({{
+              scholar.scholarSharePercentage
+            }}%)</span
+          >
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Total SLP</b>
+          </span>
+          <span>{{ scholar.inProgressSLP + scholar.slp.inWallet }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Last Claimed Date</b>
+          </span>
+          <span>{{ getLastClaimDate() }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Next Claimed Date</b>
+          </span>
+          <span>{{ getNextClaimDate() }}</span>
+        </div>
+      </mat-card>
+      <mat-card class="mat-elevation-z3" fxFlex="calc(50% - 20px)">
+        <mat-card-title [ngStyle]="{ 'font-size': '16px' }"
+          >Scholar Details</mat-card-title
+        >
+        <mat-card-content class="content-column">
+          <mat-list>
+            <mat-list-item>
+              <div mat-line class="label">Ronin name</div>
+              <div mat-line class="content">
+                {{ roninName | shortenName: false }}
+              </div>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+            <mat-list-item>
+              <div mat-line class="label">Ronin Address</div>
+              <div mat-line fxLayout="row" fxLayoutAlign="space-between center">
+                <span>
+                  {{ scholar.roninAddress | shortenRoninAddress: false }}
+                </span>
+
+                <button
+                  mat-icon-button
+                  [cdkCopyToClipboard]="scholar.roninAddress"
+                  (click)="openSnackBar(scholar.roninAddress)"
+                >
+                  <mat-icon>file_copy</mat-icon>
+                </button>
+              </div>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+          </mat-list>
+          <div
+            fxLayout="row"
+            fxLayoutAlign="space-between center"
+            [ngStyle]="{ 'margin-top': '10px' }"
+          >
+            <span> Paid Times </span>
+            <span>{{ scholar.paidTimes }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
-    <mat-card class="note-card">
+    <mat-card class="mat-elevation-z3" class="note-card">
       <mat-card-title>Notes</mat-card-title>
       <mat-card-content>
         <mat-form-field [ngStyle]="{ width: '100%' }">

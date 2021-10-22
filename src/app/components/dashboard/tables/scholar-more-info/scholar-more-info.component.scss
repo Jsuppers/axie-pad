@@ -30,6 +30,29 @@
   min-width: 200px;
 }
 
+.mat-list-base {
+  padding-top: 0px;
+
+  .mat-list-item.mat-2-line {
+    height: 48px;
+  }
+}
+
+.mat-card-title {
+  margin-bottom: 0;
+}
+
+.mat-icon, .mat-icon-button {
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  font-size: 18px;
+}
+
+:host ::ng-deep .mat-list-item-content {
+  padding: 0 !important;
+}
+
 :host {
   width: 100%;
   text-align: left;
