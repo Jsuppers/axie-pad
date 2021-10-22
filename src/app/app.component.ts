@@ -35,6 +35,7 @@ export class AppComponent implements OnInit {
   hideAddress: BehaviorSubject<boolean>;
   linkedTables: Table[];
   ownTableTitle: string;
+  noOfNotes: number = 0;
 
   constructor(private authService: AuthService,
               private userService: UserService,
@@ -69,6 +70,11 @@ export class AppComponent implements OnInit {
     this.userService.getTitle().subscribe((title) => {
       this.title = title ? title : 'Axie Pad';
     });
+    this.userService.getScholars().subscribe((scholars) => {
+      this.noOfNotes = scholars.reduce<number>((result, scholar) => {
+        return scholar.note ? result + 1 : result;
+      },  0);
+    })
   }
 
   setOwnTable(): void {
@@ -191,7 +197,8 @@ export class AppComponent implements OnInit {
 
   showNotificationDialog(): void {
     const dialogRef = this.dialog.open(NotificationRulesComponent, {
-      width: '400px',
+      width: '90%',
+      maxWidth: '600px',
       maxHeight: '90vh',
     });
 

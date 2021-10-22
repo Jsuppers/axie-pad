@@ -57,3 +57,10 @@
   width: 100%;
   text-align: left;
 }
+
+
+.battles-table {
+  td {
+    word-break: normal;
+  }
+}
