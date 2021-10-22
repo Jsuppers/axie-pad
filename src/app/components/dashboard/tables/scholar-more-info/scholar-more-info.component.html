@@ -1,215 +1,299 @@
-<div fxLayout.sm="column" fxLayout.gt-md="row" fxLayoutAlign="space-between">
-  <div fxLayout="column">
-    <table style="text-align: start; padding-left: 10px" *ngIf="scholar">
-      <tr>
-        <td class="title-row">Ronin Name</td>
-        <td class="item-row">{{ roninName | shortenName: false }}</td>
-      </tr>
-      <tr
-        [cdkCopyToClipboard]="scholar.roninAddress"
-        (click)="openSnackBar(scholar.roninAddress)"
-      >
-        <td class="title-row">Ronin Address</td>
-        <td class="item-row">
-          <mat-icon>file_copy</mat-icon
-          >{{ scholar.roninAddress | shortenRoninAddress: false }}
-        </td>
-      </tr>
-      <tr>
-        <td class="title-row">Email</td>
-        <td class="item-row">
-          {{ scholar.email }}
-        </td>
-      </tr>
-      <tr>
-        <td class="title-row">SLP In Progress</td>
-        <td class="item-row">{{ scholar.inProgressSLP }}</td>
-      </tr>
-      <tr>
-        <td class="title-row">Manager's Share</td>
-        <td class="item-row">
-          <div>
-            {{ scholar.managersShareSLP | number: "1.0-0" }}
-            <span class="small-text">
-              {{ "(" + scholar.managersSharePercentage + "%)" }}
-            </span>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td class="title-row">Scholar's Share</td>
-        <td class="item-row">
-          <div>
-            {{
-              scholar.inProgressSLP - scholar.managersShareSLP | number: "1.0-0"
-            }}
-            <span class="small-text">
-              {{ "(" + (100 - scholar.managersSharePercentage) + "%)" }}
-            </span>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td class="title-row">Total SLP (In progress + Ronin Wallet)</td>
-        <td class="item-row">{{ scholar.totalSLP }}</td>
-      </tr>
-      <tr>
-        <td class="title-row">Paid Times</td>
-        <td class="item-row">{{ scholar.paidTimes }}</td>
-      </tr>
-      <tr>
-        <td class="title-row">Last Claimed Date</td>
-        <td class="item-row">{{ getLastClaimDate() }}</td>
-      </tr>
-      <tr>
-        <td class="title-row">Next Claimable Date</td>
-        <td class="item-row">{{ getNextClaimDate() }}</td>
-      </tr>
-      <tr>
-        <td class="title-row">Rank</td>
-        <td class="item-row">{{ scholar.rank }}</td>
-      </tr>
-      <tr>
-        <td class="title-row">Elo</td>
-        <td class="item-row">{{ scholar.elo }}</td>
-      </tr>
-      <tr>
-        <td class="title-row">Wins</td>
-        <td class="item-row">{{ scholar.wins }}</td>
-      </tr>
-      <tr>
-        <td class="title-row">Draws</td>
-        <td class="item-row">{{ scholar.draws }}</td>
-      </tr>
-      <tr>
-        <td class="title-row">Loses</td>
-        <td class="item-row">{{ scholar.loses }}</td>
-      </tr>
-      <tr
-        *ngIf="scholar.scholar.preferredPaymentMethod === paymentMethods.ronin"
-      >
-        <td class="title-row">Ronin Name</td>
-        <td class="item-row">{{ scholarRoninName | shortenName: false }}</td>
-      </tr>
-      <tr
-        *ngIf="scholar.scholar.preferredPaymentMethod === paymentMethods.ronin"
-        [cdkCopyToClipboard]="scholar.scholar.scholarRoninAddress"
-        (click)="openSnackBar(scholar.scholar.scholarRoninAddress)"
-      >
-        <td class="title-row">Scholar Ronin Address</td>
-        <td class="item-row">
-          <mat-icon>file_copy</mat-icon
-          >{{
-            scholar.scholar.scholarRoninAddress | shortenRoninAddress: false
-          }}
-        </td>
-      </tr>
-      <tr
-        *ngIf="scholar.scholar.preferredPaymentMethod === paymentMethods.eth"
-        [cdkCopyToClipboard]="scholar.scholar.scholarEthAddress"
-        (click)="openSnackBar(scholar.scholar.scholarEthAddress)"
-      >
-        <td class="title-row">Scholar Ethereum Address</td>
-        <td class="item-row">
-          <mat-icon>file_copy</mat-icon
-          >{{ scholar.scholar.scholarEthAddress | shortenRoninAddress: false }}
-        </td>
-      </tr>
-    </table>
-    <div style="width: 100%; padding-bottom: 30px; padding-top: 20px">
-      <mat-expansion-panel (opened)="getBattleInfo()">
-        <mat-expansion-panel-header>
-          <mat-panel-title> ⚔️ Previous Battles </mat-panel-title>
-        </mat-expansion-panel-header>
-        <div *ngIf="loading">
-          <p>Loading please be patient</p>
-          <mat-spinner style="margin: 0 auto"></mat-spinner>
-        </div>
+<div fxLayout="column" fxLayoutGap="20px" [ngStyle]="{ margin: '20px 10px' }">
+  <div fxLayout="row" fxLayoutAlign="space-between start" fxLayoutGap="10px">
+    <div fxLayout="row" fxFlex class="content-container">
+      <mat-card class="mat-elevation-z3" fxFlex="calc(50% - 20px)">
+        <mat-card-title fxLayout="row" fxLayoutAlign="space-between start">
+          <span class="mat-card-title">{{ scholar.scholar.name }}</span>
 
-        <div *ngIf="battleLogs && loading == false">
-          <div *ngIf="battleLogs.hasError">
-            <p>There was a error please refresh</p>
-          </div>
-          <div *ngIf="!battleLogs.hasError">
-            <table
-              style="text-align: start; padding-left: 10px"
-              *ngIf="battleLogs.battles"
-              class="battles-table"
-            >
-              <tr *ngFor="let battle of battleLogs.battles">
-                <td style="padding-right: 20px; min-width: 90px">
-                  <strong>
-                    {{ getPlayedTime(battle) }}
-                  </strong>
-                </td>
-                <td>
-                  <p
-                    *ngIf="!battle.win"
-                    style="height: 20px; color: rgb(247, 5, 5)"
-                  >
-                    Lose
-                  </p>
-                  <p
-                    *ngIf="battle.win"
-                    style="height: 20px; color: rgb(29, 250, 0)"
-                  >
-                    Win
-                  </p>
-                </td>
-                <td *ngFor="let fighter of battle.fighters | ownAxie">
-                  <img
-                    *ngIf="fighter.ownTeam == true"
-                    style="height: 80px"
-                    [src]="
-                      'https://storage.googleapis.com/assets.axieinfinity.com/axies/' +
-                      fighter.axieId +
-                      '/axie/axie-full-transparent.png'
-                    "
-                  />
-                </td>
-                <td>VS</td>
-                <td *ngFor="let fighter of battle.fighters | enemyAxie">
-                  <img
-                    style="height: 80px"
-                    *ngIf="!fighter.ownTeam"
-                    [src]="
-                      'https://storage.googleapis.com/assets.axieinfinity.com/axies/' +
-                      fighter.axieId +
-                      '/axie/axie-full-transparent.png'
-                    "
-                  />
-                </td>
-                <td>
-                  <mat-chip
-                    (click)="navigateToScholarReplay(battle)"
-                    style="
-                      height: 20px;
-                      color: white;
-                      background: rgb(146, 215, 255);
-                      min-height: 20px;
-                    "
-                  >
-                    Watch
-                  </mat-chip>
-                </td>
-              </tr>
-            </table>
-          </div>
+          <a
+            mat-icon-button
+            [href]="
+              'https://marketplace.axieinfinity.com/profile/' +
+              scholar.roninAddress +
+              '/axie/'
+            "
+            target="_blank"
+          >
+            <mat-icon>launch</mat-icon>
+          </a>
+        </mat-card-title>
+        <mat-card-content class="content-column">
+          <mat-list>
+            <mat-list-item>
+              <div mat-line class="label">Email</div>
+              <div mat-line class="content">{{ scholar.scholar.email }}</div>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+            <mat-list-item>
+              <div mat-line class="label">Ronin Name</div>
+              <div mat-line class="content">
+                {{ roninName | shortenName: false }}
+              </div>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+            <mat-list-item>
+              <div mat-line class="label">Ronin Address</div>
+              <div mat-line fxLayout="row" fxLayoutAlign="space-between center">
+                <span>
+                  {{ scholar.roninAddress | shortenRoninAddress: false }}
+                </span>
+
+                <button
+                  mat-icon-button
+                  [cdkCopyToClipboard]="scholar.roninAddress"
+                  (click)="openSnackBar(scholar.roninAddress)"
+                >
+                  <mat-icon>file_copy</mat-icon>
+                </button>
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+      <mat-card
+        class="mat-elevation-z3"
+        fxFlex="calc(50% - 20px)"
+        fxLayout="column"
+      >
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Elo</b>
+          </span>
+          <span>{{ scholar.elo }}</span>
         </div>
-      </mat-expansion-panel>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Rank</b>
+          </span>
+          <span>{{ scholar.rank }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Win Rate</b>
+          </span>
+          <span>{{ scholar.winRate | number: "1.0-0" }}%</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <a
+            *ngFor="let axie of scholar.axies"
+            [ngStyle]="{ width: '30%' }"
+            [href]="'https://marketplace.axieinfinity.com/axie/' + axie.id"
+            target="_blank"
+          >
+            <img [src]="axie.image" width="100%" />
+          </a>
+        </div>
+      </mat-card>
+      <mat-card class="mat-elevation-z3" fxFlex="calc(50% - 20px)">
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Average Daily SLP</b>
+          </span>
+          <mat-chip
+            style="
+              display: inline-flex;
+              padding: 0px 12px;
+              border-radius: 16px;
+              align-items: center;
+              color: white;
+              min-height: 20px;
+            "
+            [style.background]="getAverageChipColor(scholar.averageSlp)"
+            selected
+            >{{ scholar.averageSlp | number: "1.0-0" }}</mat-chip
+          >
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Average Daily USD</b>
+          </span>
+          <span
+            >M: {{ fiatCurrency }}{{ scholar.averageManagerUsd | number: "1.2-2" }}  S: {{ fiatCurrency }}{{ scholar.averageScholarUsd | number: "1.2-2" }}</span
+          >
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>SLP In Progress</b>
+          </span>
+          <span>{{ scholar.slp.inProgress }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Manager's Share</b>
+          </span>
+          <span
+            >{{ scholar.managersShareSLP }} ({{
+              scholar.managersSharePercentage
+            }}%)</span
+          >
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Scholar's Share</b>
+          </span>
+          <span
+            >{{ scholar.scholarShareSLP }} ({{
+              scholar.scholarSharePercentage
+            }}%)</span
+          >
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Total SLP</b>
+          </span>
+          <span>{{ scholar.inProgressSLP + scholar.slp.inWallet }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Last Claimed Date</b>
+          </span>
+          <span>{{ getLastClaimDate() }}</span>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span>
+            <b>Next Claimed Date</b>
+          </span>
+          <span>{{ getNextClaimDate() }}</span>
+        </div>
+      </mat-card>
+      <mat-card class="mat-elevation-z3" fxFlex="calc(50% - 20px)">
+        <mat-card-title [ngStyle]="{ 'font-size': '16px' }"
+          >Scholar Details</mat-card-title
+        >
+        <mat-card-content class="content-column">
+          <mat-list>
+            <mat-list-item>
+              <div mat-line class="label">Ronin name</div>
+              <div mat-line class="content">
+                {{ scholarRoninName | shortenName: false }}
+              </div>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+            <mat-list-item>
+              <div mat-line class="label">Ronin Address</div>
+              <div mat-line fxLayout="row" fxLayoutAlign="space-between center">
+                <span>
+                  {{ scholar.scholarRoninAddress | shortenRoninAddress: false }}
+                </span>
+
+                <button
+                  mat-icon-button
+                  [cdkCopyToClipboard]="scholar.scholarRoninAddress"
+                  (click)="openSnackBar(scholar.scholarRoninAddress)"
+                >
+                  <mat-icon>file_copy</mat-icon>
+                </button>
+              </div>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+          </mat-list>
+          <div
+            fxLayout="row"
+            fxLayoutAlign="space-between center"
+            [ngStyle]="{ 'margin-top': '10px' }"
+          >
+            <span> Paid Times </span>
+            <span>{{ scholar.paidTimes }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
+    <mat-card class="mat-elevation-z3" class="note-card">
+      <mat-card-title>Notes</mat-card-title>
+      <mat-card-content>
+        <mat-form-field [ngStyle]="{ width: '100%' }">
+          <mat-label>Note</mat-label>
+          <textarea
+            matInput
+            [(ngModel)]="scholar.scholar.note"
+            placeholder="Add notes here"
+          ></textarea>
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-raised-button (click)="onNoteSave()">
+          <span>Save</span>
+        </button>
+      </mat-card-actions>
+    </mat-card>
   </div>
-  <div
-    fxLayout="column"
-    fxLayoutAlign="start end"
-    [ngStyle]="{ width: '90%', 'max-width': '600px' }"
-  >
-    <mat-form-field [ngStyle]="{ width: '100%' }">
-      <mat-label>Note</mat-label>
-      <textarea matInput [(ngModel)]="scholar.scholar.note"></textarea>
-    </mat-form-field>
-    <button mat-raised-button (click)="onNoteSave()">
-      <span>Save</span>
-    </button>
-  </div>
+  <mat-expansion-panel (opened)="getBattleInfo()">
+    <mat-expansion-panel-header>
+      <mat-panel-title> ⚔️ Previous Battles </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div *ngIf="loading">
+      <p>Loading please be patient</p>
+      <mat-spinner style="margin: 0 auto"></mat-spinner>
+    </div>
+
+    <div *ngIf="battleLogs && loading == false">
+      <div *ngIf="battleLogs.hasError">
+        <p>There was a error please refresh</p>
+      </div>
+      <div *ngIf="!battleLogs.hasError">
+        <table
+          style="text-align: start; padding-left: 10px"
+          *ngIf="battleLogs.battles"
+        >
+          <tr *ngFor="let battle of battleLogs.battles">
+            <td style="padding-right: 20px">
+              <strong>
+                {{ getPlayedTime(battle) }}
+              </strong>
+            </td>
+            <td>
+              <p
+                *ngIf="!battle.win"
+                style="height: 20px; color: rgb(247, 5, 5)"
+              >
+                Lose
+              </p>
+              <p
+                *ngIf="battle.win"
+                style="height: 20px; color: rgb(29, 250, 0)"
+              >
+                Win
+              </p>
+            </td>
+            <td *ngFor="let fighter of battle.fighters | ownAxie">
+              <img
+                *ngIf="fighter.ownTeam == true"
+                style="height: 80px"
+                [src]="
+                  'https://storage.googleapis.com/assets.axieinfinity.com/axies/' +
+                  fighter.axieId +
+                  '/axie/axie-full-transparent.png'
+                "
+              />
+            </td>
+            <td>VS</td>
+            <td *ngFor="let fighter of battle.fighters | enemyAxie">
+              <img
+                style="height: 80px"
+                *ngIf="!fighter.ownTeam"
+                [src]="
+                  'https://storage.googleapis.com/assets.axieinfinity.com/axies/' +
+                  fighter.axieId +
+                  '/axie/axie-full-transparent.png'
+                "
+              />
+            </td>
+            <td>
+              <mat-chip
+                (click)="navigateToScholarReplay(battle)"
+                style="
+                  height: 20px;
+                  color: white;
+                  background: rgb(146, 215, 255);
+                  min-height: 20px;
+                "
+              >
+                Watch
+              </mat-chip>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </mat-expansion-panel>
 </div>
