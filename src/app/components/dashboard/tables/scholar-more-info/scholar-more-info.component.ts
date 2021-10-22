@@ -16,10 +16,12 @@ type Scholar = Partial<
     TableArenaData & {
       email: string;
       axies: Axie[];
+      scholarRoninAddress: string;
       scholarShareSLP: number;
       scholarSharePercentage: number;
       averageSlp: number;
-      averageUsd: number;
+      averageManagerUsd: number;
+      averageScholarUsd: number;
       winRate: number;
     }
 >;
@@ -64,6 +66,10 @@ export class ScholarMoreInfoComponent implements OnInit {
               leaderboardDetails.draws)) *
           100;
 
+        const averageDailySLP = this.getAverageSLP(slp);
+        const averageDailyUSD = averageDailySLP * slpPrice;
+        const managerShare = this.user.getManagerShare(scholar) ?? 0;
+        const managerPercentageShare = managerShare / 100;
         this.scholar = {
           id: scholar.id,
           scholar: scholar,
@@ -71,14 +77,12 @@ export class ScholarMoreInfoComponent implements OnInit {
           roninName: this.user.getRoninName(scholar.roninAddress),
           paidTimes: scholar?.paidTimes ?? 0,
           roninAddress: scholar?.roninAddress,
+          scholarRoninAddress: scholar?.scholarRoninAddress,
           inProgressSLP: inProgress,
-          managersShareSLP:
-            inProgress * ((this.user.getManagerShare(scholar) ?? 0) / 100),
-          managersSharePercentage: this.user.getManagerShare(scholar) ?? 0,
-          scholarShareSLP:
-            inProgress *
-            ((100 - this.user.getManagerShare(scholar) ?? 0) / 100),
-          scholarSharePercentage: 100 - this.user.getManagerShare(scholar) ?? 0,
+          managersShareSLP: inProgress * managerPercentageShare,
+          managersSharePercentage: managerShare,
+          scholarShareSLP: inProgress * ((100 - managerShare) / 100),
+          scholarSharePercentage: 100 - managerShare,
           totalSLP: slp?.total ?? 0,
           slp: slp,
           rank: leaderboardDetails.rank,
@@ -87,8 +91,9 @@ export class ScholarMoreInfoComponent implements OnInit {
           loses: leaderboardDetails.loses,
           draws: leaderboardDetails.draws,
           axies: axies.axies.slice(0, 3),
-          averageSlp: this.getAverageSLP(slp),
-          averageUsd: this.getAverageSLP(slp) * slpPrice,
+          averageSlp: averageDailySLP,
+          averageManagerUsd: averageDailyUSD * managerPercentageShare,
+          averageScholarUsd: averageDailyUSD * (1 - managerPercentageShare),
           winRate: Number.isNaN(winRate) ? 0 : winRate,
         };
 

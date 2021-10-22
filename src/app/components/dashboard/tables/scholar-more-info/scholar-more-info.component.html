@@ -108,7 +108,7 @@
             <b>Average Daily USD</b>
           </span>
           <span
-            >{{ fiatCurrency }} {{ scholar.averageUsd | number: "1.2-2" }}</span
+            >M: {{ fiatCurrency }}{{ scholar.averageManagerUsd | number: "1.2-2" }}  S: {{ fiatCurrency }}{{ scholar.averageScholarUsd | number: "1.2-2" }}</span
           >
         </div>
         <div fxLayout="row" fxLayoutAlign="space-between center">
@@ -165,7 +165,7 @@
             <mat-list-item>
               <div mat-line class="label">Ronin name</div>
               <div mat-line class="content">
-                {{ roninName | shortenName: false }}
+                {{ scholarRoninName | shortenName: false }}
               </div>
             </mat-list-item>
             <mat-divider></mat-divider>
@@ -173,13 +173,13 @@
               <div mat-line class="label">Ronin Address</div>
               <div mat-line fxLayout="row" fxLayoutAlign="space-between center">
                 <span>
-                  {{ scholar.roninAddress | shortenRoninAddress: false }}
+                  {{ scholar.scholarRoninAddress | shortenRoninAddress: false }}
                 </span>
 
                 <button
                   mat-icon-button
-                  [cdkCopyToClipboard]="scholar.roninAddress"
-                  (click)="openSnackBar(scholar.roninAddress)"
+                  [cdkCopyToClipboard]="scholar.scholarRoninAddress"
+                  (click)="openSnackBar(scholar.scholarRoninAddress)"
                 >
                   <mat-icon>file_copy</mat-icon>
                 </button>
