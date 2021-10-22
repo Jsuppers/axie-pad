@@ -71,7 +71,7 @@
           <span>
             <b>Win Rate</b>
           </span>
-          <span>%{{ scholar.winRate | number: "1.0-0" }}</span>
+          <span>{{ scholar.winRate | number: "1.0-0" }}%</span>
         </div>
         <div fxLayout="row" fxLayoutAlign="space-between center">
           <a
@@ -90,6 +90,14 @@
             <b>Average Daily SLP</b>
           </span>
           <mat-chip
+            style="
+              display: inline-flex;
+              padding: 0px 12px;
+              border-radius: 16px;
+              align-items: center;
+              color: white;
+              min-height: 20px;
+            "
             [style.background]="getAverageChipColor(scholar.averageSlp)"
             selected
             >{{ scholar.averageSlp | number: "1.0-0" }}</mat-chip

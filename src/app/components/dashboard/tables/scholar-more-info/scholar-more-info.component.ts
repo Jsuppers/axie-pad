@@ -57,6 +57,12 @@ export class ScholarMoreInfoComponent implements OnInit {
     ]).subscribe(
       ([scholar, slp, leaderboardDetails, axies, slpPrice, currency]) => {
         const inProgress = slp?.inProgress ?? 0;
+        const winRate =
+          (leaderboardDetails.wins /
+            (leaderboardDetails.wins +
+              leaderboardDetails.loses +
+              leaderboardDetails.draws)) *
+          100;
 
         this.scholar = {
           id: scholar.id,
@@ -83,12 +89,7 @@ export class ScholarMoreInfoComponent implements OnInit {
           axies: axies.axies.slice(0, 3),
           averageSlp: this.getAverageSLP(slp),
           averageUsd: this.getAverageSLP(slp) * slpPrice,
-          winRate:
-            (leaderboardDetails.wins /
-              (leaderboardDetails.wins +
-                leaderboardDetails.loses +
-                leaderboardDetails.draws)) *
-              100 ?? 0,
+          winRate: Number.isNaN(winRate) ? 0 : winRate,
         };
 
         this.fiatCurrency = getSymbolFromCurrency(currency);
