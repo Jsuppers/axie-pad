@@ -81,18 +81,18 @@
         <div
           *ngFor="let axie of element.axies"
           (click)="navigateToAxie(axie.id)"
-          style="width: 164px; float: left"
+          class="axie-container"
         >
-          <span [style.background]="getAxieClassColor(axie.class)">{{
+          <span [style.background]="getAxieClassColor(axie.class)" class="axie-id">{{
             hideAddresses ? "#AxieId" : "#" + axie.id
           }}</span
-          ><br />
+          >
           <span style="font-size: 12px">{{
             hideAddresses ? "AxieName" : axie.name
           }}</span
-          ><br />
+          >
           <span style="font-size: 12px">Breed Count: {{ axie.breedCount }}</span
-          ><br />
+          >
           <img [src]="axie.image" style="height: 120px" />
         </div>
       </div>

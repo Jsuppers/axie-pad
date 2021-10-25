@@ -108,26 +108,27 @@
       <h2>{{ (axies | async).length || 0 }} Axies</h2>
     </div>
 
-    <div class="axie-container">
+    <div class="axies-container">
       <mat-card *ngFor="let axie of axies | async" class="axie-card">
         <a
           [href]="'https://marketplace.axieinfinity.com/axie/' + axie.id"
           target="_blank"
+          class="axie-container"
         >
-          <span [style.background]="getAxieClassColor(axie.class)">{{
+          <span [style.background]="getAxieClassColor(axie.class)" class="axie-id">{{
             hideAddresses ? "#AxieId" : "#" + axie.id
           }}</span
-          ><br />
+          >
           <span style="font-size: 12px">{{
             hideAddresses ? "AxieName" : axie.name
           }}</span
-          ><br />
+          >
           <span style="font-size: 12px">Breed Count: {{ axie.breedCount }}</span
-          ><br />
+          >
           <span style="font-size: 12px">Pureness: {{ axie.pureness }}</span
-          ><br />
+          >
           <span style="font-size: 12px">Quality: {{ axie.quality }}%</span
-          ><br />
+          >
           <img [src]="axie.image" style="height: 120px" />
         </a>
       </mat-card>
