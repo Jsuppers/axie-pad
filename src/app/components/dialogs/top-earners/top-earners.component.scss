@@ -1,0 +1,13 @@
+:host ::ng-deep {
+  .mat-tab-labels :last-child.mat-tab-label {
+    justify-content: center;
+  }
+
+  .mat-tab-label {
+    color: rgba(0,0,0,.6) !important;
+
+    &.mat-tab-label-active {
+      color: black !important;
+    }
+  }
+}
