@@ -104,19 +104,19 @@ export class TopEarnersComponent implements OnInit {
     this.scholars.reverse();
   }
 
-  showElo() {
-    this.viewMode$.next(ViewMode.elo);
-  }
-
-  showSLP() {
-    this.viewMode$.next(ViewMode.slp);
-  }
-
   get scholarChunks() {
     if (this.pageEvent) {
       return chunk(this.scholars, this.pageEvent.pageSize)[this.pageEvent.pageIndex];
     } else {
       return chunk(this.scholars, 10)[0];
+    }
+  }
+
+  onTabChange(index: number) {
+    if (index === 0) {
+      this.viewMode$.next(ViewMode.slp);
+    } else {
+      this.viewMode$.next(ViewMode.elo);
     }
   }
 }

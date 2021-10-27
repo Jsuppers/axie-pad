@@ -2,14 +2,6 @@
 
       <h2>Top Earners
         <button mat-button (click)="close()" style="float:right">Close</button>
-        <button mat-raised-button class="crypto-button">
-          <div *ngIf="viewMode$.getValue() === viewMode.elo" (click)="showSLP()">
-            <img src="assets/slp.webp" style="width: 20px"><span style="padding-left: 5px;"></span>
-          </div>
-          <div *ngIf="viewMode$.getValue() === viewMode.slp" (click)="showElo()">
-            <span style="padding-left: 5px;">⚔️</span>
-          </div>
-        </button>
 
         <mat-icon style="float:right; cursor: pointer;
         font-size: 18px;
@@ -17,6 +9,18 @@
     </h2>
 
       <div style="margin: 10px; height: 90vh; max-height: 600px;">
+        <mat-tab-group (selectedTabChange)="onTabChange($event.index)" [selectedIndex]="0">
+          <mat-tab>
+            <ng-template mat-tab-label>
+              SLP<img src="assets/slp.webp" style="width: 20px; margin-left: 5px">
+            </ng-template>
+          </mat-tab>
+          <mat-tab>
+            <ng-template mat-tab-label>
+              Arena ⚔️
+            </ng-template>
+          </mat-tab>
+        </mat-tab-group>
         <mat-list class="content" id="style-2">
           <mat-list-item *ngFor="let scholar of scholarChunks; let i = index">
 
