@@ -6,8 +6,8 @@ import { UserService } from 'src/app/services/user/user.service';
 import { FirestoreScholar } from 'src/app/_models/scholar';
 
 type EditableScholarNote = FirestoreScholar & {
-  editing: boolean;
   expanded: boolean;
+  oldNote: string;
 };
 
 @Component({
@@ -22,25 +22,31 @@ export class NotesDialogComponent implements OnInit {
   constructor(private user: UserService, private db: AngularFirestore) {}
 
   ngOnInit(): void {
+    this._fetchScholars();
+  }
+
+  _fetchScholars() {
     this.user
-      .getScholars()
-      .pipe(
-        map((scholars) =>
-          scholars.map((scholar) => ({
-            ...scholar,
-            editing: false,
-            expanded: false,
-          }))
-        )
+    .getScholars()
+    .pipe(
+      map((scholars) =>
+        scholars.map((scholar) => ({
+          ...scholar,
+          editing: false,
+          expanded: false,
+          oldNote: scholar.note && String(scholar.note).length ? scholar.note : undefined,
+        }))
       )
-      .subscribe((scholars) => {
-        this._scholars = scholars;
-      });
+    )
+    .subscribe((scholars) => {
+      this._scholars = scholars;
+      console.log(scholars);
+    });
   }
 
   get scholars() {
     return this._scholars
-      .filter((scholar) => (this.isScholarWithNote ? (scholar.note || scholar.editing) : true))
+      .filter((scholar) => (this.isScholarWithNote ? scholar.oldNote !== undefined : true))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -49,24 +55,17 @@ export class NotesDialogComponent implements OnInit {
   }
 
   onEdit(index: number) {
-    this.scholars[index].editing = true;
     this.scholars[index].expanded = true;
   }
 
-  onDiscard(index: number) {
-    this.scholars[index].editing = false;
-  }
-
-  async onSave(index: number) {
-    this.scholars[index].editing = false;
-
+  async onAction(index: number, isSaving: boolean) {
     const scholar = this.scholars[index];
 
     const uid = this.user.tableID.getValue();
     const scholarID = scholar.id;
 
     if (uid && scholarID) {
-      const note = scholar.note;
+      const note = isSaving ? scholar.note : '';
       const userDocument = await this.db
         .collection('users')
         .doc(uid)
@@ -76,6 +75,8 @@ export class NotesDialogComponent implements OnInit {
       await userDocument.ref.update({
         ['scholars.' + scholarID + '.note']: note,
       });
+
+      this._fetchScholars();
     }
   }
 }
