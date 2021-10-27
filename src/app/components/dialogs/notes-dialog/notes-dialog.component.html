@@ -28,32 +28,21 @@
           matInput
           mat-autosize
           [minRows]="2"
-          [readonly]="!scholar.editing"
           [(ngModel)]="scholar.note"
         ></textarea>
       </mat-form-field>
       <div [ngStyle]="{ 'text-align': 'right' }">
         <button
           mat-flat-button
-          color="primary"
-          *ngIf="!scholar.editing"
-          (click)="onEdit(index)"
-        >
-          Edit
-        </button>
-        <button
-          mat-flat-button
           color="warn"
-          *ngIf="scholar.editing"
-          (click)="onDiscard(index)"
+          (click)="onAction(index, false)"
         >
-          Cancel
+          Delete
         </button>
         <button
           mat-flat-button
           color="primary"
-          *ngIf="scholar.editing"
-          (click)="onSave(index)"
+          (click)="onAction(index, true)"
         >
           Save
         </button>
