@@ -1,43 +1,72 @@
+<h2>
+  Top Earners
+  <button mat-button (click)="close()" style="float: right">Close</button>
 
+  <mat-icon
+    style="float: right; cursor: pointer; font-size: 18px; margin: 10px"
+    (click)="sortScholars()"
+    >sort</mat-icon
+  >
+</h2>
 
-      <h2>Top Earners
-        <button mat-button (click)="close()" style="float:right">Close</button>
+<div style="margin: 10px; height: 90vh; max-height: 650px">
+  <mat-tab-group
+    (selectedTabChange)="onTabChange($event.index)"
+    [selectedIndex]="0"
+  >
+    <mat-tab>
+      <ng-template mat-tab-label>
+        SLP<img src="assets/slp.webp" style="width: 20px; margin-left: 5px" />
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label> Arena ⚔️ </ng-template>
+    </mat-tab>
+  </mat-tab-group>
 
-        <mat-icon style="float:right; cursor: pointer;
-        font-size: 18px;
-        margin: 10px;" (click)="sortScholars()">sort</mat-icon>
-    </h2>
+  <table mat-table [dataSource]="dataSource">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+    </ng-container>
+    <ng-container matColumnDef="averageSLP">
+      <th mat-header-cell *matHeaderCellDef>Average Daily SLP</th>
+      <td mat-cell *matCellDef="let element">
+        <mat-chip
+          style="
+            display: inline-flex;
+            padding: 0px 12px;
+            border-radius: 16px;
+            align-items: center;
+            color: white;
+            min-height: 20px;
+          "
+          [style.background]="getAverageChipColor(element.averageSLP)"
+          >{{ element.averageSLP | number: "1.2-2" }}</mat-chip
+        >
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="averageUSD">
+      <th mat-header-cell *matHeaderCellDef>Average Daily USD</th>
+      <td mat-cell *matCellDef="let element">
+        ${{ element.averageUSD | number: "1.2-2" }}
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="elo">
+      <th mat-header-cell *matHeaderCellDef>Elo</th>
+      <td mat-cell *matCellDef="let element">{{ element.elo }}</td>
+    </ng-container>
+    <ng-container matColumnDef="winRate">
+      <th mat-header-cell *matHeaderCellDef>Win rate</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.winRate | number: "1.2-2" }}%
+      </td>
+    </ng-container>
 
-      <div style="margin: 10px; height: 90vh; max-height: 600px;">
-        <mat-tab-group (selectedTabChange)="onTabChange($event.index)" [selectedIndex]="0">
-          <mat-tab>
-            <ng-template mat-tab-label>
-              SLP<img src="assets/slp.webp" style="width: 20px; margin-left: 5px">
-            </ng-template>
-          </mat-tab>
-          <mat-tab>
-            <ng-template mat-tab-label>
-              Arena ⚔️
-            </ng-template>
-          </mat-tab>
-        </mat-tab-group>
-        <mat-list class="content" id="style-2">
-          <mat-list-item *ngFor="let scholar of scholarChunks; let i = index">
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
 
-            <h3 matLine> {{ scholar.name}}
-              <span *ngIf="viewMode$.getValue() === viewMode.slp" style="font-size: 10px;">(Average: {{scholar.average | number: "1.2-2"}})</span>
-              <span *ngIf="viewMode$.getValue() === viewMode.elo" style="font-size: 10px;">(Elo: {{scholar.elo | number: '1.0-0'}})</span>
-
-            </h3>
-            <mat-divider style="width: calc(100% - 10px);"></mat-divider>
-          </mat-list-item>
-      </mat-list>
-
-        <mat-paginator
-          [length]="scholars.length"
-          [pageSize]="10"
-          (page)="pageEvent = $event"
-          [ngStyle]="{'margin-top': '25px'}">
-        </mat-paginator>
-      </div>
-
+  <mat-paginator [pageSize]="10" [ngStyle]="{ 'margin-top': '25px' }">
+  </mat-paginator>
+</div>
