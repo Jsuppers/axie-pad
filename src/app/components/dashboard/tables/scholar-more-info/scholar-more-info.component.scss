@@ -21,7 +21,6 @@
   padding-left: 10px;
 }
 
-
 .small-text {
   font-size: 10px;
 }
@@ -42,22 +41,30 @@
   margin-bottom: 0;
 }
 
-.mat-icon, .mat-icon-button {
+.mat-icon,
+.mat-icon-button {
   width: 18px;
   height: 18px;
   line-height: 18px;
   font-size: 18px;
 }
 
-:host ::ng-deep .mat-list-item-content {
-  padding: 0 !important;
+:host ::ng-deep {
+  .mat-list-item-content {
+    padding: 0 !important;
+  }
+
+  .mat-card .mat-divider-horizontal {
+    width: 95%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 :host {
   width: 100%;
   text-align: left;
 }
-
 
 .battles-table {
   td {
