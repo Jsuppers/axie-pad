@@ -86,6 +86,11 @@ export class AxieTableComponent implements OnInit {
   @Output('errorChange')
   tableErrorChange = new EventEmitter<boolean>();
 
+  @Input()
+  averageElo = 0;
+  @Output()
+  averageEloChange = new EventEmitter<number>();
+
   @Input() searchQuery: BehaviorSubject<string>;
 
   constructor(
@@ -116,6 +121,8 @@ export class AxieTableComponent implements OnInit {
                   );
                   const axies = axiesResult.axies;
                   const failedRules: AxieCountRule[] = [];
+                  this.averageElo += leaderboardDetails.elo;
+
                   Object.values(user?.notificationRules ?? {}).forEach((rule) => {
                     if (rule.type === RuleType.axieCount) {
                       if (axies.length < (rule as AxieCountRule).lessThan &&
@@ -167,6 +174,9 @@ export class AxieTableComponent implements OnInit {
       )
       .subscribe((tableData) => {
         const newGroups = this.getGroups(tableData, this.groupByColumns);
+
+        this.averageElo = this.averageElo / tableData.length;
+        this.averageEloChange.next(this.averageElo);
 
         if (
           isEmpty(this.dataSource.data) ||

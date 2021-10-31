@@ -107,6 +107,17 @@ export class EarningsTableComponent implements OnInit {
   scholarTableData: Record<string, BehaviorSubject<TableEarningsData>> = {};
   expandingScholar: TableEarningsData = undefined;
 
+  private averageAllSLP$: BehaviorSubject<Record<string, number>> = new BehaviorSubject({});
+
+  @Input()
+  averageAllSLP: number = 0;
+  @Output()
+  averageAllSLPChange = new EventEmitter<number>();
+  @Input()
+  averageAllUSD: number = 0;
+  @Output()
+  averageAllUSDChange = new EventEmitter<number>();
+
   @Input('error')
   tableError = false;
   @Output('errorChange')
@@ -164,8 +175,28 @@ export class EarningsTableComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    combineLatest([this.user.getScholars(), this.user.currentUser$()]).pipe(
-        switchMap(([scholars, user]) => {
+    combineLatest([this.user.getSLPPrice(), this.averageAllSLP$.pipe()])
+      .subscribe(([slpPrice, allAverageSLP]) => {
+      this.averageAllSLP = 0;
+      this.averageAllUSD = 0;
+
+      const keys = Object.keys(allAverageSLP ?? {});
+      keys.forEach((averageSLPKey) => {
+        this.averageAllSLP += allAverageSLP[averageSLPKey];
+        this.averageAllUSD += allAverageSLP[averageSLPKey] * slpPrice;
+      });
+
+      this.averageAllSLP = this.averageAllSLP / keys.length;
+      this.averageAllUSD = this.averageAllUSD / keys.length;
+
+      this.averageAllSLPChange.next(this.averageAllSLP);
+      this.averageAllUSDChange.next(this.averageAllUSD);
+    });
+
+    combineLatest([this.user.getScholars(), this.user.currentUser$(), this.user.getSLPPrice()]).pipe(
+        switchMap(([scholars, user, slpPrice]) => {
+          const averageSLPRecord = {};
+          this.averageAllSLP$.next(averageSLPRecord);
           this.allData = [];
           this.scholarTableData = {};
           const output: Observable<TableEarningsData>[] = [];
@@ -174,6 +205,9 @@ export class EarningsTableComponent implements OnInit {
                this.user.getScholarsSLP(scholar.id).pipe(map((slp) => {
                 const failedRules: SLPRule[] = [];
                 const averageSLP = this.getAverageSLP(slp);
+                averageSLPRecord[scholar.id] = averageSLP;
+                this.averageAllSLP$.next(averageSLPRecord);
+
                 Object.values(user?.notificationRules ?? {}).forEach((rule) => {
                   if (rule.type === RuleType.slpCount) {
                     if (averageSLP < (rule as SLPRule).lessThan) {
