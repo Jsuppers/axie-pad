@@ -137,7 +137,8 @@ export class DashboardComponent implements OnInit {
 
   openTopEarnerDialog(): void {
     this.dialog.open(TopEarnersComponent, {
-      width: '400px',
+      width: '90vw',
+      maxWidth: '650px',
     });
   }
 

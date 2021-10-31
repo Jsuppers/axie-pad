@@ -5,9 +5,15 @@
 
   .mat-tab-label {
     color: rgba(0,0,0,.6) !important;
+    width: 50%;
+    padding: 0;
 
     &.mat-tab-label-active {
       color: black !important;
     }
   }
+}
+
+table {
+  width: 100%;
 }
