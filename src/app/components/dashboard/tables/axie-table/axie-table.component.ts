@@ -175,7 +175,7 @@ export class AxieTableComponent implements OnInit {
       .subscribe((tableData) => {
         const newGroups = this.getGroups(tableData, this.groupByColumns);
 
-        this.averageElo / tableData.length;
+        this.averageElo = this.averageElo / tableData.length;
         this.averageEloChange.next(this.averageElo);
 
         if (
