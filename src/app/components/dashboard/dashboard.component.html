@@ -85,7 +85,10 @@
         </span>
       </div>
 
-      <app-arena-table [hideAddress$]="hideAddress" [(error)]="tableArenaError" [searchQuery]="searchQuery"></app-arena-table>
+      <app-arena-table
+      [hideAddress$]="hideAddress"
+       [(error)]="tableArenaError"
+       [searchQuery]="searchQuery"></app-arena-table>
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>
@@ -103,7 +106,11 @@
         </button>
         <mat-icon *ngIf="!searchQuery.value.length" matSuffix>search</mat-icon>
       </mat-form-field>
-      <app-axie-table [hideAddress$]="hideAddress" [(error)]="tableAxiesError" [searchQuery]="searchQuery"></app-axie-table>
+      <app-axie-table
+      [hideAddress$]="hideAddress"
+      [(error)]="tableAxiesError"
+      [(averageElo)]="averageElo"
+      [searchQuery]="searchQuery"></app-axie-table>
     </mat-tab>
     <mat-tab>
       <ng-template mat-tab-label>
