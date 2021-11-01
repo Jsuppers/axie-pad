@@ -2,8 +2,8 @@
   <div fxLayout="row" fxLayoutAlign="space-between start" fxLayoutGap="10px">
     <div fxLayout="row" fxFlex class="content-container">
       <mat-card class="mat-elevation-z3" fxFlex="calc(50% - 20px)">
-        <mat-card-title fxLayout="row" fxLayoutAlign="space-between start">
-          <div fxLayout="row">
+        <mat-card-title fxLayout="row" fxLayoutAlign="space-between end" [ngStyle]="{ height: '26px' }">
+          <div fxLayout="row" fxLayoutAlign="start end">
             <a
               mat-icon-button
               [href]="
@@ -12,7 +12,7 @@
                 '/axie/'
               "
               target="_blank"
-              [ngStyle]="{ 'margin-right': '5px' }"
+              [ngStyle]="{ 'margin-right': '5px', 'line-height': '14px' }"
             >
               <mat-icon>launch</mat-icon>
             </a>
@@ -27,7 +27,8 @@
               align-items: center;
               min-height: 20px;
             "
-            >Team</mat-chip
+            [style.background]="getTeamColor(scholar.group)"
+            >{{ scholar.group }}</mat-chip
           >
         </mat-card-title>
         <mat-card-content class="content-column">
