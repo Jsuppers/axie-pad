@@ -86,6 +86,13 @@ export class AxieTableComponent implements OnInit {
   @Output('errorChange')
   tableErrorChange = new EventEmitter<boolean>();
 
+  private averageAllElo$: BehaviorSubject<Record<string, number>> = new BehaviorSubject({});
+
+  @Input()
+  averageElo = 0;
+  @Output()
+  averageEloChange = new EventEmitter<number>();
+
   @Input() searchQuery: BehaviorSubject<string>;
 
   constructor(
@@ -97,11 +104,27 @@ export class AxieTableComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.averageAllElo$
+      .subscribe((allAverageElo) => {
+      this.averageElo = 0;
+
+      const keys = Object.keys(allAverageElo ?? {});
+      keys.forEach((averageSLPKey) => {
+        this.averageElo += allAverageElo[averageSLPKey];
+      });
+
+      this.averageElo = this.averageElo / keys.length;
+
+      this.averageEloChange.next(this.averageElo);
+    });
+
     combineLatest([this.user.getScholars(), this.user.currentUser$()])
       .pipe(
         switchMap(([scholars, user]) => {
           this.allData = [];
           this.scholarTableData = {};
+          const averageAllElo = {};
+          this.averageAllElo$.next(averageAllElo);
 
           const output: Observable<TableData>[] = [];
           scholars.forEach((scholar) => {
@@ -114,8 +137,11 @@ export class AxieTableComponent implements OnInit {
                   const index = this.allData.findIndex(
                     (value) => value.id === scholar.id
                   );
+                  averageAllElo[scholar.id] = leaderboardDetails?.elo ?? 0;
+                  this.averageAllElo$.next(averageAllElo);
                   const axies = axiesResult.axies;
                   const failedRules: AxieCountRule[] = [];
+
                   Object.values(user?.notificationRules ?? {}).forEach((rule) => {
                     if (rule.type === RuleType.axieCount) {
                       if (axies.length < (rule as AxieCountRule).lessThan &&

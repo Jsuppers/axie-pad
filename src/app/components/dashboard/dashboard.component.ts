@@ -15,6 +15,7 @@ import { PayShareDialogComponent } from '../dialogs/pay-share-dialog/pay-share-d
 import { AngularFirestore } from '@angular/fire/firestore';
 import { PayShare } from 'src/app/_models/pay-share';
 import { FormBuilder } from '@angular/forms';
+import { AverageColorDialogComponent } from '../dialogs/average-color-dialog/average-color-dialog.component';
 
 class TopEarningData {
   name: string;
@@ -52,6 +53,9 @@ export class DashboardComponent implements OnInit {
   tableAxiesError = false;
 
   searchQuery = new BehaviorSubject<string>('');
+  averageAllSLP: number = 0;
+  averageAllUSD: number = 0;
+  averageElo: number = 0;
 
   constructor(private service: AuthService,
               private db: AngularFirestore,
@@ -133,11 +137,32 @@ export class DashboardComponent implements OnInit {
 
   openTopEarnerDialog(): void {
     this.dialog.open(TopEarnersComponent, {
-      width: '400px',
+      width: '90vw',
+      maxWidth: '650px',
     });
   }
 
   onSearch(query: string) {
     this.searchQuery.next(query);
+  }
+
+  openAverageColorDialog(): void {
+    const dialogRef = this.dialog.open(AverageColorDialogComponent, {
+      width: '400px',
+    });
+  }
+
+  getAverageChipColor(averageSLP: number): string {
+    const colors = this.userService.currentColors();
+    if (Math.round(averageSLP) < colors[0]) {
+      return '#FF0000'; // red
+    }
+    if (Math.round(averageSLP) < colors[1]) {
+      return '#FF8000'; // orange
+    }
+    if (Math.round(averageSLP) < colors[2]) {
+      return '#00CC00'; // green
+    }
+    return '#FF00FF'; // pink
   }
 }

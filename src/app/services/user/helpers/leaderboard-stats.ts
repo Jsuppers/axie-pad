@@ -12,22 +12,23 @@ export class LeaderboardStats {
       try {
         // create the leaderboard url
         // TODO change to official api when they release it
-        const url = 'https://api.lunaciaproxy.cloud/_stats/' +
+
+        const url = 'https://game-api.axie.technology/api/v1/' +
           roninAddress.replace('ronin:', '0x');
 
         // send and wait for the request
         const output: any = await http.get<any>(url).pipe(retryWhen(retryStrategy())).toPromise();
 
         // if the rank is set as the max Int the address is invalid
-        if (output?.stats?.rank === maxInt) {
+        if (output?.rank === maxInt) {
           throw 'unknown address';
         }
         // update leaderboard details
-        leaderboardDetails.wins = output?.stats?.win_total ?? 0;
-        leaderboardDetails.loses = output?.stats?.lose_total ?? 0;
-        leaderboardDetails.draws = output?.stats?.draw_total ?? 0;
-        leaderboardDetails.elo = output?.stats?.elo ?? 0;
-        leaderboardDetails.rank = output?.stats?.rank ?? 0;
+        leaderboardDetails.wins = output?.win_total ?? 0;
+        leaderboardDetails.loses = output?.lose_total ?? 0;
+        leaderboardDetails.draws = output?.draw_total ?? 0;
+        leaderboardDetails.elo = output?.mmr ?? 0;
+        leaderboardDetails.rank = output?.rank ?? 0;
       } catch (e) {
         leaderboardDetails.hasError = true;
         console.log(e);
