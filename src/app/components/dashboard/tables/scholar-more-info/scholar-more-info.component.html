@@ -2,20 +2,34 @@
   <div fxLayout="row" fxLayoutAlign="space-between start" fxLayoutGap="10px">
     <div fxLayout="row" fxFlex class="content-container">
       <mat-card class="mat-elevation-z3" fxFlex="calc(50% - 20px)">
-        <mat-card-title fxLayout="row" fxLayoutAlign="space-between start">
-          <span class="mat-card-title">{{ scholar.scholar.name }}</span>
+        <mat-card-title fxLayout="row" fxLayoutAlign="space-between end" [ngStyle]="{ height: '26px' }">
+          <div fxLayout="row" fxLayoutAlign="start end">
+            <a
+              mat-icon-button
+              [href]="
+                'https://marketplace.axieinfinity.com/profile/' +
+                scholar.roninAddress +
+                '/axie/'
+              "
+              target="_blank"
+              [ngStyle]="{ 'margin-right': '5px', 'line-height': '14px' }"
+            >
+              <mat-icon>launch</mat-icon>
+            </a>
+            <span class="mat-card-title">{{ scholar.scholar.name }}</span>
+          </div>
 
-          <a
-            mat-icon-button
-            [href]="
-              'https://marketplace.axieinfinity.com/profile/' +
-              scholar.roninAddress +
-              '/axie/'
+          <mat-chip
+            style="
+              display: inline-flex;
+              padding: 0px 12px;
+              border-radius: 16px;
+              align-items: center;
+              min-height: 20px;
             "
-            target="_blank"
+            [style.background]="getTeamColor(scholar.group)"
+            >{{ scholar.group }}</mat-chip
           >
-            <mat-icon>launch</mat-icon>
-          </a>
         </mat-card-title>
         <mat-card-content class="content-column">
           <mat-list>
@@ -108,7 +122,10 @@
             <b>Average Daily USD</b>
           </span>
           <span
-            >M: {{ fiatCurrency }}{{ scholar.averageManagerUsd | number: "1.2-2" }}  S: {{ fiatCurrency }}{{ scholar.averageScholarUsd | number: "1.2-2" }}</span
+            >M: {{ fiatCurrency
+            }}{{ scholar.averageManagerUsd | number: "1.2-2" }} S:
+            {{ fiatCurrency
+            }}{{ scholar.averageScholarUsd | number: "1.2-2" }}</span
           >
         </div>
         <div fxLayout="row" fxLayoutAlign="space-between center">

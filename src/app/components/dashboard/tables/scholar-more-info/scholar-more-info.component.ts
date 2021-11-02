@@ -96,6 +96,7 @@ export class ScholarMoreInfoComponent implements OnInit {
           averageManagerUsd: averageDailyUSD * managerPercentageShare,
           averageScholarUsd: averageDailyUSD * (1 - managerPercentageShare),
           winRate: Number.isNaN(winRate) ? 0 : winRate,
+          group: scholar.group,
         };
 
         this.fiatCurrency = getSymbolFromCurrency(currency);
@@ -205,5 +206,12 @@ export class ScholarMoreInfoComponent implements OnInit {
       return '#00CC00'; // green
     }
     return '#FF00FF'; // pink
+  }
+
+  getTeamColor(groupName: string) {
+    const color = this.user.currentGroupColors()[groupName];
+    if (color) {
+      return '#' + color;
+    }
   }
 }
