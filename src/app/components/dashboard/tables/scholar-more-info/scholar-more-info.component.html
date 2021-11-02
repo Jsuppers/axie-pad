@@ -139,7 +139,7 @@
             <b>Manager's Share</b>
           </span>
           <span
-            >{{ scholar.managersShareSLP }} ({{
+            >{{ scholar.managersShareSLP | number: "1.2-2" }} ({{
               scholar.managersSharePercentage
             }}%)</span
           >
@@ -149,7 +149,7 @@
             <b>Scholar's Share</b>
           </span>
           <span
-            >{{ scholar.scholarShareSLP }} ({{
+            >{{ scholar.scholarShareSLP | number: "1.2-2" }} ({{
               scholar.scholarSharePercentage
             }}%)</span
           >
