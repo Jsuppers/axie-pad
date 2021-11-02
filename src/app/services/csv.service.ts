@@ -69,6 +69,11 @@ export class CsvService {
         fieldName: 'scholarEthAddress',
         replacer: (key, value) => (value === null ? '' : value),
       },
+      {
+        title: 'Paid times',
+        fieldName: 'paidTimes',
+        replacer: (key, value) => (value === null ? 0 : value),
+      },
     ];
 
     const csv = this._scholars.map((scholar) =>

@@ -26,6 +26,7 @@ export class ImportDialogComponent {
     'preferredPaymentMethod',
     'scholarRoninAddress',
     'scholarEthAddress',
+    'paidTimes',
   ];
   dataSource = [];
   content = '';
@@ -77,7 +78,7 @@ export class ImportDialogComponent {
       // Remove " and \r character and split each rows
       const columns = row.replace(/["\r]/g, '').split(','); // Split between comma
 
-      if (columns.length !== 9) {
+      if (columns.length !== 10) {
         return;
       }
 
@@ -102,6 +103,7 @@ export class ImportDialogComponent {
       scholar.preferredPaymentMethod = columns[6] === 'ronin' ? 0 : 1;
       scholar.scholarRoninAddress = columns[7] || '';
       scholar.scholarEthAddress = columns[8] || '';
+      scholar.paidTimes = Number(columns[9]);
 
       this._uploadedScholars.push(scholar);
     });
