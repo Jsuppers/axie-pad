@@ -10,6 +10,7 @@ import { PaymentMethods } from 'src/app/_models/scholar';
 import { SLP } from 'src/app/_models/slp';
 import { TableArenaData } from '../arena-table/arena-table.component';
 import { TableEarningsData } from '../earnings-table/earnings-table.component';
+import moment from 'moment';
 
 type Scholar = Partial<
   TableEarningsData &
@@ -152,10 +153,7 @@ export class ScholarMoreInfoComponent implements OnInit {
   }
 
   getPlayedTime(element: Battle): string {
-    var currentTime = Date.now();
-    var playedTime = new Date(element.timestamp)?.getTime();
-    var hours = Math.abs(currentTime - playedTime) / 36e5;
-    return hours.toPrecision(2) + ' hours ago';
+    return moment.utc(element.timestamp).fromNow();
   }
 
   navigateToScholarReplay(element: Battle): void {
