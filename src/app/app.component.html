@@ -39,7 +39,7 @@
     <mat-menu #menu="matMenu">
 
 
-      <button mat-menu-item routerLink="/donate">
+      <button mat-menu-item (click)="openDonateDialog()">
         <mat-icon style="margin-left: 5px; color: #fa0032">favorite</mat-icon>Donate
       </button>
       <button mat-menu-item (click)="addTable()">

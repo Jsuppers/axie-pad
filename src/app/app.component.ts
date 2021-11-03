@@ -20,6 +20,7 @@ import { Rule, RuleType } from './_models/rule';
 import { CsvService } from './services/csv.service';
 import { ImportDialogComponent } from './components/dialogs/import-dialog/import-dialog.component';
 import { NotesDialogComponent } from './components/dialogs/notes-dialog/notes-dialog.component';
+import { DonateDialogComponent } from './components/dialogs/donate-dialog/donate-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -230,5 +231,12 @@ export class AppComponent implements OnInit {
       maxWidth: '600px',
       height: '90vh',
     });
+  }
+
+  openDonateDialog() {
+    this.dialog.open(DonateDialogComponent, {
+      width: '90vw',
+      maxWidth: '600px',
+    })
   }
 }
