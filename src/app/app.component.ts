@@ -163,7 +163,8 @@ export class AppComponent implements OnInit {
 
   shareDialog(): void {
     const dialogRef = this.dialog.open(PayShareDialogComponent, {
-      width: '400px',
+      width: '90vh',
+      maxWidth: '600px',
       maxHeight: '90vh',
     });
 

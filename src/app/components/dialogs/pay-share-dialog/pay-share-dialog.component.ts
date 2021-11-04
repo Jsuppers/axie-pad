@@ -1,13 +1,10 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 import _ from 'lodash';
 import { defaultManagerShare, defaultScholarShare } from 'src/app/constants';
 import { DialogService } from 'src/app/services/dialog.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { PayShare } from 'src/app/_models/pay-share';
-import { FirestoreScholar, PaymentMethods } from 'src/app/_models/scholar';
-import { SLP } from 'src/app/_models/slp';
-import { User } from 'src/app/_models/user';
 
 @Component({
   selector: 'app-pay-share-dialog',
@@ -52,5 +49,9 @@ export class PayShareDialogComponent {
 
   updateScholarShare(payShare: PayShare): void {
     payShare.scholar = 100 - payShare.manager;
+  }
+
+  onChange(index: number, value: number) {
+    this.payShares[index].manager = 100 - value;
   }
 }

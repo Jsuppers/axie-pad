@@ -1,12 +1,38 @@
-.title-row {
-  font-weight: bold;
+:host ::ng-deep {
+  .mat-slider-track-background {
+    background-color: #ffd740 !important;
+  }
 }
 
-.item-row {
-  padding-left: 10px;
+.paid-column {
+  width: 80px;
+  text-align: center;
+
+  .paid-column-scholar {
+    color: #673ab7;
+  }
 }
 
+.perc-line {
+  height: 2px;
+  background: rgba(0, 0, 0, 0.1);
+}
 
-.small-text {
-  font-size: 10px;
+.color-block {
+  width: 20px;
+  height: 20px;
+
+  &.color-block-scholar {
+    background: #673ab7;
+  }
+
+  &.color-block-manager {
+    background: #ffd740;
+  }
+}
+
+.color-block-container {
+  margin: 10px 0;
+  margin-bottom: 20px;
+  font-size: 12px;
 }
