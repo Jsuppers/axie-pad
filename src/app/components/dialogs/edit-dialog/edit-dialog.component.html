@@ -23,7 +23,10 @@
     <mat-label>Account Ronin Address</mat-label>
     <input matInput [(ngModel)]="data.roninAddress">
   </mat-form-field>
-  <mat-checkbox [(ngModel)]="data.useOwnPayShare">Use own pay scale</mat-checkbox>
+  <mat-radio-group class="pay-scale-group" [(ngModel)]="data.useOwnPayShare" color="primary">
+    <mat-radio-button class="pay-scale-item pay-scale-link" [value]="false"><span (click)="onDefaultPayScale()">Use default Pay Scale</span></mat-radio-button>
+    <mat-radio-button class="pay-scale-item" [value]="true">Use own Pay Scale</mat-radio-button>
+  </mat-radio-group>
   <div style="margin-top: 10px;">
     <mat-form-field *ngIf="data.useOwnPayShare">
       <mat-label>Manager's Share</mat-label>

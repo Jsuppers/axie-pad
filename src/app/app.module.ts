@@ -85,6 +85,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { ImportDialogComponent } from 'src/app/components/dialogs/import-dialog/import-dialog.component';
 import { NotesDialogComponent } from 'src/app/components/dialogs/notes-dialog/notes-dialog.component';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatRadioModule } from '@angular/material/radio';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -202,6 +203,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatTooltipModule,
     MatSliderModule,
     MatSlideToggleModule,
+    MatRadioModule,
   ],
   providers: [
     AuthService,
