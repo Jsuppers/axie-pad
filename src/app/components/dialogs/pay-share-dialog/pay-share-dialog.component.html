@@ -1,22 +1,45 @@
-<div mat-dialog-actions  style="padding-bottom: 30px;">
-  <h1 >Default Share</h1>
-  <div style="margin-left: 10px; margin-bottom: 10px;">
-    <button mat-button (click)="reset()">Reset</button>
-    <button mat-button (click)="addPoint()">Add</button>
+<h1 mat-dialog-title>Default Share</h1>
+<div mat-dialog-content>
+  <p>The percentage of the manager and scholar at specific paid times.</p>
+
+  <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px" class="color-block-container">
+    <div class="color-block color-block-scholar"></div><span>Scholar's share</span>
+    <div class="color-block color-block-manager"></div><span>Manager's share</span>
+  </div>
+
+  <div fxLayout="column" fxLayoutGap="5px">
+
+    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px">
+      <span class="paid-column">Paid times</span>
+      <div fxFlex fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="start center">
+        <span>0%</span>
+        <div class="perc-line" fxFlex></div>
+        <span>25%</span>
+        <div class="perc-line" fxFlex></div>
+        <span>50%</span>
+        <div class="perc-line" fxFlex></div>
+        <span>75%</span>
+        <div class="perc-line" fxFlex></div>
+        <span>100%</span>
+      </div>
+    </div>
+
+    <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+      *ngFor="let share of payShares; let index = index">
+      <span class="paid-column">{{ index + 1 }}{{ index === payShares.length - 1 ? '+' : '' }} <span
+          class="paid-column-scholar">({{ share.scholar }}%)</span></span>
+      <mat-slider fxFlex max="100" min="0" step="1" thumbLabel [(ngModel)]="share.scholar"
+        (change)="onChange(index, $event.value)" color="primary">
+      </mat-slider>
+    </div>
+
+    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
+      <button mat-stroked-button color="primary" (click)="addPoint()">Add</button>
+      <button mat-stroked-button color="warn" (click)="reset()">Reset</button>
+    </div>
   </div>
 </div>
-<span >
-  The percentage of the manager and scholar at specific paid times.
-</span>
-<br>
-<div *ngFor="let payShare of payShares; let i = index" style="padding-top: 8px;">
-  <span>
-    <strong>>={{i}} </strong>
-    Manager: <input matInput type="number" max="100" min="0" [(ngModel)]="payShare.manager" (change)="updateScholarShare(payShare)">
-    Scholar: {{payShare.scholar}}
-  </span>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">Close</button>
-  <button mat-button [mat-dialog-close]="payShares" cdkFocusInitial>Save</button>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button (click)="onNoClick()">Close</button>
+  <button mat-flat-button color="primary" [mat-dialog-close]="payShares" cdkFocusInitial>Save</button>
 </div>
