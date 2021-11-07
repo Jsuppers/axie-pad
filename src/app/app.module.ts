@@ -25,7 +25,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { FlexModule } from '@angular/flex-layout';
 import { MatCardModule } from '@angular/material/card';
-import { DonateComponent } from './components/donate/donate.component';
+import { DonateDialogComponent } from './components/dialogs/donate-dialog/donate-dialog.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { FooterComponent } from './components/footer/footer.component';
 import { TermsComponent } from './components/terms/terms.component';
@@ -131,7 +131,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     DashboardComponent,
     SignInComponent,
     DeleteDialogComponent,
-    DonateComponent,
+    DonateDialogComponent,
     FooterComponent,
     TermsComponent,
     PrivacyComponent,

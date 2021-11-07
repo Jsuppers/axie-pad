@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-donate',
-  templateUrl: './donate.component.html',
-  styleUrls: ['./donate.component.scss']
+  selector: 'app-donate-dialog',
+  templateUrl: './donate-dialog.component.html',
+  styleUrls: ['./donate-dialog.component.scss']
 })
-export class DonateComponent implements OnInit {
+export class DonateDialogComponent implements OnInit {
   ethAddress = '0x1d4C3D2A27D77Ab6C2Cf0DEf4b5d9be551272424';
   roninAddress = 'ronin:1d4c3d2a27d77ab6c2cf0def4b5d9be551272424';
   totalDonations: number;
