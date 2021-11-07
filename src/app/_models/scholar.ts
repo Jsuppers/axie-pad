@@ -29,6 +29,7 @@ export function DefaultFirestoreScholar(): FirestoreScholar {
     id: firebase.firestore().collection('tmp').doc().id,
     roninAddress: '',
     scholarRoninAddress: '',
+    useOwnPayShare: false,
     paidTimes: 0,
     scholarEthAddress: '',
     preferredPaymentMethod: PaymentMethods.ronin,
