@@ -1,0 +1,41 @@
+<div fxLayout="row" fxLayoutAlign="space-between center">
+  <h2 mat-dialog-title>Share</h2>
+  <div id="share-link" class="link-box">
+    {{ (shareLink | slice:0:35) + '...' }}
+  </div>
+  <button mat-stroked-button color="primary" (click)="onCopy()">Copy</button>
+</div>
+<div mat-dialog-content>
+  <p>By selecting the scholars, you are sharing allowing anyone with this link to see the axies you have for this
+    scholar. Be careful who you give this link to!</p>
+
+  <div [ngStyle]="{'text-align': 'right'}">
+    <button mat-flat-button color="primary">Add All</button>
+  </div>
+
+  <table mat-table [dataSource]="scholars">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Scholar Name</th>
+      <td mat-cell *matCellDef="let scholar">{{scholar.name}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="team">
+      <th mat-header-cell *matHeaderCellDef>Scholar Team</th>
+      <td mat-cell *matCellDef="let scholar">{{scholar.group.length ? scholar.group : '😥 no team'}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="roninAddress">
+      <th mat-header-cell *matHeaderCellDef>Scholar Ronin Address</th>
+      <td mat-cell *matCellDef="let scholar">{{(scholar.roninAddress | slice:0:9) + '...' + (scholar.roninAddress |
+        slice:scholar.roninAddress.length - 4:scholar.roninAddress.length)}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Action</th>
+      <td mat-cell *matCellDef="let scholar"><button mat-flat-button color="primary">Add</button></td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>

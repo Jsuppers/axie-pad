@@ -7,6 +7,8 @@ import { FormArray, FormBuilder, FormControl } from '@angular/forms';
 import { UserService } from 'src/app/services/user/user.service';
 import { Axie } from 'src/app/_models/axie';
 import { AxiePart } from 'src/app/_models/part';
+import { MatDialog } from '@angular/material/dialog';
+import { ShareDialogComponent } from 'src/app/components/dialogs/share-dialog/share-dialog.component';
 
 type PartTypes = {
   name: string;
@@ -43,7 +45,11 @@ export class FinderComponent implements OnInit {
   hideAddress$: Observable<boolean>;
   hideAddresses: boolean;
 
-  constructor(private fb: FormBuilder, private user: UserService) {}
+  constructor(
+    private fb: FormBuilder,
+    private user: UserService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
     this.user
@@ -319,5 +325,12 @@ export class FinderComponent implements OnInit {
 
   onRemoveBreedCount() {
     this.maxBreedCountQueryControl.setValue(undefined);
+  }
+
+  onShare() {
+    this.dialog.open(ShareDialogComponent, {
+      width: '90vw',
+      maxWidth: '800px'
+    })
   }
 }

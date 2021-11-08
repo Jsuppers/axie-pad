@@ -104,8 +104,10 @@
   </form>
   <mat-divider vertical></mat-divider>
   <div fxLayout="column" [ngStyle]="{ width: '100%' }" class="right-panel">
-    <div fxLayout="row">
-      <h2>{{ (axies | async).length || 0 }} Axies</h2>
+    <div fxLayout="row" fxLayoutAlign="space-between center" [ngStyle]="{ 'margin-bottom': '16px' }">
+      <h2 [ngStyle]="{ margin: 0 }">{{ (axies | async).length || 0 }} Axies</h2>
+
+      <button mat-flat-button color="primary" (click)="onShare()">Share</button>
     </div>
 
     <div class="axies-container">
