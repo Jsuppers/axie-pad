@@ -6,12 +6,14 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AuthGuard } from './auth.guard';
 import { TermsComponent } from './components/terms/terms.component';
 import { PrivacyComponent } from './components/privacy/privacy.component';
+import { SharedScholarsComponent } from './components/shared-scholars/shared-scholars.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'sign-in', component: SignInComponent },
   { path: 'terms', component: TermsComponent },
   { path: 'privacy', component: PrivacyComponent },
+  { path: 'user/:userId', component: SharedScholarsComponent},
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
 ];
 

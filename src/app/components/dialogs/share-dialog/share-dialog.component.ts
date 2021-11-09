@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from 'src/app/services/auth.service';
+import { Router } from '@angular/router';
 import { UserService } from 'src/app/services/user/user.service';
 import { FirestoreScholar } from 'src/app/_models/scholar';
 
@@ -9,6 +10,7 @@ import { FirestoreScholar } from 'src/app/_models/scholar';
   styleUrls: ['./share-dialog.component.scss'],
 })
 export class ShareDialogComponent implements OnInit {
+  private _uid: string;
   shareLink: string;
   scholars: FirestoreScholar[] = [];
 
@@ -16,17 +18,16 @@ export class ShareDialogComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private authService: AuthService,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
+    private db: AngularFirestore,
+    private router: Router,
   ) {}
 
   ngOnInit() {
-    this.shareLink = `https://axiepad.com/#/user/${
-      this.authService.userState.getValue().uid
-    }`;
+    this._uid = this.userService.tableID.getValue();
+    this.shareLink = `https://axiepad.com/#/user/${this._uid}`;
 
     this.userService.getScholars().subscribe((scholars) => {
-      console.log(scholars);
       this.scholars = scholars;
     });
   }
@@ -36,7 +37,18 @@ export class ShareDialogComponent implements OnInit {
     this.snackbar.open('Copied!', undefined, {
       duration: 5000,
     });
+
+    this.router.navigate(['..', 'user', this._uid]);
   }
 
-  onAdd() {}
+  async onAdd() {
+    const userDocument = await this.db
+      .collection('users')
+      .doc(this._uid)
+      .collection('shared')
+      .get()
+      .toPromise();
+
+    console.log(userDocument);
+  }
 }

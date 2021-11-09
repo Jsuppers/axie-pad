@@ -1,0 +1,137 @@
+<mat-card fxLayout="row" class="main">
+  <form [formGroup]="form" fxLayout="column" fxFlex="300px" class="left-panel">
+    <div fxLayout="row" fxLayoutAlign="space-between baseline">
+      <h3>Filter</h3>
+
+      <button mat-button (click)="onClearFilter()" type="button">Clear filter</button>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Search by name</mat-label>
+      <input matInput placeholder="Axie name" formControlName="searchQuery" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" [ngStyle]="{ width: '100%' }">
+      <mat-label>Parts</mat-label>
+      <input
+        type="text"
+        matInput
+        formControlName="partQuery"
+        [matAutocomplete]="partAuto"
+        name="part"
+      />
+      <mat-autocomplete
+        #partAuto="matAutocomplete"
+        (optionSelected)="onSelectPart($event.option.value)"
+      >
+        <mat-optgroup *ngFor="let type of types | async" [label]="type.name">
+          <mat-option *ngFor="let part of type.parts" [value]="part.name">
+            {{ part.name }}
+          </mat-option>
+        </mat-optgroup>
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <mat-chip-list [ngStyle]="{ 'margin-bottom': selectedPartsControl.value.length ? '15px' : '0' }">
+      <mat-chip
+        *ngFor="let part of selectedPartsControl.value; let index = index"
+        [removable]="true"
+        (removed)="onRemovePart(index)"
+        >{{ part }} <mat-icon matChipRemove>cancel</mat-icon></mat-chip
+      >
+    </mat-chip-list>
+
+    <mat-form-field appearance="outline" [ngStyle]="{ width: '100%' }">
+      <mat-label>Classes</mat-label>
+      <input
+        type="text"
+        matInput
+        formControlName="classQuery"
+        [matAutocomplete]="classAuto"
+        name="class"
+      />
+      <mat-autocomplete
+        #classAuto="matAutocomplete"
+        (optionSelected)="onSelectClass($event.option.value)"
+      >
+        <mat-option *ngFor="let class of classes | async" [value]="class">
+          {{ class }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <mat-chip-list [ngStyle]="{ 'margin-bottom': selectedClassesControl.value.length ? '15px' : '0' }">
+      <mat-chip
+        *ngFor="let class of selectedClassesControl.value; let index = index"
+        [removable]="true"
+        (removed)="onRemoveClass(index)"
+        >{{ class }} <mat-icon matChipRemove>cancel</mat-icon></mat-chip
+      >
+    </mat-chip-list>
+
+    <mat-form-field appearance="outline" [ngStyle]="{ width: '100%' }">
+      <mat-label>Max breed count</mat-label>
+      <mat-select formControlName="maxBreedCountQuery">
+        <mat-option
+          *ngFor="let number of [undefined, 0, 1, 2, 3, 4, 5, 6, 7]"
+          [value]="number"
+          >{{ number === undefined ? "Any" : number }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" [ngStyle]="{ width: '100%' }">
+      <mat-label>Pureness</mat-label>
+      <mat-select formControlName="purenessQuery">
+        <mat-option
+          *ngFor="let number of [undefined, 0, 1, 2, 3, 4, 5, 6]"
+          [value]="number"
+          >{{ number === undefined ? "Any" : number }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+
+    <div>
+      <p>Min quality: {{100 - qualityQueryControl.value}}%</p>
+      <mat-slider
+        invert
+        [min]="0"
+        [max]="100"
+        [ngStyle]="{ width: '100%' }"
+        formControlName="qualityQuery"
+      ></mat-slider>
+    </div>
+  </form>
+  <mat-divider vertical></mat-divider>
+  <div fxLayout="column" [ngStyle]="{ width: '100%' }" class="right-panel">
+    <div fxLayout="row" fxLayoutAlign="space-between center" [ngStyle]="{ 'margin-bottom': '16px' }">
+      <h2 [ngStyle]="{ margin: 0 }">{{ (axies | async).length || 0 }} Axies</h2>
+    </div>
+
+    <div class="axies-container">
+      <mat-card *ngFor="let axie of axies | async" class="axie-card">
+        <a
+          [href]="'https://marketplace.axieinfinity.com/axie/' + axie.id"
+          target="_blank"
+          class="axie-container"
+        >
+          <span [style.background]="getAxieClassColor(axie.class)" class="axie-id">{{
+            hideAddresses ? "#AxieId" : "#" + axie.id
+          }}</span
+          >
+          <span style="font-size: 12px">{{
+            hideAddresses ? "AxieName" : axie.name
+          }}</span
+          >
+          <span style="font-size: 12px">Breed Count: {{ axie.breedCount }}</span
+          >
+          <span style="font-size: 12px">Pureness: {{ axie.pureness }}</span
+          >
+          <span style="font-size: 12px">Quality: {{ axie.quality }}%</span
+          >
+          <img [src]="axie.image" style="height: 120px" />
+        </a>
+      </mat-card>
+    </div>
+  </div>
+</mat-card>

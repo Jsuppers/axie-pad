@@ -87,6 +87,7 @@ import { NotesDialogComponent } from 'src/app/components/dialogs/notes-dialog/no
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatRadioModule } from '@angular/material/radio';
 import { ShareDialogComponent } from './components/dialogs/share-dialog/share-dialog.component';
+import { SharedScholarsComponent } from './components/shared-scholars/shared-scholars.component';
 
 const cookieConfig: NgcCookieConsentConfig = {
   cookie: {
@@ -159,6 +160,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     ImportDialogComponent,
     NotesDialogComponent,
     ShareDialogComponent,
+    SharedScholarsComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebase),

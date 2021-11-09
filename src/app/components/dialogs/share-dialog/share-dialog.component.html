@@ -32,7 +32,7 @@
 
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef>Action</th>
-      <td mat-cell *matCellDef="let scholar"><button mat-flat-button color="primary">Add</button></td>
+      <td mat-cell *matCellDef="let scholar"><button mat-flat-button color="primary" (click)="onAdd()">Add</button></td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

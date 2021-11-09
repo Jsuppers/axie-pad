@@ -23,14 +23,19 @@ export class AuthService {
   ) {
     this.afAuth.authState.subscribe((user: User) => {
       this.userState.next(user);
-      if (user) {
-        this.ngZone.run(() => {
-          this.router.navigate(['dashboard']);
-        });
-      } else {
-        this.ngZone.run(() => {
-          this.router.navigate(['sign-in']);
-        });
+
+      const isOnSharedRoute = router.url.includes('user');
+
+      if (!isOnSharedRoute) {
+        if (user) {
+          this.ngZone.run(() => {
+              this.router.navigate(['dashboard']);
+          });
+        } else {
+          this.ngZone.run(() => {
+            this.router.navigate(['sign-in']);
+          });
+        }
       }
     });
   }
