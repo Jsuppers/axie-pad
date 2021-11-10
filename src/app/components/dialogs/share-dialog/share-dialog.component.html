@@ -1,16 +1,17 @@
 <div fxLayout="row" fxLayoutAlign="space-between center">
   <h2 mat-dialog-title>Share</h2>
-  <div id="share-link" class="link-box">
+  <div id="share-link" class="link-box" (click)="showCopyMessage()" [cdkCopyToClipboard]>
     {{ (shareLink | slice:0:35) + '...' }}
   </div>
-  <button mat-stroked-button color="primary" (click)="onCopy()">Copy</button>
+  <button mat-stroked-button color="primary" (click)="onCopy()">Share</button>
+  <button mat-stroked-button color="primary" (click)="stopSharing()">Stop Sharing</button>
 </div>
 <div mat-dialog-content>
   <p>By selecting the scholars, you are sharing allowing anyone with this link to see the axies you have for this
     scholar. Be careful who you give this link to!</p>
 
   <div [ngStyle]="{'text-align': 'right'}">
-    <button mat-flat-button color="primary">Add All</button>
+    <button mat-flat-button color="primary" (click)="onAddAll()">Add All</button>
   </div>
 
   <table mat-table [dataSource]="scholars">

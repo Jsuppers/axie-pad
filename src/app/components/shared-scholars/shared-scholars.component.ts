@@ -8,6 +8,7 @@ import { lowerCase } from 'lodash';
 import { Axie } from 'src/app/_models/axie';
 import { AxiePart } from 'src/app/_models/part';
 import { UserService } from 'src/app/services/user/user.service';
+import { SharedConfig } from 'src/app/_models/shared';
 
 type PartTypes = {
   name: string;
@@ -55,9 +56,11 @@ export class SharedScholarsComponent implements OnInit {
       .collection('users')
       .doc(userId)
       .collection('shared')
-      .snapshotChanges()
-      .subscribe((shared) => {
-        console.log(shared);
+      .doc(userId)
+      .valueChanges()
+      .subscribe((config: SharedConfig) => {
+        // todo update values with these config.scholars
+        console.log(config);
       });
 
     this.userService.hideAddress.subscribe((hideAddresses) => {
