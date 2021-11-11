@@ -5,7 +5,7 @@ export interface SharedConfig {
   scholars: string[];
 }
 
-export function DefaultSharedConfig(): SharedConfig {
+export const DefaultSharedConfig = (): SharedConfig => {
   return {
     id: firebase.firestore().collection('tmp').doc().id,
     scholars: [],

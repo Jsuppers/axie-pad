@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { map, switchMap } from 'rxjs/operators';
 import { UserService } from 'src/app/services/user/user.service';
 import { FirestoreScholar } from 'src/app/_models/scholar';
 import { DefaultSharedConfig } from 'src/app/_models/shared';
@@ -21,20 +21,38 @@ export class ShareDialogComponent implements OnInit {
   constructor(
     private userService: UserService,
     private snackbar: MatSnackBar,
-    private db: AngularFirestore,
-    private router: Router,
+    private db: AngularFirestore
   ) {}
 
   ngOnInit() {
     this._uid = this.userService.tableID.getValue();
     this.shareLink = `https://axiepad.com/#/user/${this._uid}`;
 
-    this.userService.getScholars().subscribe((scholars) => {
-      this.scholars = scholars;
-    });
+    this.db
+      .collection('users')
+      .doc(this._uid)
+      .collection('shared')
+      .doc(this._uid)
+      .valueChanges()
+      .pipe(
+        switchMap((config) =>
+          this.userService.getScholars().pipe(
+            map((scholars) => {
+              return [config, scholars];
+            })
+          )
+        )
+      )
+      .subscribe(([config, scholars]) => {
+        this.scholars = scholars as FirestoreScholar[];
+
+        if (config) {
+          this.scholarsToShare = config.scholars;
+        }
+      });
   }
 
-  async onCopy() {
+  async onShare() {
     const userDocument = await this.db
       .collection('users')
       .doc(this._uid)
@@ -46,16 +64,16 @@ export class ShareDialogComponent implements OnInit {
     if (!userDocument || !userDocument.exists) {
       const config = DefaultSharedConfig();
       config.scholars = this.scholarsToShare;
-      await userDocument.ref.set(
-        config,
-      );
+      await userDocument.ref.set(config);
     } else {
-      await userDocument.ref.update(
-        {
-          scholars: this.scholarsToShare,
-        },
-      );
+      await userDocument.ref.update({
+        scholars: this.scholarsToShare,
+      });
     }
+
+    this.snackbar.open('Saved scholars to share!', undefined, {
+      duration: 5000,
+    });
   }
 
   showCopyMessage(): void {
@@ -65,15 +83,14 @@ export class ShareDialogComponent implements OnInit {
     });
   }
 
-  async onAdd() {
-    // TODO add scholar
-    // this.scholarsToShare.push(scholarAddress)
+  onAdd(scholarAddress: string) {
+    this.scholarsToShare.push(scholarAddress);
   }
 
   async onAddAll() {
     this.scholars.forEach((scholar) => {
       this.scholarsToShare.push(scholar.roninAddress);
-    })
+    });
   }
 
   async stopSharing() {
@@ -88,16 +105,27 @@ export class ShareDialogComponent implements OnInit {
     if (!userDocument || !userDocument.exists) {
       const config = DefaultSharedConfig();
       config.scholars = [];
-      await userDocument.ref.set(
-        config,
-      );
+      await userDocument.ref.set(config);
     } else {
-      await userDocument.ref.update(
-        {
-          scholars: [],
-        },
-      );
+      await userDocument.ref.update({
+        scholars: [],
+      });
     }
 
+    this.snackbar.open('Stopped sharing!', undefined, {
+      duration: 5000,
+    });
+  }
+
+  isSharing(scholarAddress: string) {
+    return Boolean(
+      this.scholarsToShare.find((address) => address === scholarAddress)
+    );
+  }
+
+  onRemove(scholarAddress: string) {
+    this.scholarsToShare = this.scholarsToShare.filter(
+      (address) => address !== scholarAddress
+    );
   }
 }

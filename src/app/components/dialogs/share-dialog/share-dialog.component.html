@@ -1,9 +1,9 @@
-<div fxLayout="row" fxLayoutAlign="space-between center">
+<div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="15px">
   <h2 mat-dialog-title>Share</h2>
-  <div id="share-link" class="link-box" (click)="showCopyMessage()" [cdkCopyToClipboard]>
+  <div fxFlex id="share-link" class="link-box" (click)="showCopyMessage()" [cdkCopyToClipboard]>
     {{ (shareLink | slice:0:35) + '...' }}
   </div>
-  <button mat-stroked-button color="primary" (click)="onCopy()">Share</button>
+  <button mat-stroked-button color="primary" (click)="onShare()">Share</button>
   <button mat-stroked-button color="primary" (click)="stopSharing()">Stop Sharing</button>
 </div>
 <div mat-dialog-content>
@@ -33,7 +33,10 @@
 
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef>Action</th>
-      <td mat-cell *matCellDef="let scholar"><button mat-flat-button color="primary" (click)="onAdd()">Add</button></td>
+      <td mat-cell *matCellDef="let scholar">
+        <button mat-flat-button color="primary" (click)="onAdd(scholar.roninAddress)" *ngIf="!isSharing(scholar.roninAddress)">Add</button>
+        <button mat-flat-button color="error" (click)="onRemove(scholar.roninAddress)" *ngIf="isSharing(scholar.roninAddress)">Remove</button>
+      </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

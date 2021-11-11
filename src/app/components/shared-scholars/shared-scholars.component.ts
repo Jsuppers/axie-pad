@@ -2,13 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { FormArray, FormBuilder, FormControl } from '@angular/forms';
-import { combineLatest, merge, Observable } from 'rxjs';
-import { map, startWith, switchMap } from 'rxjs/operators';
+import { merge, Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import { lowerCase } from 'lodash';
 import { Axie } from 'src/app/_models/axie';
 import { AxiePart } from 'src/app/_models/part';
 import { UserService } from 'src/app/services/user/user.service';
 import { SharedConfig } from 'src/app/_models/shared';
+import { Apollo } from 'apollo-angular';
+import { AccountAxies } from 'src/app/services/user/helpers/account-axies';
 
 type PartTypes = {
   name: string;
@@ -47,10 +49,12 @@ export class SharedScholarsComponent implements OnInit {
     private db: AngularFirestore,
     private route: ActivatedRoute,
     private userService: UserService,
+    private apollo: Apollo
   ) {}
 
   ngOnInit() {
     const userId = this.route.snapshot.paramMap.get('userId');
+    const accountAxies = new AccountAxies(this.apollo);
 
     this.db
       .collection('users')
@@ -59,8 +63,61 @@ export class SharedScholarsComponent implements OnInit {
       .doc(userId)
       .valueChanges()
       .subscribe((config: SharedConfig) => {
-        // todo update values with these config.scholars
-        console.log(config);
+        for (const roninAddress of config.scholars) {
+          accountAxies.getAxies(roninAddress).then(({ axies }) => {
+            this._axies = this._axies.concat(axies);
+
+            this._parts = this._axies.reduce<AxiePart[]>(
+              (parts, currentAxie) => {
+                currentAxie.parts.forEach((part) => {
+                  const alreadyAdded = Boolean(
+                    parts.find((_part) => _part.name === part.name)
+                  );
+
+                  if (!alreadyAdded) {
+                    parts.push(part);
+                  }
+                });
+
+                return parts;
+              },
+              []
+            );
+
+            this._types = this._parts.reduce<PartTypes[]>(
+              (result, currentPart) => {
+                const typeIndex = result.findIndex(
+                  (type) => type.name === currentPart.type
+                );
+
+                if (typeIndex !== -1) {
+                  result[typeIndex].parts.push(currentPart);
+                } else {
+                  result.push({ name: currentPart.type, parts: [currentPart] });
+                }
+
+                return result;
+              },
+              []
+            );
+
+            this._classes = this._axies.reduce<string[]>(
+              (classes, currentAxie) => {
+                if (
+                  !classes.find((cl) => cl === currentAxie.class) &&
+                  currentAxie.class
+                ) {
+                  classes.push(currentAxie.class);
+                }
+
+                return classes;
+              },
+              []
+            );
+
+            this.onClearFilter();
+          });
+        }
       });
 
     this.userService.hideAddress.subscribe((hideAddresses) => {
