@@ -1,14 +1,16 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { combineLatest, merge, Observable } from 'rxjs';
-import { map, startWith, switchMap } from 'rxjs/operators';
-import { lowerCase } from 'lodash';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { FormArray, FormBuilder, FormControl } from '@angular/forms';
-
-import { UserService } from 'src/app/services/user/user.service';
+import { merge, Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { lowerCase } from 'lodash';
 import { Axie } from 'src/app/_models/axie';
 import { AxiePart } from 'src/app/_models/part';
-import { MatDialog } from '@angular/material/dialog';
-import { ShareDialogComponent } from 'src/app/components/dialogs/share-dialog/share-dialog.component';
+import { UserService } from 'src/app/services/user/user.service';
+import { SharedConfig } from 'src/app/_models/shared';
+import { Apollo } from 'apollo-angular';
+import { AccountAxies } from 'src/app/services/user/helpers/account-axies';
 
 type PartTypes = {
   name: string;
@@ -16,11 +18,10 @@ type PartTypes = {
 };
 
 @Component({
-  selector: 'app-finder',
-  templateUrl: './finder.component.html',
-  styleUrls: ['./finder.component.scss'],
+  templateUrl: './shared-scholars.component.html',
+  styleUrls: ['./shared-scholars.component.scss'],
 })
-export class FinderComponent implements OnInit {
+export class SharedScholarsComponent implements OnInit {
   _axies: Axie[] = [];
   _types: PartTypes[] = [];
   _parts: AxiePart[] = [];
@@ -41,88 +42,85 @@ export class FinderComponent implements OnInit {
     selectedClasses: this.fb.array([]),
   });
 
-  @Input()
-  hideAddress$: Observable<boolean>;
   hideAddresses: boolean;
 
   constructor(
     private fb: FormBuilder,
-    private user: UserService,
-    private dialog: MatDialog
+    private db: AngularFirestore,
+    private route: ActivatedRoute,
+    private userService: UserService,
+    private apollo: Apollo
   ) {}
 
-  ngOnInit(): void {
-    this.user
-      .getScholars()
-      .pipe(
-        switchMap((scholars) => {
-          return combineLatest(
-            scholars.map((scholar) =>
-              this.user.getScholarsAxies(scholar.id).pipe(
-                map((result) => {
-                  if (result.hasError) {
-                    return [];
+  ngOnInit() {
+    const userId = this.route.snapshot.paramMap.get('userId');
+    const accountAxies = new AccountAxies(this.apollo);
+
+    this.db
+      .collection('users')
+      .doc(userId)
+      .collection('shared')
+      .doc(userId)
+      .valueChanges()
+      .subscribe((config: SharedConfig) => {
+        for (const roninAddress of config.scholars) {
+          accountAxies.getAxies(roninAddress).then(({ axies }) => {
+            this._axies = this._axies.concat(axies);
+
+            this._parts = this._axies.reduce<AxiePart[]>(
+              (parts, currentAxie) => {
+                currentAxie.parts.forEach((part) => {
+                  const alreadyAdded = Boolean(
+                    parts.find((_part) => _part.name === part.name)
+                  );
+
+                  if (!alreadyAdded) {
+                    parts.push(part);
                   }
+                });
 
-                  return result.axies;
-                })
-              )
-            )
-          );
-        }),
-        map((axiesArray) =>
-          axiesArray.reduce(
-            (result, currentArray) => [...result, ...currentArray],
-            []
-          )
-        )
-      )
-      .subscribe((axies) => {
-        this._axies = axies;
-
-        this._parts = axies.reduce<AxiePart[]>((parts, currentAxie) => {
-          currentAxie.parts.forEach((part) => {
-            const alreadyAdded = Boolean(
-              parts.find((_part) => _part.name === part.name)
+                return parts;
+              },
+              []
             );
 
-            if (!alreadyAdded) {
-              parts.push(part);
-            }
+            this._types = this._parts.reduce<PartTypes[]>(
+              (result, currentPart) => {
+                const typeIndex = result.findIndex(
+                  (type) => type.name === currentPart.type
+                );
+
+                if (typeIndex !== -1) {
+                  result[typeIndex].parts.push(currentPart);
+                } else {
+                  result.push({ name: currentPart.type, parts: [currentPart] });
+                }
+
+                return result;
+              },
+              []
+            );
+
+            this._classes = this._axies.reduce<string[]>(
+              (classes, currentAxie) => {
+                if (
+                  !classes.find((cl) => cl === currentAxie.class) &&
+                  currentAxie.class
+                ) {
+                  classes.push(currentAxie.class);
+                }
+
+                return classes;
+              },
+              []
+            );
+
+            this.onClearFilter();
           });
-
-          return parts;
-        }, []);
-
-        this._types = this._parts.reduce<PartTypes[]>((result, currentPart) => {
-          const typeIndex = result.findIndex(
-            (type) => type.name === currentPart.type
-          );
-
-          if (typeIndex !== -1) {
-            result[typeIndex].parts.push(currentPart);
-          } else {
-            result.push({ name: currentPart.type, parts: [currentPart] });
-          }
-
-          return result;
-        }, []);
-
-        this._classes = axies.reduce<string[]>((classes, currentAxie) => {
-          if (
-            !classes.find((cl) => cl === currentAxie.class) &&
-            currentAxie.class
-          ) {
-            classes.push(currentAxie.class);
-          }
-
-          return classes;
-        }, []);
-
-        this.onClearFilter();
+        }
       });
 
-    this.hideAddress$.subscribe((hideAddresses) => {
+    this.userService.hideAddress.subscribe((hideAddresses) => {
       this.hideAddresses = hideAddresses;
     });
 
@@ -325,12 +323,5 @@ export class FinderComponent implements OnInit {
 
   onRemoveBreedCount() {
     this.maxBreedCountQueryControl.setValue(undefined);
-  }
-
-  onShare() {
-    this.dialog.open(ShareDialogComponent, {
-      width: '90vw',
-      maxWidth: '800px'
-    })
   }
 }
