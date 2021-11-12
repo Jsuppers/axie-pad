@@ -121,6 +121,7 @@ export class AppComponent implements OnInit {
       const uid = this.userService.tableID.getValue();
       if (uid && result) {
         const userDocument = await this.db.collection('users').doc(uid).get().toPromise();
+        const tableDocument = await this.db.collection('tables').doc(uid).get().toPromise();
         const newLinkedUsers: Record<string, LinkedUser> = {};
         Object.values(result ?? {}).forEach((user) => {
           if (!_.isEmpty(user.email)) {
@@ -128,6 +129,29 @@ export class AppComponent implements OnInit {
             newLinkedUsers[user.id] = user;
           }
         });
+        const tableName = this.userService.ownTableName.getValue();
+        const linkedUsers = Object.values(result ?? {}).reduce(
+          (linkedResult, currentUser) => {
+            return {
+              ...linkedResult,
+              [currentUser.id]: currentUser.role,
+            };
+          },
+          {}
+        );
+
+        if (!tableDocument || !tableDocument.exists) {
+          await tableDocument.ref.set({
+            tableName,
+            tableID: uid,
+            users: linkedUsers,
+          });
+        } else {
+          await tableDocument.ref.update({
+            tableID: uid,
+            users: linkedUsers,
+          });
+        }
 
         await userDocument.ref.update({
           ['linkedUsers']: newLinkedUsers
