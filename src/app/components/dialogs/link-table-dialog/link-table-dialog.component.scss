@@ -1,0 +1,8 @@
+.tables-container {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+:host ::ng-deep .mat-divider {
+  margin-bottom: 10px;
+}
