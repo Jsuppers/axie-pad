@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialogRef } from '@angular/material/dialog';
-import _ from 'lodash';
 import { combineLatest } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { DefaultTable, Table } from 'src/app/_models/table';
@@ -14,11 +13,10 @@ import { DefaultTable, Table } from 'src/app/_models/table';
   styleUrls: ['./link-table-dialog.component.scss'],
 })
 export class LinkTableDialogComponent {
-  private _currentTables: Record<string, Table> = {};
   private _linkedTables: Table[] = [];
 
+  ownTableName = "";
   searchQuery = '';
-  tablesToBeAdded: Table[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<LinkTableDialogComponent>,
@@ -29,7 +27,7 @@ export class LinkTableDialogComponent {
     const user = this.authService.userState.getValue();
 
     combineLatest([
-      this.userService.ownLinkedTables,
+      this.userService.ownTableName,
       this.db
         .collection('tables', (ref) =>
           ref.where(`users.${btoa(user.email)}`, '!=', '')
@@ -42,8 +40,8 @@ export class LinkTableDialogComponent {
             )
           )
         ),
-    ]).subscribe(([currentTables, tables]) => {
-      this._currentTables = currentTables;
+    ]).subscribe(([ownTableName, tables]) => {
+      this.ownTableName = ownTableName;
       this._linkedTables = tables;
     });
   }
@@ -56,49 +54,13 @@ export class LinkTableDialogComponent {
     );
   }
 
-  isAvailable(tableId: string) {
-    let result = true;
-
-    Object.values(this._currentTables).forEach((table) => {
-      if (table.tableID === tableId) {
-        result = false;
-      }
-    });
-
-    return result;
-  }
-
-  isAdded(table: Table) {
-    return Boolean(
-      this.tablesToBeAdded.find((_) => _.tableID === table.tableID)
-    );
-  }
-
-  onNoClick(): void {
+  onLoadTable(table: Table) {
+    this.userService.setTable(table);
     this.dialogRef.close();
   }
 
-  onAddTable(table: Table): void {
-    this.tablesToBeAdded.push(table);
-  }
-
-  onRemoveTable(table: Table): void {
-    this.tablesToBeAdded = this.tablesToBeAdded.filter(
-      (_) => _.tableID !== table.tableID
-    );
-  }
-
-  onSave() {
-    const result = {
-      ...this._currentTables,
-      ...this.tablesToBeAdded.reduce((currentResult, currentTable) => {
-        return (currentResult = {
-          ...currentResult,
-          [currentTable.id]: currentTable,
-        });
-      }, {}),
-    };
-
-    this.dialogRef.close(result);
+  onLoadOwnTable() {
+    this.userService.setOwnTable();
+    this.dialogRef.close();
   }
 }

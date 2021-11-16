@@ -13,7 +13,7 @@ import { PayShare } from './_models/pay-share';
 import { LinkedUser } from './_models/linked-user';
 import { AddManagerDialogComponent } from './components/dialogs/add-manager-dialog/add-manager-dialog.component';
 import { LinkTableDialogComponent } from './components/dialogs/link-table-dialog/link-table-dialog.component';
-import { Table } from './_models/table';
+import { DefaultTable, Table } from './_models/table';
 import _ from 'lodash';
 import { NotificationRulesComponent } from './components/dialogs/notification-rules/notification-rules.component';
 import { Rule, RuleType } from './_models/rule';
@@ -21,6 +21,7 @@ import { CsvService } from './services/csv.service';
 import { ImportDialogComponent } from './components/dialogs/import-dialog/import-dialog.component';
 import { NotesDialogComponent } from './components/dialogs/notes-dialog/notes-dialog.component';
 import { DonateDialogComponent } from './components/dialogs/donate-dialog/donate-dialog.component';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -45,9 +46,27 @@ export class AppComponent implements OnInit {
               private ccService: NgcCookieConsentService,
               private csvService: CsvService) {
       this.hideAddress = this.userService.hideAddress;
-      this.userService.ownLinkedTables.subscribe((tables) => {
-        this.linkedTables = Object.values(tables ?? {});
-      });
+
+      this.authService.userState
+        .pipe(
+          filter((user) => Boolean(user)),
+          switchMap((user) =>
+            this.db
+              .collection('tables', (ref) =>
+                ref.where(`users.${btoa(user.email)}`, '!=', '')
+              )
+              .valueChanges()
+          ),
+          map((tables) =>
+            tables.map((table: { tableID: string; tableName: string }) =>
+              DefaultTable(table.tableID, table.tableName)
+            )
+          )
+        )
+        .subscribe((tables) => {
+          this.linkedTables = Object.values(tables ?? {});
+        });
+
       this.userService.ownTableName.subscribe((name) => {
         this.ownTableTitle = name;
       });
@@ -148,6 +167,7 @@ export class AppComponent implements OnInit {
           });
         } else {
           await tableDocument.ref.update({
+            tableName,
             tableID: uid,
             users: linkedUsers,
           });
@@ -204,20 +224,10 @@ export class AppComponent implements OnInit {
     });
   }
 
-  addTable(): void {
-    const dialogRef = this.dialog.open(LinkTableDialogComponent, {
+  openSharedTables(): void {
+    this.dialog.open(LinkTableDialogComponent, {
       width: '400px',
       maxHeight: '90vh',
-    });
-
-    dialogRef.afterClosed().subscribe(async (result: Record<string, Table>) => {
-      const user = this.authService.userState.getValue();
-      if (user && result) {
-        const userDocument = await this.db.collection('users').doc(user.uid).get().toPromise();
-        await userDocument.ref.update({
-          ['linkedTables']: result
-        });
-      }
     });
   }
 
