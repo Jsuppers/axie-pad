@@ -101,8 +101,6 @@ export class ScholarMoreInfoComponent implements OnInit {
 
         this.fiatCurrency = getSymbolFromCurrency(currency);
 
-        console.log(this.scholar);
-
         const roninName = this.user.getRoninName(
           this.scholar.scholar.roninAddress
         );

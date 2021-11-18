@@ -1,49 +1,60 @@
-<div mat-dialog-actions  style="padding-bottom: 30px;">
-  <h1>Add a Manager</h1>
-  <div style="margin-left: 10px; margin-bottom: 10px;">
-    <button mat-button (click)="reset()">Reset</button>
-    <button mat-button (click)="addManager()">Add</button>
+<div *ngIf="!isOwnTable">
+  <div mat-dialog-content>
+    <p>This is not your table, only owners can add other managers</p>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Close</button>
   </div>
 </div>
-<p>
-<span >
-  You can add a manager to help you with your scholars.
-</span>
-<span >
-  They will also need to copy this code for your table:
-</span>
-<span *ngIf="uid" [cdkCopyToClipboard]="uid" (click)="openSnackBar(uid)">
-  <td class="item-row">
-    <mat-icon>file_copy</mat-icon>{{uid | shortenRoninAddress: false}}</td>
-</span>
-</p>
-<p>
-  <strong>Admin</strong>: Can add, edit and delete scholars
-</p>
-<p>
-  <strong>Editor</strong>: Can edit scholars
-</p>
-<p>
-  <strong>Viewer</strong>: Can view scholars
-</p>
-<mat-divider></mat-divider>
-<div *ngFor="let manager of linkedUsers | keyvalue" style="padding-top: 8px;">
-  <mat-form-field>
-    <mat-label>Email</mat-label>
-    <input matInput [(ngModel)]="manager.value.email">
-  </mat-form-field>
-  <mat-form-field appearance="fill">
-    <mat-label>Role</mat-label>
-    <mat-select [(ngModel)]="manager.value.role">
-      <mat-option [value]="role.admin">Admin (Full access)</mat-option>
-      <mat-option [value]="role.editor">Editor (Edit access)</mat-option>
-      <mat-option [value]="role.viewer">Viewer (Read access)</mat-option>
-    </mat-select>
-  </mat-form-field>
-  <button mat-button (click)="removeUser(manager.key)">Remove</button>
+<div *ngIf="isOwnTable">
+  <div mat-dialog-actions  style="padding-bottom: 30px;">
+    <h1>Add a Manager</h1>
+    <div style="margin-left: 10px; margin-bottom: 10px;">
+      <button mat-button (click)="reset()">Reset</button>
+      <button mat-button (click)="addManager()">Add</button>
+    </div>
+  </div>
+  <p>
+  <span >
+    You can add a manager to help you with your scholars.
+  </span>
+  <span >
+    They will also need to copy this code for your table:
+  </span>
+  <span *ngIf="uid" [cdkCopyToClipboard]="uid" (click)="openSnackBar(uid)">
+    <td class="item-row">
+      <mat-icon>file_copy</mat-icon>{{uid | shortenRoninAddress: false}}</td>
+  </span>
+  </p>
+  <p>
+    <strong>Admin</strong>: Can add, edit and delete scholars
+  </p>
+  <p>
+    <strong>Editor</strong>: Can edit scholars
+  </p>
+  <p>
+    <strong>Viewer</strong>: Can view scholars
+  </p>
   <mat-divider></mat-divider>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">Close</button>
-  <button mat-button [mat-dialog-close]="linkedUsers" cdkFocusInitial>Save</button>
+  <div *ngFor="let manager of linkedUsers | keyvalue" style="padding-top: 8px;">
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input matInput [(ngModel)]="manager.value.email">
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Role</mat-label>
+      <mat-select [(ngModel)]="manager.value.role">
+        <mat-option [value]="role.admin">Admin (Full access)</mat-option>
+        <mat-option [value]="role.editor">Editor (Edit access)</mat-option>
+        <mat-option [value]="role.viewer">Viewer (Read access)</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <button mat-button (click)="removeUser(manager.key)">Remove</button>
+    <mat-divider></mat-divider>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Close</button>
+    <button mat-button [mat-dialog-close]="linkedUsers" cdkFocusInitial>Save</button>
+  </div>
+
 </div>

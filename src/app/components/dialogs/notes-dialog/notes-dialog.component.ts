@@ -40,7 +40,6 @@ export class NotesDialogComponent implements OnInit {
     )
     .subscribe((scholars) => {
       this._scholars = scholars;
-      console.log(scholars);
     });
   }
 

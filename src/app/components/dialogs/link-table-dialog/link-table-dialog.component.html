@@ -1,26 +1,35 @@
-<div mat-dialog-actions  style="padding-bottom: 30px;">
-  <h1>Linked Tables</h1>
-  <div style="margin-left: 10px; margin-bottom: 10px;">
-    <button mat-button (click)="reset()">Reset</button>
-    <button mat-button (click)="addTable()">Add</button>
-  </div>
+<div mat-dialog-actions style="padding-bottom: 30px;">
+  <h1>Shared Tables</h1>
 </div>
 <span>
-  You can add other tables from other users, then select it from the menu on the top left
+  You can load other tables from other users
 </span>
 <br>
-<div *ngFor="let tables of linkedTables | keyvalue" style="padding-top: 8px;">
+<div fxLayout="row" fxLayoutAlign="space-between center">
   <mat-form-field>
-    <mat-label>Name</mat-label>
-    <input matInput [(ngModel)]="tables.value.name">
+    <mat-label>Search tables...</mat-label>
+    <input placeholder="Name or ID" matInput [(ngModel)]="searchQuery" />
+    <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
-  <mat-form-field>
-    <mat-label>Table ID</mat-label>
-    <input matInput [(ngModel)]="tables.value.tableID">
-  </mat-form-field>
-  <mat-divider></mat-divider>
+  <button mat-flat-button color="primary" (click)="onLoadOwnTable()">Load own Table</button>
 </div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">Close</button>
-  <button mat-button [mat-dialog-close]="linkedTables" cdkFocusInitial>Save</button>
+<div class="tables-container">
+  <div *ngFor="let table of linkedTables" fxLayout="column">
+    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px">
+      <div fxLayout="column" fxFlex>
+        <mat-form-field>
+          <mat-label>Name</mat-label>
+          <input matInput [value]="table.name" readonly>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Table ID</mat-label>
+          <input matInput [value]="table.tableID" readonly>
+        </mat-form-field>
+      </div>
+      <div>
+        <button mat-flat-button color="primary" (click)="onLoadTable(table)">Load</button>
+      </div>
+    </div>
+    <mat-divider></mat-divider>
+  </div>
 </div>
