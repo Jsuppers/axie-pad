@@ -29,6 +29,10 @@ export class AddManagerDialogComponent {
       });
     }
 
+  get isOwnTable() {
+    return this.userService.tableID.getValue() === this.uid
+  }
+
   onNoClick(): void {
     this.dialogRef.close();
   }
